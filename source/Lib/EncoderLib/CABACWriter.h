@@ -59,134 +59,142 @@ THE POSSIBILITY OF SUCH DAMAGE.
 namespace vvenc {
 
 class EncCu;
-class CABACWriter : public DeriveCtx
-{
+class CABACWriter : public DeriveCtx {
 public:
-  CABACWriter(BinEncIf& binEncoder)   : m_BinEncoder(binEncoder), m_Bitstream(0)   { m_TestCtx = m_BinEncoder.getCtx(); }  
-  virtual ~CABACWriter() {}
-
-public:
-  DeriveCtx&  getDeriveCtx              ()                                                    { return *this; }
-  void        initCtxModels             ( const Slice&                  slice );
-  SliceType   getCtxInitId              ( const Slice&                  slice );
-  void        initBitstream             ( OutputBitstream*              bitstream )           { m_Bitstream = bitstream; m_BinEncoder.init( m_Bitstream ); }
-
-  const Ctx&  getCtx                    ()                                            const   { return m_BinEncoder.getCtx();  }
-  Ctx&        getCtx                    ()                                                    { return m_BinEncoder.getCtx();  }
-
-  void        start                     ()                                                    { m_BinEncoder.start(); }
-  void        resetBits                 ()                                                    { m_BinEncoder.resetBits(); }
-  uint64_t    getEstFracBits            ()                                            const   { return m_BinEncoder.getEstFracBits(); }
-  uint32_t    getNumBins                ()                                                    { return m_BinEncoder.getNumBins(); }
-  bool        isEncoding                ()                                                    { return m_BinEncoder.isEncoding(); }
+    CABACWriter(BinEncIf& binEncoder) : m_BinEncoder(binEncoder), m_Bitstream(0) { m_TestCtx = m_BinEncoder.getCtx(); }
+    virtual ~CABACWriter() {}
 
 public:
-  // slice segment data (clause 7.3.8.1)
-  void        end_of_slice              ();
+    DeriveCtx& getDeriveCtx() { return *this; }
+    void initCtxModels(const Slice& slice);
+    SliceType getCtxInitId(const Slice& slice);
+    void initBitstream(OutputBitstream* bitstream)
+    {
+        m_Bitstream = bitstream;
+        m_BinEncoder.init(m_Bitstream);
+    }
 
-  // coding tree unit (clause 7.3.8.2)
-  void        coding_tree_unit          ( CodingStructure&              cs,       const UnitArea&   area,       int (&qps)[2],  unsigned ctuRsAddr,  bool skipSao = false, bool skipAlf = false );
+    const Ctx& getCtx() const { return m_BinEncoder.getCtx(); }
+    Ctx& getCtx() { return m_BinEncoder.getCtx(); }
 
-  // sao (clause 7.3.8.3)
-  void        sao                       ( const Slice&                  slice,    unsigned          ctuRsAddr );
-  void        sao_block_pars            ( const SAOBlkParam&            saoPars,  const BitDepths&  bitDepths,  const bool* sliceEnabled, bool leftMergeAvail, bool aboveMergeAvail, bool onlyEstMergeInfo );
-  void        sao_offset_pars           ( const SAOOffset&              ctbPars,  ComponentID       compID,     bool sliceEnabled,  int bitDepth );
-  // coding (quad)tree (clause 7.3.8.4)
-  void        coding_tree               ( const CodingStructure&        cs,       Partitioner&      pm,         CUCtx& cuCtx, Partitioner* pPartitionerChroma = nullptr, CUCtx* pCuCtxChroma = nullptr);
-  void        split_cu_mode             ( const PartSplit               split,    const CodingStructure& cs,    Partitioner& pm );
-  void        mode_constraint           ( const PartSplit               split,    const CodingStructure& cs,    Partitioner& pm,    const ModeType modeType );
+    void start() { m_BinEncoder.start(); }
+    void resetBits() { m_BinEncoder.resetBits(); }
+    uint64_t getEstFracBits() const { return m_BinEncoder.getEstFracBits(); }
+    uint32_t getNumBins() { return m_BinEncoder.getNumBins(); }
+    bool isEncoding() { return m_BinEncoder.isEncoding(); }
 
-  // coding unit (clause 7.3.8.5)
-  void        coding_unit               ( const CodingUnit&             cu,       Partitioner&      pm,         CUCtx& cuCtx );
-  void        cu_skip_flag              ( const CodingUnit&             cu );
-  void        pred_mode                 ( const CodingUnit&             cu );
-  void        bdpcm_mode                ( const CodingUnit&             cu,       const ComponentID compID );
+public:
+    // slice segment data (clause 7.3.8.1)
+    void end_of_slice();
 
-  void        cu_pred_data              ( const CodingUnit&             cu );
-  void        cu_bcw_flag               ( const CodingUnit&             cu );
-  void        extend_ref_line           ( const CodingUnit&             cu );
-  void        intra_luma_pred_modes     ( const CodingUnit&             cu );
-  void        intra_luma_pred_mode      ( const CodingUnit&             cu,       const unsigned *mpmLst = nullptr );
-  void        intra_chroma_pred_modes   ( const CodingUnit&             cu );
-  void        intra_chroma_lmc_mode     ( const CodingUnit&             cu );
-  void        intra_chroma_pred_mode    ( const CodingUnit&             cu );
-  void        cu_residual               ( const CodingUnit&             cu,       Partitioner&      pm,         CUCtx& cuCtx );
-  void        rqt_root_cbf              ( const CodingUnit&             cu );
-  void        adaptive_color_transform  ( const CodingUnit&             cu);
-  void        sbt_mode                  ( const CodingUnit&             cu );
-  void        end_of_ctu                ( const CodingUnit&             cu,       CUCtx&            cuCtx );
-  void        mip_flag                  ( const CodingUnit&             cu );
-  void        mip_pred_modes            ( const CodingUnit&             cu );
-  void        mip_pred_mode             ( const CodingUnit&             cu );
-  void        cu_palette_info           ( const CodingUnit&             cu,       ComponentID       compBegin,     uint32_t numComp,          CUCtx&       cuCtx);
-  void        cuPaletteSubblockInfo     ( const CodingUnit&             cu,       ComponentID       compBegin,     uint32_t numComp,          int subSetId,               uint32_t& prevRunPos,        unsigned& prevRunType );
-  // prediction unit (clause 7.3.8.6)
-  void        prediction_unit           ( const CodingUnit&             cu );
-  void        merge_flag                ( const CodingUnit&             cu );
-  void        merge_data                ( const CodingUnit&             cu );
-  void        affine_flag               ( const CodingUnit&             cu );
-  void        subblock_merge_flag       ( const CodingUnit&             cu );
-  void        merge_idx                 ( const CodingUnit&             cu );
-  void        mmvd_merge_idx            ( const CodingUnit&             cu);
-  void        imv_mode                  ( const CodingUnit&             cu );
-  void        affine_amvr_mode          ( const CodingUnit&             cu );
-  void        inter_pred_idc            ( const CodingUnit&             cu );
-  void        ref_idx                   ( const CodingUnit&             cu,       RefPicList        eRefList );
-  void        mvp_flag                  ( const CodingUnit&             cu,       RefPicList        eRefList );
+    // coding tree unit (clause 7.3.8.2)
+    void coding_tree_unit(CodingStructure& cs, const UnitArea& area, int (&qps)[2], unsigned ctuRsAddr,
+                          bool skipSao = false, bool skipAlf = false);
 
-  void        ciip_flag                 ( const CodingUnit&             cu );
-  void        smvd_mode                 ( const CodingUnit&             cu );
+    // sao (clause 7.3.8.3)
+    void sao(const Slice& slice, unsigned ctuRsAddr);
+    void sao_block_pars(const SAOBlkParam& saoPars, const BitDepths& bitDepths, const bool* sliceEnabled,
+                        bool leftMergeAvail, bool aboveMergeAvail, bool onlyEstMergeInfo);
+    void sao_offset_pars(const SAOOffset& ctbPars, ComponentID compID, bool sliceEnabled, int bitDepth);
+    // coding (quad)tree (clause 7.3.8.4)
+    void coding_tree(const CodingStructure& cs, Partitioner& pm, CUCtx& cuCtx,
+                     Partitioner* pPartitionerChroma = nullptr, CUCtx* pCuCtxChroma = nullptr);
+    void split_cu_mode(const PartSplit split, const CodingStructure& cs, Partitioner& pm);
+    void mode_constraint(const PartSplit split, const CodingStructure& cs, Partitioner& pm, const ModeType modeType);
 
-  // transform tree (clause 7.3.8.8)
-  void        transform_tree            ( const CodingStructure&        cs,       Partitioner&      pm,     CUCtx& cuCtx,                         const PartSplit ispType = TU_NO_ISP, const int subTuIdx = -1 );
-  void        cbf_comp                  ( const CodingUnit&             cu,       bool              cbf,    const CompArea& area, unsigned depth, const bool prevCbf = false, const bool useISP = false );
+    // coding unit (clause 7.3.8.5)
+    void coding_unit(const CodingUnit& cu, Partitioner& pm, CUCtx& cuCtx);
+    void cu_skip_flag(const CodingUnit& cu);
+    void pred_mode(const CodingUnit& cu);
+    void bdpcm_mode(const CodingUnit& cu, const ComponentID compID);
 
-  // mvd coding (clause 7.3.8.9)
-  void        mvd_coding                ( const Mv &rMvd, int8_t imv );
-  // transform unit (clause 7.3.8.10)
-  void        transform_unit            ( const TransformUnit&          tu,       CUCtx&            cuCtx,  Partitioner& pm,       const int subTuCounter = -1 );
-  void        cu_qp_delta               ( const CodingUnit&             cu,       int               predQP, const int8_t qp );
-  void        cu_chroma_qp_offset       ( const CodingUnit&             cu );
+    void cu_pred_data(const CodingUnit& cu);
+    void cu_bcw_flag(const CodingUnit& cu);
+    void extend_ref_line(const CodingUnit& cu);
+    void intra_luma_pred_modes(const CodingUnit& cu);
+    void intra_luma_pred_mode(const CodingUnit& cu, const unsigned* mpmLst = nullptr);
+    void intra_chroma_pred_modes(const CodingUnit& cu);
+    void intra_chroma_lmc_mode(const CodingUnit& cu);
+    void intra_chroma_pred_mode(const CodingUnit& cu);
+    void cu_residual(const CodingUnit& cu, Partitioner& pm, CUCtx& cuCtx);
+    void rqt_root_cbf(const CodingUnit& cu);
+    void adaptive_color_transform(const CodingUnit& cu);
+    void sbt_mode(const CodingUnit& cu);
+    void end_of_ctu(const CodingUnit& cu, CUCtx& cuCtx);
+    void mip_flag(const CodingUnit& cu);
+    void mip_pred_modes(const CodingUnit& cu);
+    void mip_pred_mode(const CodingUnit& cu);
+    void cu_palette_info(const CodingUnit& cu, ComponentID compBegin, uint32_t numComp, CUCtx& cuCtx);
+    void cuPaletteSubblockInfo(const CodingUnit& cu, ComponentID compBegin, uint32_t numComp, int subSetId,
+                               uint32_t& prevRunPos, unsigned& prevRunType);
+    // prediction unit (clause 7.3.8.6)
+    void prediction_unit(const CodingUnit& cu);
+    void merge_flag(const CodingUnit& cu);
+    void merge_data(const CodingUnit& cu);
+    void affine_flag(const CodingUnit& cu);
+    void subblock_merge_flag(const CodingUnit& cu);
+    void merge_idx(const CodingUnit& cu);
+    void mmvd_merge_idx(const CodingUnit& cu);
+    void imv_mode(const CodingUnit& cu);
+    void affine_amvr_mode(const CodingUnit& cu);
+    void inter_pred_idc(const CodingUnit& cu);
+    void ref_idx(const CodingUnit& cu, RefPicList eRefList);
+    void mvp_flag(const CodingUnit& cu, RefPicList eRefList);
 
-  // residual coding (clause 7.3.8.11)
-  void        residual_coding           ( const TransformUnit&          tu,       ComponentID       compID, CUCtx* cuCtx = nullptr );
-  void        ts_flag                   ( const TransformUnit&          tu,       ComponentID       compID );
-  void        mts_idx                   ( const CodingUnit&             cu,       CUCtx*            cuCtx  );
-  void        residual_lfnst_mode       ( const CodingUnit&             cu,       CUCtx&            cuCtx );
-  void        isp_mode                  ( const CodingUnit&             cu );
-  void        last_sig_coeff            ( CoeffCodingContext&           cctx,     const TransformUnit& tu, ComponentID       compID );
-  void        residual_coding_subblock  ( CoeffCodingContext&           cctx,     const TCoeff*     coeff, const int stateTransTable, int& state );
-  void        residual_codingTS         ( const TransformUnit&          tu,       ComponentID       compID );
-  void        residual_coding_subblockTS( CoeffCodingContext&           cctx,     const TCoeff*     coeff  );
-  void        joint_cb_cr               ( const TransformUnit&          tu,       const int cbfMask );
+    void ciip_flag(const CodingUnit& cu);
+    void smvd_mode(const CodingUnit& cu);
 
+    // transform tree (clause 7.3.8.8)
+    void transform_tree(const CodingStructure& cs, Partitioner& pm, CUCtx& cuCtx, const PartSplit ispType = TU_NO_ISP,
+                        const int subTuIdx = -1);
+    void cbf_comp(const CodingUnit& cu, bool cbf, const CompArea& area, unsigned depth, const bool prevCbf = false,
+                  const bool useISP = false);
 
-  void        codeAlfCtuEnabled          ( CodingStructure& cs, ChannelType channel, AlfParam* alfParam );
-  void        codeAlfCtuEnabled          ( CodingStructure& cs, ComponentID compID, AlfParam* alfParam );
-  void        codeAlfCtuEnabledFlag      ( CodingStructure& cs, uint32_t ctuRsAddr, const int compIdx, AlfParam* alfParam );
-  void        codeAlfCtuFilterIndex      ( CodingStructure& cs, uint32_t ctuRsAddr, bool alfEnableLuma );
+    // mvd coding (clause 7.3.8.9)
+    void mvd_coding(const Mv& rMvd, int8_t imv);
+    // transform unit (clause 7.3.8.10)
+    void transform_unit(const TransformUnit& tu, CUCtx& cuCtx, Partitioner& pm, const int subTuCounter = -1);
+    void cu_qp_delta(const CodingUnit& cu, int predQP, const int8_t qp);
+    void cu_chroma_qp_offset(const CodingUnit& cu);
 
-  void        codeAlfCtuAlternatives     ( CodingStructure& cs, ChannelType channel, AlfParam* alfParam );
-  void        codeAlfCtuAlternatives     ( CodingStructure& cs, ComponentID compID, AlfParam* alfParam );
-  void        codeAlfCtuAlternative      ( CodingStructure& cs, uint32_t ctuRsAddr, const int compIdx, const AlfParam* alfParam = NULL );
-  void        codeCcAlfFilterControlIdc  ( uint8_t idcVal, CodingStructure &cs, const ComponentID compID, const int curIdx,
-                                           const uint8_t *filterControlIdc, Position lumaPos, const int filterCount);
+    // residual coding (clause 7.3.8.11)
+    void residual_coding(const TransformUnit& tu, ComponentID compID, CUCtx* cuCtx = nullptr);
+    void ts_flag(const TransformUnit& tu, ComponentID compID);
+    void mts_idx(const CodingUnit& cu, CUCtx* cuCtx);
+    void residual_lfnst_mode(const CodingUnit& cu, CUCtx& cuCtx);
+    void isp_mode(const CodingUnit& cu);
+    void last_sig_coeff(CoeffCodingContext& cctx, const TransformUnit& tu, ComponentID compID);
+    void residual_coding_subblock(CoeffCodingContext& cctx, const TCoeff* coeff, const int stateTransTable, int& state);
+    void residual_codingTS(const TransformUnit& tu, ComponentID compID);
+    void residual_coding_subblockTS(CoeffCodingContext& cctx, const TCoeff* coeff);
+    void joint_cb_cr(const TransformUnit& tu, const int cbfMask);
+
+    void codeAlfCtuEnabled(CodingStructure& cs, ChannelType channel, AlfParam* alfParam);
+    void codeAlfCtuEnabled(CodingStructure& cs, ComponentID compID, AlfParam* alfParam);
+    void codeAlfCtuEnabledFlag(CodingStructure& cs, uint32_t ctuRsAddr, const int compIdx, AlfParam* alfParam);
+    void codeAlfCtuFilterIndex(CodingStructure& cs, uint32_t ctuRsAddr, bool alfEnableLuma);
+
+    void codeAlfCtuAlternatives(CodingStructure& cs, ChannelType channel, AlfParam* alfParam);
+    void codeAlfCtuAlternatives(CodingStructure& cs, ComponentID compID, AlfParam* alfParam);
+    void codeAlfCtuAlternative(CodingStructure& cs, uint32_t ctuRsAddr, const int compIdx,
+                               const AlfParam* alfParam = NULL);
+    void codeCcAlfFilterControlIdc(uint8_t idcVal, CodingStructure& cs, const ComponentID compID, const int curIdx,
+                                   const uint8_t* filterControlIdc, Position lumaPos, const int filterCount);
 
 private:
-  void        unary_max_symbol           ( unsigned symbol, unsigned ctxId0, unsigned ctxIdN, unsigned maxSymbol );
-  void        unary_max_eqprob           ( unsigned symbol,                                   unsigned maxSymbol );
-  void        exp_golomb_eqprob          ( unsigned symbol, unsigned count );
+    void unary_max_symbol(unsigned symbol, unsigned ctxId0, unsigned ctxIdN, unsigned maxSymbol);
+    void unary_max_eqprob(unsigned symbol, unsigned maxSymbol);
+    void exp_golomb_eqprob(unsigned symbol, unsigned count);
 
-  void        xWriteTruncBinCode         ( uint32_t uiSymbol, uint32_t uiMaxSymbol);
+    void xWriteTruncBinCode(uint32_t uiSymbol, uint32_t uiMaxSymbol);
+
 private:
-  BinEncIf&          m_BinEncoder;
-  OutputBitstream*   m_Bitstream;
-  Ctx                m_TestCtx;
-  const ScanElement* m_scanOrder;
- };
-
+    BinEncIf& m_BinEncoder;
+    OutputBitstream* m_Bitstream;
+    Ctx m_TestCtx;
+    const ScanElement* m_scanOrder;
+};
 
 } // namespace vvenc
 
 //! \}
-

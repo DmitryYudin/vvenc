@@ -61,10 +61,9 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-class InputByteStream
-{
+class InputByteStream {
 public:
-  /**
+    /**
    * Create a bytestream reader that will extract bytes from
    * istream.
    *
@@ -73,53 +72,45 @@ public:
    *
    * Side-effects: the exception mask of istream is set to eofbit
    */
-  InputByteStream(std::istream& istream)
-  : m_NumFutureBytes(0)
-  , m_FutureBytes(0)
-  , m_Input(istream)
-  {
-    istream.exceptions(std::istream::eofbit | std::istream::badbit);
-  }
+    InputByteStream(std::istream& istream) : m_NumFutureBytes(0), m_FutureBytes(0), m_Input(istream)
+    {
+        istream.exceptions(std::istream::eofbit | std::istream::badbit);
+    }
 
-  /**
+    /**
    * Reset the internal state.  Must be called if input stream is
    * modified externally to this class
    */
-  void reset()
-  {
-    m_NumFutureBytes = 0;
-    m_FutureBytes = 0;
-  }
+    void reset()
+    {
+        m_NumFutureBytes = 0;
+        m_FutureBytes = 0;
+    }
 
-  /**
+    /**
    * returns true if an EOF will be encountered within the next
    * n bytes.
    */
-  bool eofBeforeNBytes(uint32_t n)
-  {
-    CHECK(n > 4, "Unsupported look-ahead value");
-    if (m_NumFutureBytes >= n)
+    bool eofBeforeNBytes(uint32_t n)
     {
-      return false;
+        CHECK(n > 4, "Unsupported look-ahead value");
+        if( m_NumFutureBytes >= n ) {
+            return false;
+        }
+
+        n -= m_NumFutureBytes;
+        try {
+            for( uint32_t i = 0; i < n; i++ ) {
+                m_FutureBytes = (m_FutureBytes << 8) | m_Input.get();
+                m_NumFutureBytes++;
+            }
+        } catch( ... ) {
+            return true;
+        }
+        return false;
     }
 
-    n -= m_NumFutureBytes;
-    try
-    {
-      for (uint32_t i = 0; i < n; i++)
-      {
-        m_FutureBytes = (m_FutureBytes << 8) | m_Input.get();
-        m_NumFutureBytes++;
-      }
-    }
-    catch (...)
-    {
-      return true;
-    }
-    return false;
-  }
-
-  /**
+    /**
    * return the next n bytes in the stream without advancing
    * the stream pointer.
    *
@@ -131,72 +122,69 @@ public:
    * is undefined.
    *
    */
-  uint32_t peekBytes(uint32_t n)
-  {
-    eofBeforeNBytes(n);
-    return m_FutureBytes >> 8*(m_NumFutureBytes - n);
-  }
+    uint32_t peekBytes(uint32_t n)
+    {
+        eofBeforeNBytes(n);
+        return m_FutureBytes >> 8 * (m_NumFutureBytes - n);
+    }
 
-  /**
+    /**
    * consume and return one byte from the input.
    *
    * If bytestream is already at EOF prior to a call to readByte(),
    * an exception std::ios_base::failure is thrown.
    */
-  uint8_t readByte()
-  {
-    if (!m_NumFutureBytes)
+    uint8_t readByte()
     {
-      uint8_t byte = m_Input.get();
-      return byte;
+        if( !m_NumFutureBytes ) {
+            uint8_t byte = m_Input.get();
+            return byte;
+        }
+        m_NumFutureBytes--;
+        uint8_t wanted_byte = m_FutureBytes >> 8 * m_NumFutureBytes;
+        m_FutureBytes &= ~(0xff << 8 * m_NumFutureBytes);
+        return wanted_byte;
     }
-    m_NumFutureBytes--;
-    uint8_t wanted_byte = m_FutureBytes >> 8*m_NumFutureBytes;
-    m_FutureBytes &= ~(0xff << 8*m_NumFutureBytes);
-    return wanted_byte;
-  }
 
-  /**
+    /**
    * consume and return n bytes from the input.  n bytes from
    * bytestream are interpreted as bigendian when assembling
    * the return value.
    */
-  uint32_t readBytes(uint32_t n)
-  {
-    uint32_t val = 0;
-    for (uint32_t i = 0; i < n; i++)
+    uint32_t readBytes(uint32_t n)
     {
-      val = (val << 8) | readByte();
+        uint32_t val = 0;
+        for( uint32_t i = 0; i < n; i++ ) {
+            val = (val << 8) | readByte();
+        }
+        return val;
     }
-    return val;
-  }
 
 private:
-  uint32_t m_NumFutureBytes; /* number of valid bytes in m_FutureBytes */
-  uint32_t m_FutureBytes; /* bytes that have been peeked */
-  std::istream& m_Input; /* Input stream to read from */
+    uint32_t m_NumFutureBytes; /* number of valid bytes in m_FutureBytes */
+    uint32_t m_FutureBytes;    /* bytes that have been peeked */
+    std::istream& m_Input;     /* Input stream to read from */
 };
 
 /**
  * Statistics associated with AnnexB bytestreams
  */
-struct AnnexBStats
-{
-  uint32_t m_numLeadingZero8BitsBytes;
-  uint32_t m_numZeroByteBytes;
-  uint32_t m_numStartCodePrefixBytes;
-  uint32_t m_numBytesInNALUnit;
-  uint32_t m_numTrailingZero8BitsBytes;
+struct AnnexBStats {
+    uint32_t m_numLeadingZero8BitsBytes;
+    uint32_t m_numZeroByteBytes;
+    uint32_t m_numStartCodePrefixBytes;
+    uint32_t m_numBytesInNALUnit;
+    uint32_t m_numTrailingZero8BitsBytes;
 
-  AnnexBStats& operator+=(const AnnexBStats& rhs)
-  {
-    m_numLeadingZero8BitsBytes += rhs.m_numLeadingZero8BitsBytes;
-    m_numZeroByteBytes += rhs.m_numZeroByteBytes;
-    m_numStartCodePrefixBytes += rhs.m_numStartCodePrefixBytes;
-    m_numBytesInNALUnit += rhs.m_numBytesInNALUnit;
-    m_numTrailingZero8BitsBytes += rhs.m_numTrailingZero8BitsBytes;
-    return *this;
-  }
+    AnnexBStats& operator+=(const AnnexBStats& rhs)
+    {
+        m_numLeadingZero8BitsBytes += rhs.m_numLeadingZero8BitsBytes;
+        m_numZeroByteBytes += rhs.m_numZeroByteBytes;
+        m_numStartCodePrefixBytes += rhs.m_numStartCodePrefixBytes;
+        m_numBytesInNALUnit += rhs.m_numBytesInNALUnit;
+        m_numTrailingZero8BitsBytes += rhs.m_numTrailingZero8BitsBytes;
+        return *this;
+    }
 };
 
 bool byteStreamNALUnit(InputByteStream& bs, std::vector<uint8_t>& nalUnit, AnnexBStats& stats);
@@ -204,4 +192,3 @@ bool byteStreamNALUnit(InputByteStream& bs, std::vector<uint8_t>& nalUnit, Annex
 } // namespace vvenc
 
 //! \}
-

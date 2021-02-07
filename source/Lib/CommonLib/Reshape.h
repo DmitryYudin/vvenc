@@ -43,7 +43,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ------------------------------------------------------------------------------------------- */
- /** \file     Reshape.h
+/** \file     Reshape.h
      \brief    reshaping header and class (header)
  */
 
@@ -63,93 +63,92 @@ namespace vvenc {
 // Class definition
 // ====================================================================================================================
 
-class ReshapeData
-{
+class ReshapeData {
 protected:
-  LmcsParam               m_sliceReshapeInfo;
-  bool                    m_CTUFlag;
-  int                     m_chromaScale;
-  int                     m_lumaBD;
-  int                     m_vpduX;
-  int                     m_vpduY;
-  double                  m_chromaWeightRS;
-  std::vector<Pel>        m_invLUT;
-  std::vector<Pel>        m_fwdLUT;
-  std::vector<Pel>        m_reshapePivot;
-  std::vector<int>        m_chromaAdjHelpLUT;
-  std::vector<uint32_t>   m_reshapeLumaLevelToWeightPLUT;
+    LmcsParam m_sliceReshapeInfo;
+    bool m_CTUFlag;
+    int m_chromaScale;
+    int m_lumaBD;
+    int m_vpduX;
+    int m_vpduY;
+    double m_chromaWeightRS;
+    std::vector<Pel> m_invLUT;
+    std::vector<Pel> m_fwdLUT;
+    std::vector<Pel> m_reshapePivot;
+    std::vector<int> m_chromaAdjHelpLUT;
+    std::vector<uint32_t> m_reshapeLumaLevelToWeightPLUT;
 
 public:
-  ReshapeData()
-    : m_CTUFlag         ( false )
-    , m_chromaScale     ( 1 << CSCALE_FP_PREC )
-    , m_lumaBD          ( 0 )
-    , m_vpduX           ( -1 )
-    , m_vpduY           ( -1 )
-    , m_chromaWeightRS  ( 0.0 )
-  {}
+    ReshapeData()
+        : m_CTUFlag(false),
+          m_chromaScale(1 << CSCALE_FP_PREC),
+          m_lumaBD(0),
+          m_vpduX(-1),
+          m_vpduY(-1),
+          m_chromaWeightRS(0.0)
+    {
+    }
 
-  virtual ~ReshapeData() {}
+    virtual ~ReshapeData() {}
 
-  void   copyReshapeData( const ReshapeData& d )          { *this = d; }
+    void copyReshapeData(const ReshapeData& d) { *this = d; }
 
-  const Pel* getFwdLUT()                            const { return m_fwdLUT.data(); }
-  const Pel* getInvLUT()                            const { return m_invLUT.data(); }
-  double getChromaWeight()                          const { return m_chromaWeightRS; }
-  const uint32_t* getReshapeLumaLevelToWeightPLUT() const { return m_reshapeLumaLevelToWeightPLUT.data(); }
+    const Pel* getFwdLUT() const { return m_fwdLUT.data(); }
+    const Pel* getInvLUT() const { return m_invLUT.data(); }
+    double getChromaWeight() const { return m_chromaWeightRS; }
+    const uint32_t* getReshapeLumaLevelToWeightPLUT() const { return m_reshapeLumaLevelToWeightPLUT.data(); }
 
-  bool   getCTUFlag()                               const { return m_CTUFlag; }
-  void   setCTUFlag( bool b )                             { m_CTUFlag = b; }
+    bool getCTUFlag() const { return m_CTUFlag; }
+    void setCTUFlag(bool b) { m_CTUFlag = b; }
 
-  bool   isVPDUprocessed( int x, int y )            const { return ( ( x == m_vpduX ) && ( y == m_vpduY ) ); }
-  void   setVPDULoc     ( int x, int y )                  { m_vpduX = x; m_vpduY = y; }
+    bool isVPDUprocessed(int x, int y) const { return ((x == m_vpduX) && (y == m_vpduY)); }
+    void setVPDULoc(int x, int y)
+    {
+        m_vpduX = x;
+        m_vpduY = y;
+    }
 
-  LmcsParam& getSliceReshaperInfo()                       { return m_sliceReshapeInfo; }
+    LmcsParam& getSliceReshaperInfo() { return m_sliceReshapeInfo; }
 
-  int    calculateChromaAdjVpduNei( const TransformUnit& tu, const CompArea& , const TreeType _treeType );
+    int calculateChromaAdjVpduNei(const TransformUnit& tu, const CompArea&, const TreeType _treeType);
 
 protected:
-  int    getPWLIdxInv( int lumaVal )       const;
-  int    calculateChromaAdj( Pel avgLuma ) const;
+    int getPWLIdxInv(int lumaVal) const;
+    int calculateChromaAdj(Pel avgLuma) const;
 };
 
-class Reshape : public ReshapeData
-{
+class Reshape : public ReshapeData {
 protected:
-  std::vector<uint16_t>   m_binCW;
-  uint16_t                m_initCW;
-  bool                    m_reshape;
-  std::vector<Pel>        m_inputPivot;
-  std::vector<int32_t>    m_fwdScaleCoef;
-  std::vector<int32_t>    m_invScaleCoef;
-  int                     m_reshapeLUTSize;
+    std::vector<uint16_t> m_binCW;
+    uint16_t m_initCW;
+    bool m_reshape;
+    std::vector<Pel> m_inputPivot;
+    std::vector<int32_t> m_fwdScaleCoef;
+    std::vector<int32_t> m_invScaleCoef;
+    int m_reshapeLUTSize;
 
-  uint32_t                m_signalType;
-  std::vector<double>     m_lumaLevelToWeightPLUT; //ALF
+    uint32_t m_signalType;
+    std::vector<double> m_lumaLevelToWeightPLUT; //ALF
 
 public:
-  Reshape()
-    : m_reshape (true)
-  {}
+    Reshape() : m_reshape(true) {}
 
-  virtual ~Reshape() {}
+    virtual ~Reshape() {}
 
-  void createDec(int bitDepth);
+    void createDec(int bitDepth);
 
-  void constructReshaper();
+    void constructReshaper();
 
-  bool getReshapeFlag()                           const { return m_reshape; }
-  void setReshapeFlag(bool b)                           { m_reshape = b; }
-  const double* getlumaLevelToWeightPLUT()        const { return m_lumaLevelToWeightPLUT.data(); }
+    bool getReshapeFlag() const { return m_reshape; }
+    void setReshapeFlag(bool b) { m_reshape = b; }
+    const double* getlumaLevelToWeightPLUT() const { return m_lumaLevelToWeightPLUT.data(); }
 
-  void initLumaLevelToWeightTableReshape();
-  void updateReshapeLumaLevelToWeightTableChromaMD (const Pel* ILUT);
-  void restoreReshapeLumaLevelToWeightTable        ();
-  void updateReshapeLumaLevelToWeightTable         (LmcsParam &sliceReshape, Pel* wtTable, double cwt);
-};// END CLASS DEFINITION Reshape
+    void initLumaLevelToWeightTableReshape();
+    void updateReshapeLumaLevelToWeightTableChromaMD(const Pel* ILUT);
+    void restoreReshapeLumaLevelToWeightTable();
+    void updateReshapeLumaLevelToWeightTable(LmcsParam& sliceReshape, Pel* wtTable, double cwt);
+}; // END CLASS DEFINITION Reshape
 
 } // namespace vvenc
 
 //! \}
-
-

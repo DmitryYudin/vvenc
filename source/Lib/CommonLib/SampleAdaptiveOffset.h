@@ -57,23 +57,23 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-template<typename T> static inline int sgn( T val )
+template <typename T>
+static inline int sgn(T val)
 {
-  return ( T( 0 ) < val ) - ( val < T( 0 ) );
+    return (T(0) < val) - (val < T(0));
 }
 
 // ====================================================================================================================
 // Constants
 // ====================================================================================================================
 
-#define MAX_SAO_TRUNCATED_BITDEPTH     10
+#define MAX_SAO_TRUNCATED_BITDEPTH 10
 
 // ====================================================================================================================
 // Class definition
 // ====================================================================================================================
 
-  enum Available
-  {
+enum Available {
     LeftAvail = 1,
     RightAvail = 2,
     AboveAvail = 4,
@@ -82,60 +82,52 @@ template<typename T> static inline int sgn( T val )
     AboveRightAvail = 32,
     BelowLeftAvail = 64,
     BelowRightAvail = 128,
-  };
+};
 
-class SampleAdaptiveOffset
-{
+class SampleAdaptiveOffset {
 public:
-
-  SampleAdaptiveOffset();
-  virtual ~SampleAdaptiveOffset();
-  void        SAOProcess      ( CodingStructure& cs, SAOBlkParam* saoBlkParams );
-  void        init            ( ChromaFormat format, uint32_t maxCUWidth, uint32_t maxCUHeight, uint32_t lumaBitShift, uint32_t chromaBitShift );
-  static int  getMaxOffsetQVal( const int channelBitDepth) { return (1<<(std::min<int>(channelBitDepth,MAX_SAO_TRUNCATED_BITDEPTH)-5))-1; } //Table 9-32, inclusive
+    SampleAdaptiveOffset();
+    virtual ~SampleAdaptiveOffset();
+    void SAOProcess(CodingStructure& cs, SAOBlkParam* saoBlkParams);
+    void init(ChromaFormat format, uint32_t maxCUWidth, uint32_t maxCUHeight, uint32_t lumaBitShift,
+              uint32_t chromaBitShift);
+    static int getMaxOffsetQVal(const int channelBitDepth)
+    {
+        return (1 << (std::min<int>(channelBitDepth, MAX_SAO_TRUNCATED_BITDEPTH) - 5)) - 1;
+    } //Table 9-32, inclusive
 
 protected:
-  void deriveLoopFilterBoundaryAvailibility( CodingStructure& cs, const Position& pos, uint8_t& availMask ) const;
+    void deriveLoopFilterBoundaryAvailibility(CodingStructure& cs, const Position& pos, uint8_t& availMask) const;
 
-  void (*offsetBlock) ( const int     channelBitDepth,
-                        const ClpRng& clpRng,
-                        int           typeIdx,
-                        int*          offset,
-                        int           startIdx,
-                        const Pel*    srcBlk,
-                        Pel*          resBlk,
-                        ptrdiff_t     srcStride,
-                        ptrdiff_t     resStride,
-                        int           width,
-                        int           height,
-                        uint8_t       availMask,
-                        std::vector<int8_t> &signLineBuf1,
-                        std::vector<int8_t> &signLineBuf2);
+    void (*offsetBlock)(const int channelBitDepth, const ClpRng& clpRng, int typeIdx, int* offset, int startIdx,
+                        const Pel* srcBlk, Pel* resBlk, ptrdiff_t srcStride, ptrdiff_t resStride, int width, int height,
+                        uint8_t availMask, std::vector<int8_t>& signLineBuf1, std::vector<int8_t>& signLineBuf2);
 
-  void invertQuantOffsets       (ComponentID compIdx, int typeIdc, int typeAuxInfo, int* dstOffsets, int* srcOffsets);
-  void reconstructBlkSAOParam   (SAOBlkParam& recParam, SAOBlkParam* mergeList[NUM_SAO_MERGE_TYPES]);
-  int  getMergeList             (CodingStructure& cs, int ctuRsAddr, SAOBlkParam* blkParams, SAOBlkParam* mergeList[NUM_SAO_MERGE_TYPES]);
-  void offsetCTU                (const UnitArea& area, const CPelUnitBuf& src, PelUnitBuf& res, SAOBlkParam& saoblkParam, CodingStructure& cs);
-  void xReconstructBlkSAOParams (CodingStructure& cs, SAOBlkParam* saoBlkParams);
+    void invertQuantOffsets(ComponentID compIdx, int typeIdc, int typeAuxInfo, int* dstOffsets, int* srcOffsets);
+    void reconstructBlkSAOParam(SAOBlkParam& recParam, SAOBlkParam* mergeList[NUM_SAO_MERGE_TYPES]);
+    int getMergeList(CodingStructure& cs, int ctuRsAddr, SAOBlkParam* blkParams,
+                     SAOBlkParam* mergeList[NUM_SAO_MERGE_TYPES]);
+    void offsetCTU(const UnitArea& area, const CPelUnitBuf& src, PelUnitBuf& res, SAOBlkParam& saoblkParam,
+                   CodingStructure& cs);
+    void xReconstructBlkSAOParams(CodingStructure& cs, SAOBlkParam* saoBlkParams);
 
 #ifdef TARGET_SIMD_X86
-  void initSampleAdaptiveOffsetX86();
-  template <X86_VEXT vext>
-  void _initSampleAdaptiveOffsetX86();
+    void initSampleAdaptiveOffsetX86();
+    template <X86_VEXT vext>
+    void _initSampleAdaptiveOffsetX86();
 #endif
 
 protected:
-  uint32_t    m_offsetStepLog2[MAX_NUM_COMP]; //offset step
-  uint32_t    m_numberOfComponents;
+    uint32_t m_offsetStepLog2[MAX_NUM_COMP]; //offset step
+    uint32_t m_numberOfComponents;
 
-  std::vector<int8_t> m_signLineBuf1;
-  std::vector<int8_t> m_signLineBuf2;
+    std::vector<int8_t> m_signLineBuf1;
+    std::vector<int8_t> m_signLineBuf2;
 
 private:
-  bool m_picSAOEnabled[MAX_NUM_COMP];
+    bool m_picSAOEnabled[MAX_NUM_COMP];
 };
 
 } // namespace vvenc
 
 //! \}
-

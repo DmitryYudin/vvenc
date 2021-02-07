@@ -59,53 +59,53 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-class  EncLib;
-class  EncCfg;
-class  AccessUnit;
+class EncLib;
+class EncCfg;
+class AccessUnit;
 struct YUVBuffer;
 
 // ====================================================================================================================
 
-class VVENC_DECL YUVWriterIf
-{
+class VVENC_DECL YUVWriterIf {
 protected:
-  YUVWriterIf() {}
-  virtual ~YUVWriterIf() {}
+    YUVWriterIf() {}
+    virtual ~YUVWriterIf() {}
 
 public:
-  virtual void outputYuv( const YUVBuffer& /*yuvOutBuf*/ )
-  {
-  }
+    virtual void outputYuv(const YUVBuffer& /*yuvOutBuf*/) {}
 };
 
 // ====================================================================================================================
 
-class VVENC_DECL EncoderIf
-{
-  private:
+class VVENC_DECL EncoderIf {
+private:
     EncLib* m_pEncLib;
 
-  public:
+public:
     EncoderIf();
 
     ~EncoderIf();
 
-    void  initEncoderLib  ( const EncCfg& encCfg, YUVWriterIf* yuvWriterIf = nullptr );
-    void  initPass        ( int pass = 0 );
-    void  encodePicture   ( bool flush, const YUVBuffer& yuvInBuf, AccessUnit& au, bool& isQueueEmpty );
-    void  uninitEncoderLib();
-    void  printSummary    ();
+    void initEncoderLib(const EncCfg& encCfg, YUVWriterIf* yuvWriterIf = nullptr);
+    void initPass(int pass = 0);
+    void encodePicture(bool flush, const YUVBuffer& yuvInBuf, AccessUnit& au, bool& isQueueEmpty);
+    void uninitEncoderLib();
+    void printSummary();
 };
 
 // ====================================================================================================================
 
-void        VVENC_DECL registerMsgCbf( std::function<void( int, const char*, va_list )> msgFnc );   ///< set message output function for encoder lib. if not set, no messages will be printed.
-std::string VVENC_DECL setSIMDExtension( const std::string& simdId );                               ///< tries to set given simd extensions used. if not supported by cpu, highest possible extension level will be set and returned.
-bool        VVENC_DECL isTracingEnabled();                                                          ///< checks if library has tracing supported enabled (see ENABLE_TRACING).
-std::string VVENC_DECL getCompileInfoString();                                                      ///< creates compile info string containing OS, Compiler and Bit-depth (e.g. 32 or 64 bit).
-void        VVENC_DECL decodeBitstream( const std::string& FileName);                               ///< decode bitstream with limited build in decoder
+void VVENC_DECL registerMsgCbf(
+    std::function<void(int, const char*, va_list)>
+        msgFnc); ///< set message output function for encoder lib. if not set, no messages will be printed.
+std::string VVENC_DECL setSIMDExtension(
+    const std::string&
+        simdId); ///< tries to set given simd extensions used. if not supported by cpu, highest possible extension level will be set and returned.
+bool VVENC_DECL isTracingEnabled(); ///< checks if library has tracing supported enabled (see ENABLE_TRACING).
+std::string VVENC_DECL
+getCompileInfoString(); ///< creates compile info string containing OS, Compiler and Bit-depth (e.g. 32 or 64 bit).
+void VVENC_DECL decodeBitstream(const std::string& FileName); ///< decode bitstream with limited build in decoder
 
 } // namespace vvenc
 
 //! \}
-

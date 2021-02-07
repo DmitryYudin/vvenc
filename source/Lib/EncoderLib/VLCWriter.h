@@ -65,86 +65,82 @@ struct OlsHrdParams;
 
 #if ENABLE_TRACING
 
-#define WRITE_SCODE( value, length, name)   xWriteSCodeTr ( value, length, name )
-#define WRITE_CODE( value, length, name)    xWriteCodeTr ( value, length, name )
-#define WRITE_UVLC( value,         name)    xWriteUvlcTr ( value,         name )
-#define WRITE_SVLC( value,         name)    xWriteSvlcTr ( value,         name )
-#define WRITE_FLAG( value,         name)    xWriteFlagTr ( value,         name )
+#define WRITE_SCODE(value, length, name) xWriteSCodeTr(value, length, name)
+#define WRITE_CODE(value, length, name) xWriteCodeTr(value, length, name)
+#define WRITE_UVLC(value, name) xWriteUvlcTr(value, name)
+#define WRITE_SVLC(value, name) xWriteSvlcTr(value, name)
+#define WRITE_FLAG(value, name) xWriteFlagTr(value, name)
 
 extern bool g_HLSTraceEnable;
 #else
-#define WRITE_SCODE( value, length, name)    xWriteSCode ( value, length )
-#define WRITE_CODE( value, length, name)     xWriteCode ( value, length )
-#define WRITE_UVLC( value,         name)     xWriteUvlc ( value )
-#define WRITE_SVLC( value,         name)     xWriteSvlc ( value )
-#define WRITE_FLAG( value,         name)     xWriteFlag ( value )
+#define WRITE_SCODE(value, length, name) xWriteSCode(value, length)
+#define WRITE_CODE(value, length, name) xWriteCode(value, length)
+#define WRITE_UVLC(value, name) xWriteUvlc(value)
+#define WRITE_SVLC(value, name) xWriteSvlc(value)
+#define WRITE_FLAG(value, name) xWriteFlag(value)
 
 #endif
 
-
-class VLCWriter
-{
+class VLCWriter {
 protected:
+    OutputBitstream* m_pcBitIf;
 
-  OutputBitstream*    m_pcBitIf;
+    VLCWriter() : m_pcBitIf(NULL) {}
+    virtual ~VLCWriter() {}
 
-  VLCWriter() : m_pcBitIf(NULL) {}
-  virtual ~VLCWriter() {}
-
-  void  setBitstream          ( OutputBitstream* p )  { m_pcBitIf = p;  }
-  void  xWriteSCode           ( int  code,  uint32_t length );
-  void  xWriteCode            ( uint32_t uiCode, uint32_t uiLength );
-  void  xWriteUvlc            ( uint32_t uiCode );
-  void  xWriteSvlc            ( int  iCode   );
-  void  xWriteFlag            ( bool flag );
+    void setBitstream(OutputBitstream* p) { m_pcBitIf = p; }
+    void xWriteSCode(int code, uint32_t length);
+    void xWriteCode(uint32_t uiCode, uint32_t uiLength);
+    void xWriteUvlc(uint32_t uiCode);
+    void xWriteSvlc(int iCode);
+    void xWriteFlag(bool flag);
 #if ENABLE_TRACING
-  void  xWriteSCodeTr         ( int value,  uint32_t  length, const char *pSymbolName);
-  void  xWriteCodeTr          ( uint32_t value, uint32_t  length, const char *pSymbolName);
-  void  xWriteUvlcTr          ( uint32_t value,               const char *pSymbolName);
-  void  xWriteSvlcTr          ( int  value,                   const char *pSymbolName);
-  void  xWriteFlagTr          ( bool flag,                    const char *pSymbolName);
+    void xWriteSCodeTr(int value, uint32_t length, const char* pSymbolName);
+    void xWriteCodeTr(uint32_t value, uint32_t length, const char* pSymbolName);
+    void xWriteUvlcTr(uint32_t value, const char* pSymbolName);
+    void xWriteSvlcTr(int value, const char* pSymbolName);
+    void xWriteFlagTr(bool flag, const char* pSymbolName);
 #endif
-  void  xWriteRbspTrailingBits();
-  bool isByteAligned()      { return (m_pcBitIf->getNumBitsUntilByteAligned() == 0); } ;
+    void xWriteRbspTrailingBits();
+    bool isByteAligned() { return (m_pcBitIf->getNumBitsUntilByteAligned() == 0); };
 };
 
-
-class HLSWriter : private VLCWriter
-{
+class HLSWriter : private VLCWriter {
 public:
-  HLSWriter() {}
-  virtual ~HLSWriter() {}
+    HLSWriter() {}
+    virtual ~HLSWriter() {}
 
-  void  setBitstream            ( OutputBitstream* p )  { m_pcBitIf = p;  }
-  uint32_t  getNumberOfWrittenBits  ()                      { return m_pcBitIf->getNumberOfWrittenBits();  }
-  void  codeVUI                 ( const VUI *pcVUI, const SPS* pcSPS );
-  void  codeSPS                 ( const SPS* pcSPS );
-  void  codePPS                 ( const PPS* pcPPS, const SPS* pcSPS );
-  void  codeAPS                 ( const APS* pcAPS );
-  void  codeAlfAps              ( const APS* pcAPS );
-  void  codeLmcsAps             ( const APS* aps );
-  void  codeVPS                 ( const VPS* pcVPS );
-  void  codeDCI                 ( const DCI* dci );
-  void  codePictureHeader       ( const PicHeader* picHeader, bool writeRbspTrailingBits );
-  void  codeSliceHeader         ( const Slice* slice );
-  void  codeConstraintInfo      ( const ConstraintInfo* cinfo );
-  void  codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool profileTierPresent, int maxNumSubLayersMinus1 );
-  void  codeOlsHrdParameters    ( const GeneralHrdParams * generalHrd, const OlsHrdParams *olsHrd , const uint32_t firstSubLayer, const uint32_t maxNumSubLayersMinus1);
+    void setBitstream(OutputBitstream* p) { m_pcBitIf = p; }
+    uint32_t getNumberOfWrittenBits() { return m_pcBitIf->getNumberOfWrittenBits(); }
+    void codeVUI(const VUI* pcVUI, const SPS* pcSPS);
+    void codeSPS(const SPS* pcSPS);
+    void codePPS(const PPS* pcPPS, const SPS* pcSPS);
+    void codeAPS(const APS* pcAPS);
+    void codeAlfAps(const APS* pcAPS);
+    void codeLmcsAps(const APS* aps);
+    void codeVPS(const VPS* pcVPS);
+    void codeDCI(const DCI* dci);
+    void codePictureHeader(const PicHeader* picHeader, bool writeRbspTrailingBits);
+    void codeSliceHeader(const Slice* slice);
+    void codeConstraintInfo(const ConstraintInfo* cinfo);
+    void codeProfileTierLevel(const ProfileTierLevel* ptl, bool profileTierPresent, int maxNumSubLayersMinus1);
+    void codeOlsHrdParameters(const GeneralHrdParams* generalHrd, const OlsHrdParams* olsHrd,
+                              const uint32_t firstSubLayer, const uint32_t maxNumSubLayersMinus1);
 
-  void codeGeneralHrdparameters ( const GeneralHrdParams *hrd);
-  void  codeAUD                 ( const int audIrapOrGdrAuFlag, const int pictureType );
-  void  codeTilesWPPEntryPoint  ( Slice* pSlice );
+    void codeGeneralHrdparameters(const GeneralHrdParams* hrd);
+    void codeAUD(const int audIrapOrGdrAuFlag, const int pictureType);
+    void codeTilesWPPEntryPoint(Slice* pSlice);
 
-  void alfFilter                ( const AlfParam& alfParam, const bool isChroma, const int altIdx );
+    void alfFilter(const AlfParam& alfParam, const bool isChroma, const int altIdx);
 
 private:
-  void dpb_parameters           ( int maxSubLayersMinus1, bool subLayerInfoFlag, const SPS *pcSPS);
-  void xCodeRefPicList          ( const ReferencePictureList* rpl, bool isLongTermPresent, uint32_t ltLsbBitsCount, const bool isForbiddenZeroDeltaPoc, int rplIdx );
-  void xCodePredWeightTable     ( const PicHeader *picHeader, const PPS *pps, const SPS *sps );
-  void xCodePredWeightTable     ( const Slice* slice );
+    void dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFlag, const SPS* pcSPS);
+    void xCodeRefPicList(const ReferencePictureList* rpl, bool isLongTermPresent, uint32_t ltLsbBitsCount,
+                         const bool isForbiddenZeroDeltaPoc, int rplIdx);
+    void xCodePredWeightTable(const PicHeader* picHeader, const PPS* pps, const SPS* sps);
+    void xCodePredWeightTable(const Slice* slice);
 };
 
 } // namespace vvenc
 
 //! \}
-  

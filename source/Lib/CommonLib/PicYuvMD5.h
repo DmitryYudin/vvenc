@@ -52,12 +52,11 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-uint32_t calcMD5(const CPelUnitBuf& pic, PictureHash &digest, const BitDepths &bitDepths);
-uint32_t calcCRC(const CPelUnitBuf& pic, PictureHash &digest, const BitDepths &bitDepths);
-uint32_t calcChecksum(const CPelUnitBuf& pic, PictureHash &digest, const BitDepths &bitDepths);
+uint32_t calcMD5(const CPelUnitBuf &pic, PictureHash &digest, const BitDepths &bitDepths);
+uint32_t calcCRC(const CPelUnitBuf &pic, PictureHash &digest, const BitDepths &bitDepths);
+uint32_t calcChecksum(const CPelUnitBuf &pic, PictureHash &digest, const BitDepths &bitDepths);
 std::string hashToString(const PictureHash &digest, int numChar);
 
 } // namespace vvenc
 
 //! \}
-

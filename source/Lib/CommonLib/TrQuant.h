@@ -69,95 +69,89 @@ typedef void InvTrans(const TCoeff*, TCoeff*, int, int, int, int, const TCoeff, 
 // Class definition
 // ====================================================================================================================
 typedef std::pair<int, bool> TrMode;
-typedef std::pair<int, int>  TrCost;
+typedef std::pair<int, int> TrCost;
 
 /// transform and quantization class
-class TrQuant
-{
+class TrQuant {
 public:
-  TrQuant();
-  ~TrQuant();
+    TrQuant();
+    ~TrQuant();
 
-  // initialize class
-  void init(
-             const Quant* otherQuant,
-             const int  rdoq                 = 0,
-             const bool bUseRDOQTS           = false,
-             const bool useSelectiveRDOQ     = false,
-             const bool bEnc                 = false,
-             const bool useTransformSkipFast = false,
-             const int  dqThrValue           = 8
-           );
+    // initialize class
+    void init(const Quant* otherQuant, const int rdoq = 0, const bool bUseRDOQTS = false,
+              const bool useSelectiveRDOQ = false, const bool bEnc = false, const bool useTransformSkipFast = false,
+              const int dqThrValue = 8);
 
 public:
-  void invTransformNxN    ( TransformUnit& tu, const ComponentID compID, PelBuf& pResi, const QpParam& cQPs);
-  void transformNxN       ( TransformUnit& tu, const ComponentID compID, const QpParam& cQP, TCoeff &uiAbsSum, const Ctx& ctx, const bool loadTr = false);
-  void checktransformsNxN ( TransformUnit& tu, std::vector<TrMode> *trModes, const int maxCand, const ComponentID compID = COMP_Y);
+    void invTransformNxN(TransformUnit& tu, const ComponentID compID, PelBuf& pResi, const QpParam& cQPs);
+    void transformNxN(TransformUnit& tu, const ComponentID compID, const QpParam& cQP, TCoeff& uiAbsSum, const Ctx& ctx,
+                      const bool loadTr = false);
+    void checktransformsNxN(TransformUnit& tu, std::vector<TrMode>* trModes, const int maxCand,
+                            const ComponentID compID = COMP_Y);
 
-  void                        invTransformICT     ( const TransformUnit& tu, PelBuf& resCb, PelBuf& resCr );
-  std::pair<int64_t,int64_t>  fwdTransformICT     ( const TransformUnit& tu, const PelBuf& resCb, const PelBuf& resCr, PelBuf& resC1, PelBuf& resC2, int jointCbCr = -1 );
-  std::vector<int>            selectICTCandidates ( const TransformUnit& tu, CompStorage* resCb, CompStorage* resCr );
+    void invTransformICT(const TransformUnit& tu, PelBuf& resCb, PelBuf& resCr);
+    std::pair<int64_t, int64_t> fwdTransformICT(const TransformUnit& tu, const PelBuf& resCb, const PelBuf& resCr,
+                                                PelBuf& resC1, PelBuf& resC2, int jointCbCr = -1);
+    std::vector<int> selectICTCandidates(const TransformUnit& tu, CompStorage* resCb, CompStorage* resCr);
 
-  void   setLambdas  ( const double lambdas[MAX_NUM_COMP] )   { m_quant->setLambdas( lambdas ); }
-  void   selectLambda( const ComponentID compIdx )            { m_quant->selectLambda( compIdx ); }
-  void   getLambdas  ( double (&lambdas)[MAX_NUM_COMP]) const { m_quant->getLambdas( lambdas ); }
-  void   scaleLambda ( const double scale)                    { m_quant->scaleLambda(scale);}
+    void setLambdas(const double lambdas[MAX_NUM_COMP]) { m_quant->setLambdas(lambdas); }
+    void selectLambda(const ComponentID compIdx) { m_quant->selectLambda(compIdx); }
+    void getLambdas(double (&lambdas)[MAX_NUM_COMP]) const { m_quant->getLambdas(lambdas); }
+    void scaleLambda(const double scale) { m_quant->scaleLambda(scale); }
 
-  DepQuant* getQuant ()                                       { return m_quant; }
+    DepQuant* getQuant() { return m_quant; }
 
 protected:
-  TCoeff*   m_plTempCoeff;
-  bool      m_bEnc;
-  bool      m_scalingListEnabled;
-  TCoeff*   m_blk;
-  TCoeff*   m_tmp;
+    TCoeff* m_plTempCoeff;
+    bool m_bEnc;
+    bool m_scalingListEnabled;
+    TCoeff* m_blk;
+    TCoeff* m_tmp;
 
 private:
-  DepQuant* m_quant;          //!< Quantizer
-  TCoeff    m_tempInMatrix[48];
-  TCoeff    m_tempOutMatrix[48];
-  static const int maxAbsIctMode = 3;
-  void                      (*m_invICTMem[1+2*maxAbsIctMode])(PelBuf&,PelBuf&);
-  std::pair<int64_t,int64_t>(*m_fwdICTMem[1+2*maxAbsIctMode])(const PelBuf&,const PelBuf&,PelBuf&,PelBuf&);
-  void                      (**m_invICT)(PelBuf&,PelBuf&);
-  std::pair<int64_t,int64_t>(**m_fwdICT)(const PelBuf&,const PelBuf&,PelBuf&,PelBuf&);
-  TCoeff    m_mtsCoeffs[NUM_TRAFO_MODES_MTS][MAX_TB_SIZEY * MAX_TB_SIZEY];
+    DepQuant* m_quant; //!< Quantizer
+    TCoeff m_tempInMatrix[48];
+    TCoeff m_tempOutMatrix[48];
+    static const int maxAbsIctMode = 3;
+    void (*m_invICTMem[1 + 2 * maxAbsIctMode])(PelBuf&, PelBuf&);
+    std::pair<int64_t, int64_t> (*m_fwdICTMem[1 + 2 * maxAbsIctMode])(const PelBuf&, const PelBuf&, PelBuf&, PelBuf&);
+    void (**m_invICT)(PelBuf&, PelBuf&);
+    std::pair<int64_t, int64_t> (**m_fwdICT)(const PelBuf&, const PelBuf&, PelBuf&, PelBuf&);
+    TCoeff m_mtsCoeffs[NUM_TRAFO_MODES_MTS][MAX_TB_SIZEY * MAX_TB_SIZEY];
 
-  uint32_t xGetLFNSTIntraMode( const Area& tuArea, const uint32_t dirMode );
-  bool     xGetTransposeFlag(uint32_t intraMode);
-  void     xFwdLfnst    ( const TransformUnit &tu, const ComponentID compID, const bool loadTr = false);
-  void     xInvLfnst    ( const TransformUnit &tu, const ComponentID compID);
-  void     xFwdLfnstNxN ( int *src, int *dst, const uint32_t mode, const uint32_t index, const uint32_t size, int zeroOutSize );
-  void     xInvLfnstNxN ( int *src, int *dst, const uint32_t mode, const uint32_t index, const uint32_t size, int zeroOutSize );
-  void     xSetTrTypes  ( const TransformUnit& tu, const ComponentID compID, const int width, const int height, int &trTypeHor, int &trTypeVer );
+    uint32_t xGetLFNSTIntraMode(const Area& tuArea, const uint32_t dirMode);
+    bool xGetTransposeFlag(uint32_t intraMode);
+    void xFwdLfnst(const TransformUnit& tu, const ComponentID compID, const bool loadTr = false);
+    void xInvLfnst(const TransformUnit& tu, const ComponentID compID);
+    void xFwdLfnstNxN(int* src, int* dst, const uint32_t mode, const uint32_t index, const uint32_t size,
+                      int zeroOutSize);
+    void xInvLfnstNxN(int* src, int* dst, const uint32_t mode, const uint32_t index, const uint32_t size,
+                      int zeroOutSize);
+    void xSetTrTypes(const TransformUnit& tu, const ComponentID compID, const int width, const int height,
+                     int& trTypeHor, int& trTypeVer);
 
-  // forward Transform
-  void xT               (const TransformUnit& tu, const ComponentID compID, const CPelBuf& resi, CoeffBuf& dstCoeff, const int width, const int height);
+    // forward Transform
+    void xT(const TransformUnit& tu, const ComponentID compID, const CPelBuf& resi, CoeffBuf& dstCoeff, const int width,
+            const int height);
 
-  // quantization
-  void xQuant           (TransformUnit& tu, const ComponentID compID, const CCoeffBuf& pSrc, TCoeff &uiAbsSum, const QpParam& cQP, const Ctx& ctx);
+    // quantization
+    void xQuant(TransformUnit& tu, const ComponentID compID, const CCoeffBuf& pSrc, TCoeff& uiAbsSum,
+                const QpParam& cQP, const Ctx& ctx);
 
-  // dequantization
-  void xDeQuant( const TransformUnit& tu,
-                       CoeffBuf      &dstCoeff,
-                 const ComponentID   &compID,
-                 const QpParam       &cQP      );
+    // dequantization
+    void xDeQuant(const TransformUnit& tu, CoeffBuf& dstCoeff, const ComponentID& compID, const QpParam& cQP);
 
-  // inverse transform
-  void xIT     ( const TransformUnit& tu, const ComponentID compID, const CCoeffBuf& pCoeff, PelBuf& pResidual );
-  // skipping Transform
-  void xTransformSkip(const TransformUnit& tu, const ComponentID& compID, const CPelBuf& resi, TCoeff* psCoeff);
-  // inverse skipping transform
-  void xITransformSkip(const CCoeffBuf& plCoef, PelBuf& pResidual, const TransformUnit& tu, const ComponentID component);
-  void xGetCoeffEnergy(
-                       TransformUnit  &tu,
-                 const ComponentID    &compID,
-                 const CoeffBuf       &coeffs,
-                       double*        diagRatio,
-                       double*        horVerRatio );
-};// END CLASS DEFINITION TrQuant
+    // inverse transform
+    void xIT(const TransformUnit& tu, const ComponentID compID, const CCoeffBuf& pCoeff, PelBuf& pResidual);
+    // skipping Transform
+    void xTransformSkip(const TransformUnit& tu, const ComponentID& compID, const CPelBuf& resi, TCoeff* psCoeff);
+    // inverse skipping transform
+    void xITransformSkip(const CCoeffBuf& plCoef, PelBuf& pResidual, const TransformUnit& tu,
+                         const ComponentID component);
+    void xGetCoeffEnergy(TransformUnit& tu, const ComponentID& compID, const CoeffBuf& coeffs, double* diagRatio,
+                         double* horVerRatio);
+}; // END CLASS DEFINITION TrQuant
 
 } // namespace vvenc
 
 //! \}
-

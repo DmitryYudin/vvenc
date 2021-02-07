@@ -61,35 +61,33 @@ using namespace vvenc;
 // ====================================================================================================================
 
 /// encoder configuration class
-class EncAppCfg : public EncCfg
-{
+class EncAppCfg : public EncCfg {
 public:
-  std::string  m_inputFileName;                                ///< source file name
-  std::string  m_bitstreamFileName;                            ///< output bitstream file
-  std::string  m_reconFileName;                                ///< output reconstruction file
-  ChromaFormat m_inputFileChromaFormat;
-  bool         m_bClipInputVideoToRec709Range;
-  bool         m_bClipOutputVideoToRec709Range;
-  bool         m_packedYUVMode;                                ///< If true, output 10-bit and 12-bit YUV data as 5-byte and 3-byte (respectively) packed YUV data
-  bool         m_decode;
-
-public:
-
-  EncAppCfg()
-    :   m_inputFileChromaFormat           ( CHROMA_420 )
-      , m_bClipInputVideoToRec709Range    ( false )
-      , m_bClipOutputVideoToRec709Range   ( false )
-      , m_packedYUVMode                   ( false )
-      , m_decode                          ( false )
-  {
-  }
-
-  virtual ~EncAppCfg();
+    std::string m_inputFileName;     ///< source file name
+    std::string m_bitstreamFileName; ///< output bitstream file
+    std::string m_reconFileName;     ///< output reconstruction file
+    ChromaFormat m_inputFileChromaFormat;
+    bool m_bClipInputVideoToRec709Range;
+    bool m_bClipOutputVideoToRec709Range;
+    bool
+        m_packedYUVMode; ///< If true, output 10-bit and 12-bit YUV data as 5-byte and 3-byte (respectively) packed YUV data
+    bool m_decode;
 
 public:
-  bool parseCfg( int argc, char* argv[] );                    ///< parse configuration file to fill member variables
-  virtual void printCfg() const;
+    EncAppCfg()
+        : m_inputFileChromaFormat(CHROMA_420),
+          m_bClipInputVideoToRec709Range(false),
+          m_bClipOutputVideoToRec709Range(false),
+          m_packedYUVMode(false),
+          m_decode(false)
+    {
+    }
+
+    virtual ~EncAppCfg();
+
+public:
+    bool parseCfg(int argc, char* argv[]); ///< parse configuration file to fill member variables
+    virtual void printCfg() const;
 };
 
 //! \}
-

@@ -64,42 +64,37 @@ class EncGOP;
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-class EncPicture
-{
-  private:
-    const EncCfg*           m_pcEncCfg;
-    EncSlice                m_SliceEncoder;
-    LoopFilter              m_LoopFilter;
-    EncAdaptiveLoopFilter   m_ALF;
+class EncPicture {
+private:
+    const EncCfg* m_pcEncCfg;
+    EncSlice m_SliceEncoder;
+    LoopFilter m_LoopFilter;
+    EncAdaptiveLoopFilter m_ALF;
 
-    BitEstimator            m_BitEstimator;
-    CABACWriter             m_CABACEstimator;
-    CtxCache                m_CtxCache;
+    BitEstimator m_BitEstimator;
+    CABACWriter m_CABACEstimator;
+    CtxCache m_CtxCache;
 
-  public:
-    EncPicture()
-      : m_pcEncCfg( nullptr )
-      , m_CABACEstimator   ( m_BitEstimator )
-    {}
+public:
+    EncPicture() : m_pcEncCfg(nullptr), m_CABACEstimator(m_BitEstimator) {}
     virtual ~EncPicture() {}
 
-    void      init          ( const EncCfg& encCfg, std::vector<int>* const globalCtuQpVector,
-                              const SPS& sps, const PPS& pps, RateCtrl& rateCtrl, NoMallocThreadPool* threadPool );
-    EncSlice* getEncSlice   () { return &m_SliceEncoder; }
+    void init(const EncCfg& encCfg, std::vector<int>* const globalCtuQpVector, const SPS& sps, const PPS& pps,
+              RateCtrl& rateCtrl, NoMallocThreadPool* threadPool);
+    EncSlice* getEncSlice() { return &m_SliceEncoder; }
 
-    void      encodePicture ( Picture& pic, ParameterSetMap<APS>& shrdApsMap, EncGOP& gopEncoder );
+    void encodePicture(Picture& pic, ParameterSetMap<APS>& shrdApsMap, EncGOP& gopEncoder);
 
-  protected:
-    void xInitPicEncoder        ( Picture& pic );
-    void xCompressPicture       ( Picture& pic );
-    void xSkipCompressPicture   ( Picture& pic, ParameterSetMap<APS>& shrdApsMap );
-    void xWriteSliceData        ( Picture& pic );
+protected:
+    void xInitPicEncoder(Picture& pic);
+    void xCompressPicture(Picture& pic);
+    void xSkipCompressPicture(Picture& pic, ParameterSetMap<APS>& shrdApsMap);
+    void xWriteSliceData(Picture& pic);
 
-    void xInitSliceColFromL0Flag( Slice* slice ) const;
-    void xInitSliceCheckLDC     ( Slice* slice ) const;
+    void xInitSliceColFromL0Flag(Slice* slice) const;
+    void xInitSliceCheckLDC(Slice* slice) const;
 };
 
 } // namespace vvenc
 
 //! \}
-

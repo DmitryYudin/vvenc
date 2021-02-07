@@ -49,45 +49,46 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-
 #include "Unit.h"
 
 namespace vvenc {
 
 #define MIP_UPSAMPLING_TEMPLATE 1
 
-class MatrixIntraPrediction
-{
+class MatrixIntraPrediction {
 public:
-  MatrixIntraPrediction();
-  ~MatrixIntraPrediction();
+    MatrixIntraPrediction();
+    ~MatrixIntraPrediction();
 
-  void prepareInputForPred (const CPelBuf &pSrc, const Area& block, const int bitDepth);
-  void predBlock           (Pel* const result, const int modeIdx, const bool transpose, const int bitDepth);
+    void prepareInputForPred(const CPelBuf& pSrc, const Area& block, const int bitDepth);
+    void predBlock(Pel* const result, const int modeIdx, const bool transpose, const int bitDepth);
 
 private:
-  Pel*          m_reducedBoundary;            // downsampled             boundary of a block
-  Pel*          m_reducedBoundaryTransp;      // downsampled, transposed boundary of a block
-  int           m_inputOffset;
-  int           m_inputOffsetTransp;
-  const Pel*    m_refSamplesTop;              // top  reference samples for upsampling
-  const Pel*    m_refSamplesLeft;             // left reference samples for upsampling
-  Size          m_blockSize;
-  int           m_sizeId;
-  int           m_reducedBdrySize;
-  int           m_reducedPredSize;
-  unsigned int  m_upsmpFactorHor;
-  unsigned int  m_upsmpFactorVer;
+    Pel* m_reducedBoundary;       // downsampled             boundary of a block
+    Pel* m_reducedBoundaryTransp; // downsampled, transposed boundary of a block
+    int m_inputOffset;
+    int m_inputOffsetTransp;
+    const Pel* m_refSamplesTop;  // top  reference samples for upsampling
+    const Pel* m_refSamplesLeft; // left reference samples for upsampling
+    Size m_blockSize;
+    int m_sizeId;
+    int m_reducedBdrySize;
+    int m_reducedPredSize;
+    unsigned int m_upsmpFactorHor;
+    unsigned int m_upsmpFactorVer;
 
-  void initPredBlockParams            (const Size& block);
+    void initPredBlockParams(const Size& block);
 
-  static void boundaryDownsampling1D  (Pel* reducedDst, const Pel* const fullSrc, const SizeType srcLen, const SizeType dstLen);
+    static void boundaryDownsampling1D(Pel* reducedDst, const Pel* const fullSrc, const SizeType srcLen,
+                                       const SizeType dstLen);
 
-  template< SizeType predPredSize, unsigned log2UpsmpFactor>
-  void predictionUpsampling1DHor       (Pel* const dst, const Pel* const src, const Pel* const bndry, const SizeType dstStride, const SizeType bndryStep );
+    template <SizeType predPredSize, unsigned log2UpsmpFactor>
+    void predictionUpsampling1DHor(Pel* const dst, const Pel* const src, const Pel* const bndry,
+                                   const SizeType dstStride, const SizeType bndryStep);
 
-  template< SizeType inHeight, unsigned log2UpsmpFactor>
-  void predictionUpsampling1DVer       (Pel* const dst, const Pel* const src, const Pel* const bndry, const SizeType outWidth, const SizeType srcStep );
+    template <SizeType inHeight, unsigned log2UpsmpFactor>
+    void predictionUpsampling1DVer(Pel* const dst, const Pel* const src, const Pel* const bndry,
+                                   const SizeType outWidth, const SizeType srcStep);
 };
 
 } // namespace vvenc

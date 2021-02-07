@@ -58,71 +58,55 @@ namespace vvenc {
 /**
  * Represents a single NALunit header and the associated RBSPayload
  */
-struct VVENC_DECL NALUnit
-{
-  NalUnitType m_nalUnitType; ///< nal_unit_type
-  uint32_t    m_temporalId;  ///< temporal_id
-  uint32_t    m_nuhLayerId;  ///< nuh_layer_id
-  uint32_t    m_forbiddenZeroBit;
-  uint32_t    m_nuhReservedZeroBit;
+struct VVENC_DECL NALUnit {
+    NalUnitType m_nalUnitType; ///< nal_unit_type
+    uint32_t m_temporalId;     ///< temporal_id
+    uint32_t m_nuhLayerId;     ///< nuh_layer_id
+    uint32_t m_forbiddenZeroBit;
+    uint32_t m_nuhReservedZeroBit;
 
-  NALUnit(const NALUnit &src)
-  : m_nalUnitType       (src.m_nalUnitType)
-  , m_temporalId        (src.m_temporalId)
-  , m_nuhLayerId        (src.m_nuhLayerId)
-  , m_forbiddenZeroBit  (src.m_forbiddenZeroBit)
-  , m_nuhReservedZeroBit(src.m_nuhReservedZeroBit)
+    NALUnit(const NALUnit& src)
+        : m_nalUnitType(src.m_nalUnitType),
+          m_temporalId(src.m_temporalId),
+          m_nuhLayerId(src.m_nuhLayerId),
+          m_forbiddenZeroBit(src.m_forbiddenZeroBit),
+          m_nuhReservedZeroBit(src.m_nuhReservedZeroBit)
 
-  { }
-  /** construct an NALunit structure with given header values. */
-  NALUnit(
-    NalUnitType nalUnitType,
-    uint32_t temporalId = 0,
-    uint32_t nuhReservedZeroBit = 0,
-    uint32_t forbiddenZeroBit = 0,
-    uint32_t nuhLayerId = 0)
-    : m_nalUnitType (nalUnitType)
-    , m_temporalId  (temporalId)
-    , m_nuhLayerId  (nuhLayerId)
-    , m_forbiddenZeroBit(forbiddenZeroBit)
-    , m_nuhReservedZeroBit(nuhReservedZeroBit)
-  {}
+    {
+    }
+    /** construct an NALunit structure with given header values. */
+    NALUnit(NalUnitType nalUnitType, uint32_t temporalId = 0, uint32_t nuhReservedZeroBit = 0,
+            uint32_t forbiddenZeroBit = 0, uint32_t nuhLayerId = 0)
+        : m_nalUnitType(nalUnitType),
+          m_temporalId(temporalId),
+          m_nuhLayerId(nuhLayerId),
+          m_forbiddenZeroBit(forbiddenZeroBit),
+          m_nuhReservedZeroBit(nuhReservedZeroBit)
+    {
+    }
 
-  /** default constructor - no initialization; must be performed by user */
-  NALUnit() {}
+    /** default constructor - no initialization; must be performed by user */
+    NALUnit() {}
 
-  virtual ~NALUnit() { }
+    virtual ~NALUnit() {}
 
-  /** returns true if the NALunit is a slice NALunit */
-  bool isSlice()
-  {
-    return m_nalUnitType == NAL_UNIT_CODED_SLICE_TRAIL
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_STSA
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_RADL
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_RASL;
-  }
-  bool isSei()
-  {
-    return m_nalUnitType == NAL_UNIT_PREFIX_SEI
-        || m_nalUnitType == NAL_UNIT_SUFFIX_SEI;
-  }
+    /** returns true if the NALunit is a slice NALunit */
+    bool isSlice()
+    {
+        return m_nalUnitType == NAL_UNIT_CODED_SLICE_TRAIL || m_nalUnitType == NAL_UNIT_CODED_SLICE_STSA ||
+               m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL || m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP ||
+               m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA || m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR ||
+               m_nalUnitType == NAL_UNIT_CODED_SLICE_RADL || m_nalUnitType == NAL_UNIT_CODED_SLICE_RASL;
+    }
+    bool isSei() { return m_nalUnitType == NAL_UNIT_PREFIX_SEI || m_nalUnitType == NAL_UNIT_SUFFIX_SEI; }
 
-  bool isVcl()
-  {
-    return m_nalUnitType == NAL_UNIT_CODED_SLICE_TRAIL
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_STSA
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_RADL
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_RASL
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA
-        || m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR;
-
-  }
+    bool isVcl()
+    {
+        return m_nalUnitType == NAL_UNIT_CODED_SLICE_TRAIL || m_nalUnitType == NAL_UNIT_CODED_SLICE_STSA ||
+               m_nalUnitType == NAL_UNIT_CODED_SLICE_RADL || m_nalUnitType == NAL_UNIT_CODED_SLICE_RASL ||
+               m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL || m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP ||
+               m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA || m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR;
+    }
 };
 
 struct OutputNALUnit;
@@ -130,20 +114,18 @@ struct OutputNALUnit;
 /**
  * A single NALunit, with complete payload in EBSP format.
  */
-struct VVENC_DECL NALUnitEBSP : public NALUnit
-{
-  std::ostringstream m_nalUnitData;
+struct VVENC_DECL NALUnitEBSP : public NALUnit {
+    std::ostringstream m_nalUnitData;
 
-  /**
+    /**
    * convert the OutputNALUnit nalu into EBSP format by writing out
    * the NALUnit header, then the rbsp_bytes including any
    * emulation_prevention_three_byte symbols.
    */
-  NALUnitEBSP(OutputNALUnit& nalu);
+    NALUnitEBSP(OutputNALUnit& nalu);
 };
 //! \}
 //! \}
-
 
 /**
  * An AccessUnit is a list of one or more NAL units, according to the
@@ -160,82 +142,93 @@ struct VVENC_DECL NALUnitEBSP : public NALUnit
 class VVENC_DECL AccessUnit : public std::list<NALUnitEBSP*> // NOTE: Should not inherit from STL.
 {
 public:
-  AccessUnit()
-  {
-    clearAu();
-  }
+    AccessUnit() { clearAu(); }
 
-  ~AccessUnit()
-  {
-    clearAu();
-  }
+    ~AccessUnit() { clearAu(); }
 
-  void clearAu()
-  {
-    m_uiCts          = 0;
-    m_uiDts          = 0;
-    m_uiPOC          = 0;
-    m_eSliceType     = NUMBER_OF_SLICE_TYPES;
-    m_iTemporalLayer = 0;
-    m_iStatus        = 0;
-    m_bCtsValid      = false;
-    m_bDtsValid      = false;
-    m_bRAP           = false;
-    m_bRefPic        = false;
-    m_cInfo.clear();
-
-    for (AccessUnit::iterator it = this->begin(); it != this->end(); it++)
+    void clearAu()
     {
-      delete *it;
+        m_uiCts = 0;
+        m_uiDts = 0;
+        m_uiPOC = 0;
+        m_eSliceType = NUMBER_OF_SLICE_TYPES;
+        m_iTemporalLayer = 0;
+        m_iStatus = 0;
+        m_bCtsValid = false;
+        m_bDtsValid = false;
+        m_bRAP = false;
+        m_bRefPic = false;
+        m_cInfo.clear();
+
+        for( AccessUnit::iterator it = this->begin(); it != this->end(); it++ ) {
+            delete *it;
+        }
+        std::list<NALUnitEBSP*>::clear();
     }
-    std::list<NALUnitEBSP*>::clear();
-  }
 
-  uint64_t        m_uiCts;                                   ///< composition time stamp
-  uint64_t        m_uiDts;                                   ///< decoding time stamp
-  uint64_t        m_uiPOC;                                   ///< picture order count
-  SliceType       m_eSliceType;                              ///< slice type (I/P/B) */
-  int             m_iTemporalLayer;                          ///< temporal layer
-  int             m_iStatus;
-  bool            m_bCtsValid;                               ///< composition time stamp valid flag
-  bool            m_bDtsValid;                               ///< decoding time stamp valid flag
-  bool            m_bRAP;                                    ///< random access point flag
-  bool            m_bRefPic;                                 ///< reference picture
-  std::string     m_cInfo;
+    uint64_t m_uiCts;       ///< composition time stamp
+    uint64_t m_uiDts;       ///< decoding time stamp
+    uint64_t m_uiPOC;       ///< picture order count
+    SliceType m_eSliceType; ///< slice type (I/P/B) */
+    int m_iTemporalLayer;   ///< temporal layer
+    int m_iStatus;
+    bool m_bCtsValid; ///< composition time stamp valid flag
+    bool m_bDtsValid; ///< decoding time stamp valid flag
+    bool m_bRAP;      ///< random access point flag
+    bool m_bRefPic;   ///< reference picture
+    std::string m_cInfo;
 };
-
 
 static inline const char* nalUnitTypeToString(NalUnitType type)
 {
-  switch (type)
-  {
-  case NAL_UNIT_CODED_SLICE_TRAIL:      return "TRAIL";
-  case NAL_UNIT_CODED_SLICE_STSA:       return "STSA";
-  case NAL_UNIT_CODED_SLICE_RADL:       return "RADL";
-  case NAL_UNIT_CODED_SLICE_RASL:       return "RASL";
-  case NAL_UNIT_CODED_SLICE_IDR_W_RADL: return "IDR_W_RADL";
-  case NAL_UNIT_CODED_SLICE_IDR_N_LP:   return "IDR_N_LP";
-  case NAL_UNIT_CODED_SLICE_CRA:        return "CRA";
-  case NAL_UNIT_CODED_SLICE_GDR:        return "GDR";
-  case NAL_UNIT_DCI:                    return "DCI";
-  case NAL_UNIT_VPS:                    return "VPS";
-  case NAL_UNIT_SPS:                    return "SPS";
-  case NAL_UNIT_PPS:                    return "PPS";
-  case NAL_UNIT_PREFIX_APS:             return "Prefix APS";
-  case NAL_UNIT_SUFFIX_APS:             return "Suffix APS";
-  case NAL_UNIT_PH:                     return "PH";
-  case NAL_UNIT_ACCESS_UNIT_DELIMITER:  return "AUD";
-  case NAL_UNIT_EOS:                    return "EOS";
-  case NAL_UNIT_EOB:                    return "EOB";
-  case NAL_UNIT_PREFIX_SEI:             return "Prefix SEI";
-  case NAL_UNIT_SUFFIX_SEI:             return "Suffix SEI";
-  case NAL_UNIT_FD:                     return "FD";
-  default:                              return "UNK";
-  }
+    switch( type ) {
+        case NAL_UNIT_CODED_SLICE_TRAIL:
+            return "TRAIL";
+        case NAL_UNIT_CODED_SLICE_STSA:
+            return "STSA";
+        case NAL_UNIT_CODED_SLICE_RADL:
+            return "RADL";
+        case NAL_UNIT_CODED_SLICE_RASL:
+            return "RASL";
+        case NAL_UNIT_CODED_SLICE_IDR_W_RADL:
+            return "IDR_W_RADL";
+        case NAL_UNIT_CODED_SLICE_IDR_N_LP:
+            return "IDR_N_LP";
+        case NAL_UNIT_CODED_SLICE_CRA:
+            return "CRA";
+        case NAL_UNIT_CODED_SLICE_GDR:
+            return "GDR";
+        case NAL_UNIT_DCI:
+            return "DCI";
+        case NAL_UNIT_VPS:
+            return "VPS";
+        case NAL_UNIT_SPS:
+            return "SPS";
+        case NAL_UNIT_PPS:
+            return "PPS";
+        case NAL_UNIT_PREFIX_APS:
+            return "Prefix APS";
+        case NAL_UNIT_SUFFIX_APS:
+            return "Suffix APS";
+        case NAL_UNIT_PH:
+            return "PH";
+        case NAL_UNIT_ACCESS_UNIT_DELIMITER:
+            return "AUD";
+        case NAL_UNIT_EOS:
+            return "EOS";
+        case NAL_UNIT_EOB:
+            return "EOB";
+        case NAL_UNIT_PREFIX_SEI:
+            return "Prefix SEI";
+        case NAL_UNIT_SUFFIX_SEI:
+            return "Suffix SEI";
+        case NAL_UNIT_FD:
+            return "FD";
+        default:
+            return "UNK";
+    }
 }
-
 
 } // namespace vvenc
 
 //! \}
-

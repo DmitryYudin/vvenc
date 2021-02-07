@@ -67,69 +67,65 @@ namespace vvenc {
   and retrieve uncompressed pictures. The decoding can be end by calling flush() that causes the decoder to finish decoding of all pending packets.
   Finally calling uninit() releases all allocated resources held by the decoder internally.
 */
-class VVEncImpl
-{
+class VVEncImpl {
 public:
+    VVEncImpl();
+    virtual ~VVEncImpl();
 
-  VVEncImpl();
-  virtual ~VVEncImpl();
+    int init(const VVEncParameter& rcVVEncParameter);
+    int initPass(int pass);
+    int uninit();
 
-  int init( const VVEncParameter& rcVVEncParameter );
-  int initPass( int pass );
-  int uninit();
+    int encode(InputPicture* pcInputPicture, VvcAccessUnit& rcVvcAccessUnit);
+    int flush(VvcAccessUnit& rcVvcAccessUnit);
 
-  int encode( InputPicture* pcInputPicture, VvcAccessUnit& rcVvcAccessUnit);
-  int flush( VvcAccessUnit& rcVvcAccessUnit );
+    int getPreferredBuffer(PicBuffer& rcPicBuffer);
+    int getConfig(VVEncParameter& rcVVEncParameter);
+    int checkConfig(const vvenc::VVEncParameter& rcVVEncParameter);
 
-  int getPreferredBuffer( PicBuffer &rcPicBuffer );
-  int getConfig( VVEncParameter& rcVVEncParameter );
-  int checkConfig( const vvenc::VVEncParameter& rcVVEncParameter );
+    void clockStartTime();
+    void clockEndTime();
+    double clockGetTimeDiffMs();
 
-  void clockStartTime();
-  void clockEndTime();
-  double clockGetTimeDiffMs();
+    int setAndRetErrorMsg(int Ret);
 
-  int setAndRetErrorMsg( int Ret );
+    int getNumLeadFrames();
+    int getNumTrailFrames();
 
-  int getNumLeadFrames();
-  int getNumTrailFrames();
+    const char* getEncoderInfo();
 
-  const char* getEncoderInfo();
+    static const char* getErrorMsg(int nRet);
+    static const char* getVersionNumber();
 
-  static const char* getErrorMsg( int nRet );
-  static const char* getVersionNumber();
-
-  static const char* getPresetParamsAsStr( int iQuality );
+    static const char* getPresetParamsAsStr(int iQuality);
 
 private:
+    int xCheckParameter(const VVEncParameter& rcSrc, std::string& rcErrorString);
 
-  int xCheckParameter ( const VVEncParameter& rcSrc, std::string& rcErrorString );
+    int xInitLibCfg(const VVEncParameter& rcVVEncParameter, vvenc::EncCfg& rcEncCfg);
 
-  int xInitLibCfg( const VVEncParameter& rcVVEncParameter, vvenc::EncCfg& rcEncCfg );
-
-  int xCopyAndPadInputPlane( int16_t* pDes, const int iDesStride, const int iDesWidth, const int iDesHeight,
-                       const int16_t* pSrc, const int iSrcStride, const int iSrcWidth, const int iSrcHeight, const int iMargin );
-  int xCopyAu( VvcAccessUnit& rcVvcAccessUnit, const vvenc::AccessUnit& rcAu );
+    int xCopyAndPadInputPlane(int16_t* pDes, const int iDesStride, const int iDesWidth, const int iDesHeight,
+                              const int16_t* pSrc, const int iSrcStride, const int iSrcWidth, const int iSrcHeight,
+                              const int iMargin);
+    int xCopyAu(VvcAccessUnit& rcVvcAccessUnit, const vvenc::AccessUnit& rcAu);
 
 public:
-  bool                                                        m_bInitialized         = false;
-  bool                                                        m_bFlushed             = false;
+    bool m_bInitialized = false;
+    bool m_bFlushed = false;
 
-  vvenc::EncoderIf                                            m_cEncoderIf;                      ///< encoder library class
+    vvenc::EncoderIf m_cEncoderIf; ///< encoder library class
 
-  VVEncParameter                                              m_cVVEncParameter;
-  vvenc::EncCfg                                               m_cEncCfg;
+    VVEncParameter m_cVVEncParameter;
+    vvenc::EncCfg m_cEncCfg;
 
-  std::string                                                 m_sEncoderInfo;
-  std::string                                                 m_cErrorString;
-  std::string                                                 m_sEncoderCapabilities;
-  static std::string                                          m_sPresetAsStr;
-  static std::string                                          m_cTmpErrorString;
+    std::string m_sEncoderInfo;
+    std::string m_cErrorString;
+    std::string m_sEncoderCapabilities;
+    static std::string m_sPresetAsStr;
+    static std::string m_cTmpErrorString;
 
-  std::chrono::steady_clock::time_point                       m_cTPStart;
-  std::chrono::steady_clock::time_point                       m_cTPEnd;
+    std::chrono::steady_clock::time_point m_cTPStart;
+    std::chrono::steady_clock::time_point m_cTPEnd;
 };
 
-
 } // namespace
-

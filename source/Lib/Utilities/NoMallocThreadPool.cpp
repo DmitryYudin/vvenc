@@ -44,13 +44,11 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-
 /** \file     NoMallocThreadPool.cpp
     \brief    thread pool
 */
 
 #include "NoMallocThreadPool.h"
-
 
 #if __linux
 #include <pthread.h>
@@ -63,210 +61,178 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-
-NoMallocThreadPool::NoMallocThreadPool( int numThreads, const char * threadPoolName )
-  : m_poolName( threadPoolName )
-  , m_threads ( numThreads < 0 ? std::thread::hardware_concurrency() : numThreads )
+NoMallocThreadPool::NoMallocThreadPool(int numThreads, const char* threadPoolName)
+    : m_poolName(threadPoolName), m_threads(numThreads < 0 ? std::thread::hardware_concurrency() : numThreads)
 {
-  int tid = 0;
-  for( auto& t: m_threads )
-  {
-    t = std::thread( &NoMallocThreadPool::threadProc, this, tid++ );
-  }
+    int tid = 0;
+    for( auto& t : m_threads ) {
+        t = std::thread(&NoMallocThreadPool::threadProc, this, tid++);
+    }
 }
 
 NoMallocThreadPool::~NoMallocThreadPool()
 {
-  m_exitThreads = true;
+    m_exitThreads = true;
 
-  waitForThreads();
+    waitForThreads();
 }
 
 bool NoMallocThreadPool::processTasksOnMainThread()
 {
-  CHECK( m_threads.size() != 0, "should not be used with multiple threads" );
+    CHECK(m_threads.size() != 0, "should not be used with multiple threads");
 
-  bool         progress      = false;
-  TaskIterator firstFailedIt = m_tasks.end();
-  for( auto taskIt = findNextTask( 0, m_tasks.begin() ); taskIt.isValid(); taskIt = findNextTask( 0, taskIt ) )
-  {
-    const bool success = processTask( 0, *taskIt );
-    progress |= success;
+    bool progress = false;
+    TaskIterator firstFailedIt = m_tasks.end();
+    for( auto taskIt = findNextTask(0, m_tasks.begin()); taskIt.isValid(); taskIt = findNextTask(0, taskIt) ) {
+        const bool success = processTask(0, *taskIt);
+        progress |= success;
 
-    if( taskIt == firstFailedIt )
-    {
-      if( success )
-      {
-        // first failed was successful -> reset
-        firstFailedIt = m_tasks.end();
-      }
-      else if( progress )
-      {
-        // reset progress, try another round
-        progress = false;
-      }
-      else
-      {
-        // no progress -> exit
-        break;
-      }
+        if( taskIt == firstFailedIt ) {
+            if( success ) {
+                // first failed was successful -> reset
+                firstFailedIt = m_tasks.end();
+            } else if( progress ) {
+                // reset progress, try another round
+                progress = false;
+            } else {
+                // no progress -> exit
+                break;
+            }
+        } else if( !success && !firstFailedIt.isValid() ) {
+            firstFailedIt = taskIt;
+        }
     }
-    else if( !success && !firstFailedIt.isValid() )
-    {
-      firstFailedIt = taskIt;
-    }
-  }
 
-  // return true if all done (-> false if some tasks blocked due to barriers)
-  return std::all_of( m_tasks.begin(), m_tasks.end(), []( Slot& t ) { return t.state == FREE; } );
+    // return true if all done (-> false if some tasks blocked due to barriers)
+    return std::all_of(m_tasks.begin(), m_tasks.end(), [](Slot& t) { return t.state == FREE; });
 }
 
-void NoMallocThreadPool::shutdown( bool block )
+void NoMallocThreadPool::shutdown(bool block)
 {
-  m_exitThreads = true;
-  if( block )
-  {
-    waitForThreads();
-  }
+    m_exitThreads = true;
+    if( block ) {
+        waitForThreads();
+    }
 }
 
 void NoMallocThreadPool::waitForThreads()
 {
-  for( auto& t: m_threads )
-  {
-    if( t.joinable() )
-      t.join();
-  }
+    for( auto& t : m_threads ) {
+        if( t.joinable() )
+            t.join();
+    }
 }
 
-void NoMallocThreadPool::threadProc( int threadId )
+void NoMallocThreadPool::threadProc(int threadId)
 {
 #if __linux
-  if( !m_poolName.empty() )
-  {
-    std::string threadName( m_poolName + std::to_string( threadId ) );
-    pthread_setname_np( pthread_self(), threadName.c_str() );
-  }
+    if( !m_poolName.empty() ) {
+        std::string threadName(m_poolName + std::to_string(threadId));
+        pthread_setname_np(pthread_self(), threadName.c_str());
+    }
 #endif
 
-  auto nextTaskIt = m_tasks.begin();
-  while( !m_exitThreads )
-  {
-    auto taskIt = findNextTask( threadId, nextTaskIt );
-    if( !taskIt.isValid() )
-    {
-      std::unique_lock<std::mutex> l( m_idleMutex, std::defer_lock );
+    auto nextTaskIt = m_tasks.begin();
+    while( !m_exitThreads ) {
+        auto taskIt = findNextTask(threadId, nextTaskIt);
+        if( !taskIt.isValid() ) {
+            std::unique_lock<std::mutex> l(m_idleMutex, std::defer_lock);
 
-      ITT_TASKSTART( itt_domain_thrd, itt_handle_TPspinWait );
-      m_waitingThreads.fetch_add( 1, std::memory_order_relaxed );
-      const auto startWait = std::chrono::steady_clock::now();
-      while( !m_exitThreads )
-      {
-        taskIt = findNextTask( threadId, nextTaskIt );
-        if( taskIt.isValid() || m_exitThreads )
-        {
-          break;
+            ITT_TASKSTART(itt_domain_thrd, itt_handle_TPspinWait);
+            m_waitingThreads.fetch_add(1, std::memory_order_relaxed);
+            const auto startWait = std::chrono::steady_clock::now();
+            while( !m_exitThreads ) {
+                taskIt = findNextTask(threadId, nextTaskIt);
+                if( taskIt.isValid() || m_exitThreads ) {
+                    break;
+                }
+
+                if( !l.owns_lock() && m_waitingThreads.load(std::memory_order_relaxed) > 1 &&
+                    (BUSY_WAIT_TIME.count() == 0 || std::chrono::steady_clock::now() - startWait > BUSY_WAIT_TIME) &&
+                    !m_exitThreads ) {
+                    ITT_TASKSTART(itt_domain_thrd, itt_handle_TPblocked);
+                    l.lock();
+                    ITT_TASKEND(itt_domain_thrd, itt_handle_TPblocked);
+                } else {
+                    std::this_thread::yield();
+                }
+            }
+            m_waitingThreads.fetch_sub(1, std::memory_order_relaxed);
+            ITT_TASKEND(itt_domain_thrd, itt_handle_TPspinWait);
+        }
+        if( m_exitThreads ) {
+            return;
         }
 
-        if( !l.owns_lock()
-            && m_waitingThreads.load( std::memory_order_relaxed ) > 1
-            && ( BUSY_WAIT_TIME.count() == 0 || std::chrono::steady_clock::now() - startWait > BUSY_WAIT_TIME )
-            && !m_exitThreads )
-        {
-          ITT_TASKSTART(itt_domain_thrd, itt_handle_TPblocked);
-          l.lock();
-          ITT_TASKEND(itt_domain_thrd, itt_handle_TPblocked);
-        }
-        else
-        {
-          std::this_thread::yield();
-        }
-      }
-      m_waitingThreads.fetch_sub( 1, std::memory_order_relaxed );
-      ITT_TASKEND( itt_domain_thrd, itt_handle_TPspinWait );
+        processTask(threadId, *taskIt);
+
+        nextTaskIt = taskIt;
+        nextTaskIt.incWrap();
     }
-    if( m_exitThreads )
-    {
-      return;
-    }
-
-    processTask( threadId, *taskIt );
-
-    nextTaskIt = taskIt;
-    nextTaskIt.incWrap();
-  }
 }
 
-NoMallocThreadPool::TaskIterator NoMallocThreadPool::findNextTask( int threadId, TaskIterator startSearch )
+NoMallocThreadPool::TaskIterator NoMallocThreadPool::findNextTask(int threadId, TaskIterator startSearch)
 {
-  if( !startSearch.isValid() )
-  {
-    startSearch = m_tasks.begin();
-  }
-  bool first = true;
-  for( auto it = startSearch; it != startSearch || first; it.incWrap() )
-  {
+    if( !startSearch.isValid() ) {
+        startSearch = m_tasks.begin();
+    }
+    bool first = true;
+    for( auto it = startSearch; it != startSearch || first; it.incWrap() ) {
 #if ENABLE_VALGRIND_CODE
-    MutexLock lock( m_extraMutex );
+        MutexLock lock(m_extraMutex);
 #endif
 
-    first = false;
+        first = false;
 
-    Slot& t = *it;
-    auto expected = WAITING;
-    if( t.state.load( std::memory_order_relaxed ) == WAITING && t.state.compare_exchange_strong( expected, RUNNING ) )
-    {
-      if( !t.barriers.empty() )
-      {
-        if( std::any_of( t.barriers.cbegin(), t.barriers.cend(), []( const Barrier* b ) { return b && b->isBlocked(); } ) )
-        {
-          // reschedule
-          t.state.store( WAITING, std::memory_order_relaxed );
-          continue;
+        Slot& t = *it;
+        auto expected = WAITING;
+        if( t.state.load(std::memory_order_relaxed) == WAITING && t.state.compare_exchange_strong(expected, RUNNING) ) {
+            if( !t.barriers.empty() ) {
+                if( std::any_of(t.barriers.cbegin(), t.barriers.cend(),
+                                [](const Barrier* b) { return b && b->isBlocked(); }) ) {
+                    // reschedule
+                    t.state.store(WAITING, std::memory_order_relaxed);
+                    continue;
+                }
+                t.barriers
+                    .clear(); // clear barriers, so we don't need to check them on the next try (we assume they won't get locked again)
+            }
+            if( t.readyCheck && t.readyCheck(threadId, t.param) == false ) {
+                // reschedule
+                t.state.store(WAITING, std::memory_order_relaxed);
+                continue;
+            }
+
+            return it;
         }
-        t.barriers.clear();   // clear barriers, so we don't need to check them on the next try (we assume they won't get locked again)
-      }
-      if( t.readyCheck && t.readyCheck( threadId, t.param ) == false )
-      {
-        // reschedule
-        t.state.store( WAITING, std::memory_order_relaxed );
-        continue;
-      }
-
-      return it;
     }
-  }
-  return {};
+    return {};
 }
 
-bool NoMallocThreadPool::processTask( int threadId, NoMallocThreadPool::Slot& task )
+bool NoMallocThreadPool::processTask(int threadId, NoMallocThreadPool::Slot& task)
 {
-  const bool success = task.func( threadId, task.param );
-  if( !success )
-  {
-    task.state = WAITING;
-    return false;
-  }
+    const bool success = task.func(threadId, task.param);
+    if( !success ) {
+        task.state = WAITING;
+        return false;
+    }
 
 #if ENABLE_VALGRIND_CODE
-  MutexLock lock( m_extraMutex );
+    MutexLock lock(m_extraMutex);
 #endif
 
-  if( task.done != nullptr )
-  {
-    task.done->unlock();
-  }
-  if( task.counter != nullptr )
-  {
-    --(*task.counter);
-  }
+    if( task.done != nullptr ) {
+        task.done->unlock();
+    }
+    if( task.counter != nullptr ) {
+        --(*task.counter);
+    }
 
-  task.state = FREE;
+    task.state = FREE;
 
-  return true;
+    return true;
 }
 
 } // namespace vvenc
 
 //! \}
-

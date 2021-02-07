@@ -62,69 +62,62 @@ namespace vvcutilities {
   \ingroup HEVCUtilitiesExternalInterfaces
   The BinFileWriter class.
 */
-class BinFileWriter
-{
+class BinFileWriter {
 public:
-  /// Constructor
-  BinFileWriter(){}
+    /// Constructor
+    BinFileWriter() {}
 
-  /// Destructor
-  virtual ~BinFileWriter() {}
+    /// Destructor
+    virtual ~BinFileWriter() {}
 
-  bool isOpen()
-  {
-    return m_cOS.is_open() ? true : false;
-  }
+    bool isOpen() { return m_cOS.is_open() ? true : false; }
 
-  /**
+    /**
     This method opens a file.
     \param[in]  pcFilename pointer to Filename.
     \retval     int, nonzero if failed
 		\pre        None
 		\post       None
   */
-  int open( const char* pcFilename )
-  {
-    // if there is some stream open just shut it down
-    m_cOS.close(); 
-    m_cOS.open( pcFilename, std::ios::out | std::ios::binary | std::ios::trunc);
-    return m_cOS.is_open() ? 0 : -1;
-  }
+    int open(const char* pcFilename)
+    {
+        // if there is some stream open just shut it down
+        m_cOS.close();
+        m_cOS.open(pcFilename, std::ios::out | std::ios::binary | std::ios::trunc);
+        return m_cOS.is_open() ? 0 : -1;
+    }
 
-  /**
+    /**
     This method opens a file.
     \param[in]  rcAccessUnit reference to Accessunit.
     \retval     int, nonzero if failed
     \pre        None
     \post       None
   */
-  int writeAU( const vvenc::VvcAccessUnit& rcAccessUnit )
-  {
-    if( rcAccessUnit.m_iUsedSize == 0 )
+    int writeAU(const vvenc::VvcAccessUnit& rcAccessUnit)
     {
-      return 0;
+        if( rcAccessUnit.m_iUsedSize == 0 ) {
+            return 0;
+        }
+
+        size_t lBefore = m_cOS.tellp();
+        m_cOS.write((const char*)rcAccessUnit.m_pucBuffer, rcAccessUnit.m_iUsedSize);
+        // check if this read was okay
+        return (int)(lBefore + rcAccessUnit.m_iUsedSize - m_cOS.tellp());
     }
 
-    size_t lBefore = m_cOS.tellp();
-    m_cOS.write( (const char*)rcAccessUnit.m_pucBuffer, rcAccessUnit.m_iUsedSize );
-    // check if this read was okay
-    return (int)(lBefore + rcAccessUnit.m_iUsedSize - m_cOS.tellp());
-  }
-
-  /**
+    /**
     Close the opened file
   */
-  void close()
-  {
-    if( m_cOS.is_open() )
+    void close()
     {
-      m_cOS.close();
+        if( m_cOS.is_open() ) {
+            m_cOS.close();
+        }
     }
-  }
 
 private:
-  std::ofstream m_cOS;
+    std::ofstream m_cOS;
 };
 
 } // namespace
-

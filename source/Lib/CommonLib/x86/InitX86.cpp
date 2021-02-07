@@ -44,7 +44,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-
 /*
  * \ingroup CommonLib
  * \file    InitX86.cpp
@@ -74,144 +73,139 @@ THE POSSIBILITY OF SUCH DAMAGE.
 namespace vvenc {
 
 #if ENABLE_SIMD_OPT_MCIF
-void InterpolationFilter::initInterpolationFilterX86( /*int iBitDepthY, int iBitDepthC*/ )
+void InterpolationFilter::initInterpolationFilterX86(/*int iBitDepthY, int iBitDepthC*/)
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext){
-  case AVX512:
-  case AVX2:
-    _initInterpolationFilterX86<AVX2>(/*iBitDepthY, iBitDepthC*/);
-    break;
-  case AVX:
-    _initInterpolationFilterX86<AVX>(/*iBitDepthY, iBitDepthC*/);
-    break;
-  case SSE42:
-  case SSE41:
-    _initInterpolationFilterX86<SSE41>(/*iBitDepthY, iBitDepthC*/);
-    break;
-  default:
-    break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initInterpolationFilterX86<AVX2>(/*iBitDepthY, iBitDepthC*/);
+            break;
+        case AVX:
+            _initInterpolationFilterX86<AVX>(/*iBitDepthY, iBitDepthC*/);
+            break;
+        case SSE42:
+        case SSE41:
+            _initInterpolationFilterX86<SSE41>(/*iBitDepthY, iBitDepthC*/);
+            break;
+        default:
+            break;
+    }
 }
 #endif
 
 #if ENABLE_SIMD_OPT_BUFFER
 void PelBufferOps::initPelBufOpsX86()
 {
-  if ( isInitX86Done )
-    return;
+    if( isInitX86Done )
+        return;
 
-  auto vext = read_x86_extension_flags();
-  switch (vext){
-    case AVX512:
-    case AVX2:
-      _initPelBufOpsX86<AVX2>();
-      break;
-    case AVX:
-      _initPelBufOpsX86<AVX>();
-      break;
-    case SSE42:
-    case SSE41:
-      _initPelBufOpsX86<SSE41>();
-      break;
-    default:
-      break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initPelBufOpsX86<AVX2>();
+            break;
+        case AVX:
+            _initPelBufOpsX86<AVX>();
+            break;
+        case SSE42:
+        case SSE41:
+            _initPelBufOpsX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 
-  isInitX86Done = true;
+    isInitX86Done = true;
 }
 #endif
-
 
 #if ENABLE_SIMD_DBLF
 void LoopFilter::initLoopFilterX86()
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext)
-  {
-  case AVX512:
-  case AVX2:
-    _initLoopFilterX86<AVX2>();
-    break;
-  case AVX:
-    _initLoopFilterX86<AVX>();
-    break;
-  case SSE42:
-  case SSE41:
-    _initLoopFilterX86<SSE41>();
-    break;
-  default:
-    break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initLoopFilterX86<AVX2>();
+            break;
+        case AVX:
+            _initLoopFilterX86<AVX>();
+            break;
+        case SSE42:
+        case SSE41:
+            _initLoopFilterX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
 #endif
-
 
 #if ENABLE_SIMD_OPT_DIST
 void RdCost::initRdCostX86()
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext){
-    case AVX512:
-    case AVX2:
-      _initRdCostX86<AVX2>();
-      break;
-    case AVX:
-      _initRdCostX86<AVX>();
-      break;
-    case SSE42:
-    case SSE41:
-      _initRdCostX86<SSE41>();
-      break;
-    default:
-      break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initRdCostX86<AVX2>();
+            break;
+        case AVX:
+            _initRdCostX86<AVX>();
+            break;
+        case SSE42:
+        case SSE41:
+            _initRdCostX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
 #endif
 
 #if ENABLE_SIMD_OPT_ALF
 void AdaptiveLoopFilter::initAdaptiveLoopFilterX86()
 {
-  auto vext = read_x86_extension_flags();
-  switch( vext )
-  {
-  case AVX512:
-  case AVX2:
-    _initAdaptiveLoopFilterX86<AVX2>();
-    break;
-  case AVX:
-    _initAdaptiveLoopFilterX86<AVX>();
-    break;
-  case SSE42:
-  case SSE41:
-    _initAdaptiveLoopFilterX86<SSE41>();
-    break;
-  default:
-    break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initAdaptiveLoopFilterX86<AVX2>();
+            break;
+        case AVX:
+            _initAdaptiveLoopFilterX86<AVX>();
+            break;
+        case SSE42:
+        case SSE41:
+            _initAdaptiveLoopFilterX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
 #endif
 
 #if ENABLE_SIMD_OPT_SAO
 void SampleAdaptiveOffset::initSampleAdaptiveOffsetX86()
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext){
-    case AVX512:
-    case AVX2:
-      _initSampleAdaptiveOffsetX86<AVX2>();
-      break;
-    case AVX:
-      _initSampleAdaptiveOffsetX86<AVX>();
-      break;
-    case SSE42:
-    case SSE41:
-      _initSampleAdaptiveOffsetX86<SSE41>();
-      break;
-    default:
-      break;
-  }
-
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initSampleAdaptiveOffsetX86<AVX2>();
+            break;
+        case AVX:
+            _initSampleAdaptiveOffsetX86<AVX>();
+            break;
+        case SSE42:
+        case SSE41:
+            _initSampleAdaptiveOffsetX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
 
 #endif
@@ -219,114 +213,114 @@ void SampleAdaptiveOffset::initSampleAdaptiveOffsetX86()
 #if ENABLE_SIMD_OPT_BDOF
 void InterPredInterpolation::initInterPredictionX86()
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext){
-    case AVX512:
-    case AVX2:
-      _initInterPredictionX86<AVX2>();
-      break;
-    case AVX:
-      _initInterPredictionX86<AVX>();
-      break;
-    case SSE42:
-    case SSE41:
-      _initInterPredictionX86<SSE41>();
-      break;
-    default:
-      break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initInterPredictionX86<AVX2>();
+            break;
+        case AVX:
+            _initInterPredictionX86<AVX>();
+            break;
+        case SSE42:
+        case SSE41:
+            _initInterPredictionX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
 #endif
 
 #if ENABLE_SIMD_OPT_AFFINE_ME
 void AffineGradientSearch::initAffineGradientSearchX86()
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext) {
-  case AVX512:
-  case AVX2:
-    _initAffineGradientSearchX86<AVX2>();
-    break;
-  case AVX:
-    _initAffineGradientSearchX86<AVX>();
-    break;
-  case SSE42:
-  case SSE41:
-    _initAffineGradientSearchX86<SSE41>();
-    break;
-  default:
-    break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initAffineGradientSearchX86<AVX2>();
+            break;
+        case AVX:
+            _initAffineGradientSearchX86<AVX>();
+            break;
+        case SSE42:
+        case SSE41:
+            _initAffineGradientSearchX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
 #endif
 
 #if ENABLE_SIMD_OPT_INTRAPRED
 void IntraPrediction::initIntraPredictionX86()
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext){
-    case AVX512:
-    case AVX2:
-      _initIntraPredictionX86<AVX2>();
-      break;
-    case AVX:
-      _initIntraPredictionX86<AVX>();
-      break;
-    case SSE42:
-    case SSE41:
-      _initIntraPredictionX86<SSE41>();
-      break;
-    default:
-      break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initIntraPredictionX86<AVX2>();
+            break;
+        case AVX:
+            _initIntraPredictionX86<AVX>();
+            break;
+        case SSE42:
+        case SSE41:
+            _initIntraPredictionX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
 
 #endif
 #if ENABLE_SIMD_OPT_MCTF
 void MCTF::initMCTF_X86()
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext){
-    case AVX512:
-    case AVX2:
-      _initMCTF_X86<AVX2 >();
-      break;
-    case AVX:
-      _initMCTF_X86<AVX  >();
-      break;
-    case SSE42:
-      _initMCTF_X86<SSE42>();
-      break;
-    case SSE41:
-      _initMCTF_X86<SSE41>();
-      break;
-    default:
-      break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initMCTF_X86<AVX2>();
+            break;
+        case AVX:
+            _initMCTF_X86<AVX>();
+            break;
+        case SSE42:
+            _initMCTF_X86<SSE42>();
+            break;
+        case SSE41:
+            _initMCTF_X86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
 
 #endif
 #if ENABLE_SIMD_TRAFO
 void TCoeffOps::initTCoeffOpsX86()
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext){
-    case AVX512:
-    case AVX2:
-      _initTCoeffOpsX86<AVX2 >();
-      break;
-    case AVX:
-      _initTCoeffOpsX86<AVX  >();
-      break;
-    case SSE42:
-      _initTCoeffOpsX86<SSE42>();
-      break;
-    case SSE41:
-      _initTCoeffOpsX86<SSE41>();
-      break;
-    default:
-      break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initTCoeffOpsX86<AVX2>();
+            break;
+        case AVX:
+            _initTCoeffOpsX86<AVX>();
+            break;
+        case SSE42:
+            _initTCoeffOpsX86<SSE42>();
+            break;
+        case SSE41:
+            _initTCoeffOpsX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
 
 #endif
@@ -334,44 +328,43 @@ void TCoeffOps::initTCoeffOpsX86()
 #if ENABLE_SIMD_OPT_QUANT
 void QuantRDOQ2::initQuantX86()
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext){
-  case AVX512:
-  case AVX2:
-    _initQuantX86<AVX2>();
-    break;
-  case AVX:
-    _initQuantX86<AVX>();
-    break;
-  case SSE42:
-  case SSE41:
-    _initQuantX86<SSE41>();
-    break;
-  default:
-    break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initQuantX86<AVX2>();
+            break;
+        case AVX:
+            _initQuantX86<AVX>();
+            break;
+        case SSE42:
+        case SSE41:
+            _initQuantX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
 
 void Quant::initQuantX86()
 {
-  auto vext = read_x86_extension_flags();
-  switch (vext){
-    case AVX512:
-    case AVX2:
-      _initQuantX86<AVX2>();
-      break;
-    case AVX:
-      _initQuantX86<AVX>();
-      break;
-    case SSE42:
-    case SSE41:
-      _initQuantX86<SSE41>();
-      break;
-    default:
-      break;
-  }
+    auto vext = read_x86_extension_flags();
+    switch( vext ) {
+        case AVX512:
+        case AVX2:
+            _initQuantX86<AVX2>();
+            break;
+        case AVX:
+            _initQuantX86<AVX>();
+            break;
+        case SSE42:
+        case SSE41:
+            _initQuantX86<SSE41>();
+            break;
+        default:
+            break;
+    }
 }
-
 
 #endif
 
@@ -380,4 +373,3 @@ void Quant::initQuantX86()
 //! \}
 
 #endif // TARGET_SIMD_X86
-

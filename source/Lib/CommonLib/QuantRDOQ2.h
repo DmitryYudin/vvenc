@@ -60,73 +60,86 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-  typedef int64_t cost_t ;
+typedef int64_t cost_t;
 
 // ====================================================================================================================
 // Class definition
 // ====================================================================================================================
 
 /// transform and quantization class
-class QuantRDOQ2 : public QuantRDOQ
-{
+class QuantRDOQ2 : public QuantRDOQ {
 public:
-  QuantRDOQ2( const Quant* other );
-  ~QuantRDOQ2();
+    QuantRDOQ2(const Quant* other);
+    ~QuantRDOQ2();
 
 public:
-  virtual void setFlatScalingList      ( const int maxLog2TrDynamicRange[MAX_NUM_CH], const BitDepths &bitDepths );
-  virtual void quant                   ( TransformUnit &tu, const ComponentID compID, const CCoeffBuf &pSrc, TCoeff &uiAbsSum, const QpParam &cQP, const Ctx& ctx );
+    virtual void setFlatScalingList(const int maxLog2TrDynamicRange[MAX_NUM_CH], const BitDepths& bitDepths);
+    virtual void quant(TransformUnit& tu, const ComponentID compID, const CCoeffBuf& pSrc, TCoeff& uiAbsSum,
+                       const QpParam& cQP, const Ctx& ctx);
 #ifdef TARGET_SIMD_X86
-  void initQuantX86();
-  template <X86_VEXT vext>
-  void _initQuantX86();
+    void initQuantX86();
+    template <X86_VEXT vext>
+    void _initQuantX86();
 #endif
 
 private:
-  int  (*m_pQuantToNearestInt[4])      ( short* piQCoef, short* piCbf, const short* piCoef, const int* piQuantCoeff, const int iAdd, const int iShift, const int iSize );
+    int (*m_pQuantToNearestInt[4])(short* piQCoef, short* piCbf, const short* piCoef, const int* piQuantCoeff,
+                                   const int iAdd, const int iShift, const int iSize);
 
-  int* xGetErrScaleCoeffSL             ( unsigned list, unsigned sizeX, unsigned sizeY, int qp ) { return m_errScale[sizeX][sizeY][list][qp]; };  //!< get Error Scale Coefficent
-  int  xGetErrScaleCoeff               ( const bool needsSqrt2, SizeType width, SizeType height, int qp, const int maxLog2TrDynamicRange, const int channelBitDepth);
-  int& xGetErrScaleCoeffNoScalingList  ( unsigned list, unsigned sizeX, unsigned sizeY, int qp ) { return m_errScaleNoScalingList[sizeX][sizeY][list][qp]; };  //!< get Error Scale Coefficent
+    int* xGetErrScaleCoeffSL(unsigned list, unsigned sizeX, unsigned sizeY, int qp)
+    {
+        return m_errScale[sizeX][sizeY][list][qp];
+    }; //!< get Error Scale Coefficent
+    int xGetErrScaleCoeff(const bool needsSqrt2, SizeType width, SizeType height, int qp,
+                          const int maxLog2TrDynamicRange, const int channelBitDepth);
+    int& xGetErrScaleCoeffNoScalingList(unsigned list, unsigned sizeX, unsigned sizeY, int qp)
+    {
+        return m_errScaleNoScalingList[sizeX][sizeY][list][qp];
+    }; //!< get Error Scale Coefficent
 
-  void xInitScalingList                ( const QuantRDOQ2* other );
-  void xDestroyScalingList             ();
-  void xSetErrScaleCoeff               ( unsigned list, unsigned sizeX, unsigned sizeY, int qp, const int maxLog2TrDynamicRange[MAX_NUM_CH], const BitDepths &bitDepths );
-  void xSetErrScaleCoeffNoScalingList  ( unsigned list, unsigned wIdx, unsigned hIdx, int qp, const int maxLog2TrDynamicRange[MAX_NUM_CH], const BitDepths &bitDepths );
-  void xInitLastPosBitsTab             ( const CoeffCodingContext& cctx, const unsigned uiWidth, const unsigned uiHeight, const ChannelType chType, const FracBitsAccess& fracBits );
+    void xInitScalingList(const QuantRDOQ2* other);
+    void xDestroyScalingList();
+    void xSetErrScaleCoeff(unsigned list, unsigned sizeX, unsigned sizeY, int qp,
+                           const int maxLog2TrDynamicRange[MAX_NUM_CH], const BitDepths& bitDepths);
+    void xSetErrScaleCoeffNoScalingList(unsigned list, unsigned wIdx, unsigned hIdx, int qp,
+                                        const int maxLog2TrDynamicRange[MAX_NUM_CH], const BitDepths& bitDepths);
+    void xInitLastPosBitsTab(const CoeffCodingContext& cctx, const unsigned uiWidth, const unsigned uiHeight,
+                             const ChannelType chType, const FracBitsAccess& fracBits);
 
-  inline cost_t xiGetICost              ( int iRate ) const;
-  inline cost_t xGetIEPRate             () const;
-  inline cost_t xiGetICRateCost ( const unsigned     uiAbsLevel,
-                                  const BinFracBits& fracBitsPar,
-                                  const BinFracBits& fracBitsGt1,
-                                  const BinFracBits& fracBitsGt2,
-                                  const int          remRegBins,
-                                  unsigned           goRiceZero,
-                                  const uint16_t     ui16AbsGoRice,
-                                  const bool         useLimitedPrefixLength,
-                                  const int          maxLog2TrDynamicRange ) const;
-  inline cost_t xiGetCostSigCoeffGroup  ( const BinFracBits& fracBitsSigCG, unsigned uiSignificanceCoeffGroup ) const;
-  inline cost_t xLevelCost              ( const uint32_t uiAbsLevel, const int iScaledLevel, const int iQBits, const cost_t iErrScale, const cost_t iErrScaleShift, const cost_t costSig, const BinFracBits& fracBitsPar, const BinFracBits& fracBitsGt1, const BinFracBits& fracBitsGt2, const int remRegBins, unsigned goRiceZero, const uint16_t goRiceParam, const bool extendedPrecision, const int maxLog2TrDynamicRange ) const;
-  inline cost_t xiGetCostLast           ( const unsigned uiPosX, const unsigned uiPosY, const ChannelType chType ) const;
-  inline cost_t xiGetCostSigCoef        ( const BinFracBits& fracBitsSig, unsigned uiSignificance ) const;
+    inline cost_t xiGetICost(int iRate) const;
+    inline cost_t xGetIEPRate() const;
+    inline cost_t xiGetICRateCost(const unsigned uiAbsLevel, const BinFracBits& fracBitsPar,
+                                  const BinFracBits& fracBitsGt1, const BinFracBits& fracBitsGt2, const int remRegBins,
+                                  unsigned goRiceZero, const uint16_t ui16AbsGoRice, const bool useLimitedPrefixLength,
+                                  const int maxLog2TrDynamicRange) const;
+    inline cost_t xiGetCostSigCoeffGroup(const BinFracBits& fracBitsSigCG, unsigned uiSignificanceCoeffGroup) const;
+    inline cost_t xLevelCost(const uint32_t uiAbsLevel, const int iScaledLevel, const int iQBits,
+                             const cost_t iErrScale, const cost_t iErrScaleShift, const cost_t costSig,
+                             const BinFracBits& fracBitsPar, const BinFracBits& fracBitsGt1,
+                             const BinFracBits& fracBitsGt2, const int remRegBins, unsigned goRiceZero,
+                             const uint16_t goRiceParam, const bool extendedPrecision,
+                             const int maxLog2TrDynamicRange) const;
+    inline cost_t xiGetCostLast(const unsigned uiPosX, const unsigned uiPosY, const ChannelType chType) const;
+    inline cost_t xiGetCostSigCoef(const BinFracBits& fracBitsSig, unsigned uiSignificance) const;
 
-  template< bool bSBH, bool bUseScalingList >
-  int xRateDistOptQuantFast( TransformUnit &tu, const ComponentID &compID, const CCoeffBuf &pSrc, TCoeff &uiAbsSum, const QpParam &cQP, const Ctx &ctx );
-  int xRateDistOptQuant    ( TransformUnit &tu, const ComponentID &compID, const CCoeffBuf &pSrc, TCoeff &uiAbsSum, const QpParam &cQP, const Ctx &ctx, bool bUseScalingList );
-
+    template <bool bSBH, bool bUseScalingList>
+    int xRateDistOptQuantFast(TransformUnit& tu, const ComponentID& compID, const CCoeffBuf& pSrc, TCoeff& uiAbsSum,
+                              const QpParam& cQP, const Ctx& ctx);
+    int xRateDistOptQuant(TransformUnit& tu, const ComponentID& compID, const CCoeffBuf& pSrc, TCoeff& uiAbsSum,
+                          const QpParam& cQP, const Ctx& ctx, bool bUseScalingList);
 
 private:
-  bool    m_isErrScaleListOwner;
-  int64_t m_iLambda;
+    bool m_isErrScaleListOwner;
+    int64_t m_iLambda;
 
-  //QuantErrScale m_quantErrScale;
-  int     m_lastBitsX             [MAX_NUM_CH][LAST_SIGNIFICANT_GROUPS];
-  int     m_lastBitsY             [MAX_NUM_CH][LAST_SIGNIFICANT_GROUPS];
-  int*    m_errScale             [SCALING_LIST_SIZE_NUM][SCALING_LIST_SIZE_NUM][SCALING_LIST_NUM][SCALING_LIST_REM_NUM]; ///< array of quantization matrix coefficient 4x4
-  int     m_errScaleNoScalingList[SCALING_LIST_SIZE_NUM][SCALING_LIST_SIZE_NUM][SCALING_LIST_NUM][SCALING_LIST_REM_NUM]; ///< array of quantization matrix coefficient 4x4
-};// END CLASS DEFINITION QuantRDOQ2
+    //QuantErrScale m_quantErrScale;
+    int m_lastBitsX[MAX_NUM_CH][LAST_SIGNIFICANT_GROUPS];
+    int m_lastBitsY[MAX_NUM_CH][LAST_SIGNIFICANT_GROUPS];
+    int* m_errScale[SCALING_LIST_SIZE_NUM][SCALING_LIST_SIZE_NUM][SCALING_LIST_NUM]
+                   [SCALING_LIST_REM_NUM]; ///< array of quantization matrix coefficient 4x4
+    int m_errScaleNoScalingList[SCALING_LIST_SIZE_NUM][SCALING_LIST_SIZE_NUM][SCALING_LIST_NUM]
+                               [SCALING_LIST_REM_NUM]; ///< array of quantization matrix coefficient 4x4
+};                                                     // END CLASS DEFINITION QuantRDOQ2
 
 } // namespace vvenc
 //! \}
-

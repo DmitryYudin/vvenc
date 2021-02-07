@@ -55,16 +55,16 @@ THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 /// \endcond
 
-#if defined( _WIN32 )
-# if defined( VVENC_DYN_LINK )
-#   if defined( VVENC_SOURCE )
-#     define VVENC_DECL __declspec(dllexport)
-#   else
-#     define VVENC_DECL __declspec(dllimport)
-#   endif  // VVENC_SOURCE
-# endif // VVENC_DYN_LINK
+#if defined(_WIN32)
+#if defined(VVENC_DYN_LINK)
+#if defined(VVENC_SOURCE)
+#define VVENC_DECL __declspec(dllexport)
+#else
+#define VVENC_DECL __declspec(dllimport)
+#endif // VVENC_SOURCE
+#endif // VVENC_DYN_LINK
 #endif // _WIN32
 
-#if !defined( VVENC_DECL )
-# define VVENC_DECL
+#if !defined(VVENC_DECL)
+#define VVENC_DECL
 #endif

@@ -59,28 +59,26 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-inline unsigned calcCheckSum( const int iWidth, const int iHeight,  const Pel* p,  const uint32_t stride,  const int bitdepth )
+inline unsigned calcCheckSum(const int iWidth, const int iHeight, const Pel* p, const uint32_t stride,
+                             const int bitdepth)
 {
-  unsigned checksum = 0;
-  for( unsigned y = 0; y < iHeight; y++)
-  {
-    for( unsigned  x = 0; x < iWidth; x++)
-    {
-      uint8_t xor_mask = (x & 0xff) ^ (y & 0xff) ^ (x >> 8) ^ (y >> 8);
-      checksum = (checksum + ((p[y*stride+x] & 0xff) ^ xor_mask)) & 0xffffffff;
+    unsigned checksum = 0;
+    for( unsigned y = 0; y < iHeight; y++ ) {
+        for( unsigned x = 0; x < iWidth; x++ ) {
+            uint8_t xor_mask = (x & 0xff) ^ (y & 0xff) ^ (x >> 8) ^ (y >> 8);
+            checksum = (checksum + ((p[y * stride + x] & 0xff) ^ xor_mask)) & 0xffffffff;
 
-      if(bitdepth > 8)
-      {
-        checksum = (checksum + ((p[y*stride+x]>>8) ^ xor_mask)) & 0xffffffff;
-      }
+            if( bitdepth > 8 ) {
+                checksum = (checksum + ((p[y * stride + x] >> 8) ^ xor_mask)) & 0xffffffff;
+            }
+        }
     }
-  }
-  return checksum;
+    return checksum;
 }
 
-inline unsigned calcCheckSum( const CPelBuf& buf, int bitdepth )
+inline unsigned calcCheckSum(const CPelBuf& buf, int bitdepth)
 {
-  return calcCheckSum( buf.width, buf.height, buf.buf, buf.stride, bitdepth );
+    return calcCheckSum(buf.width, buf.height, buf.buf, buf.stride, bitdepth);
 }
 
 #if ENABLE_TRACING
@@ -90,125 +88,141 @@ inline unsigned calcCheckSum( const CPelBuf& buf, int bitdepth )
 // Specialized helper functions
 //
 //////////////////////////////////////////////////////////////////////////
-inline void dtraceCoeffBuf( DTRACE_CHANNEL channnel, const CCoeffBuf& coefBuf, const UnitArea& ua, PredMode predMode, const ComponentID compId, uint32_t zIdx = 0 )
+inline void dtraceCoeffBuf(DTRACE_CHANNEL channnel, const CCoeffBuf& coefBuf, const UnitArea& ua, PredMode predMode,
+                           const ComponentID compId, uint32_t zIdx = 0)
 {
-  int x0 = ua.blocks[compId].x;
-  int y0 = ua.blocks[compId].y;
-  const uint32_t    uiStride = coefBuf.stride;
-  const TCoeff* piReco   = coefBuf.buf;
-  const uint32_t    uiWidth  = ua.blocks[compId].width;
-  const uint32_t    uiHeight = ua.blocks[compId].height;
-  DTRACE(g_trace_ctx, channnel, "@(%4d,%4d) [%2dx%2d] comp=%d predmode=%d \n", x0, y0, uiWidth, uiHeight, compId, predMode);
-  DTRACE_BLOCK(g_trace_ctx, channnel, piReco, uiStride, uiWidth, uiHeight);
+    int x0 = ua.blocks[compId].x;
+    int y0 = ua.blocks[compId].y;
+    const uint32_t uiStride = coefBuf.stride;
+    const TCoeff* piReco = coefBuf.buf;
+    const uint32_t uiWidth = ua.blocks[compId].width;
+    const uint32_t uiHeight = ua.blocks[compId].height;
+    DTRACE(g_trace_ctx, channnel, "@(%4d,%4d) [%2dx%2d] comp=%d predmode=%d \n", x0, y0, uiWidth, uiHeight, compId,
+           predMode);
+    DTRACE_BLOCK(g_trace_ctx, channnel, piReco, uiStride, uiWidth, uiHeight);
 }
 
-inline void dtracePelBuf( DTRACE_CHANNEL channnel, const CPelBuf& pelBuf, const UnitArea& ua, PredMode predMode, const ComponentID compId )
+inline void dtracePelBuf(DTRACE_CHANNEL channnel, const CPelBuf& pelBuf, const UnitArea& ua, PredMode predMode,
+                         const ComponentID compId)
 {
-  int x0 = ua.block(compId).x;
-  int y0 = ua.block(compId).y;
-  const uint32_t    uiStride     = pelBuf.stride;
-  const Pel*    piReco       = pelBuf.buf;
-  const uint32_t    uiWidth      = ua.block(compId).width;
-  const uint32_t    uiHeight     = ua.block(compId).height;
-  DTRACE      ( g_trace_ctx, channnel,   "@(%4d,%4d) [%2dx%2d] comp=%d predmode=%d \n", x0, y0, uiWidth, uiHeight, compId, predMode );
-  DTRACE_BLOCK( g_trace_ctx, channnel,   piReco, uiStride, uiWidth, uiHeight );
+    int x0 = ua.block(compId).x;
+    int y0 = ua.block(compId).y;
+    const uint32_t uiStride = pelBuf.stride;
+    const Pel* piReco = pelBuf.buf;
+    const uint32_t uiWidth = ua.block(compId).width;
+    const uint32_t uiHeight = ua.block(compId).height;
+    DTRACE(g_trace_ctx, channnel, "@(%4d,%4d) [%2dx%2d] comp=%d predmode=%d \n", x0, y0, uiWidth, uiHeight, compId,
+           predMode);
+    DTRACE_BLOCK(g_trace_ctx, channnel, piReco, uiStride, uiWidth, uiHeight);
 }
 
-inline void dtraceBlockRec( const CPelUnitBuf& pelUnitBuf, const UnitArea& ua, PredMode predMode, uint32_t zIdx = 0 )
+inline void dtraceBlockRec(const CPelUnitBuf& pelUnitBuf, const UnitArea& ua, PredMode predMode, uint32_t zIdx = 0)
 {
-  if( ua.blocks[COMP_Y].valid() )
-  {
-    const int     x0           = ua.lumaPos().x;
-    const int     y0           = ua.lumaPos().y;
-    const uint32_t    uiStride     = pelUnitBuf.Y().stride;
-    const Pel*    piReco       = pelUnitBuf.Y().buf;
-    const uint32_t    uiWidth      = ua.lumaSize().width;
-    const uint32_t    uiHeight     = ua.lumaSize().height;
-    DTRACE      ( g_trace_ctx, D_REC_CB_LUMA,   "%d, x=%d, y=%d, size=%dx%d, predmode=%d \n", zIdx, x0, y0, uiWidth, uiHeight, predMode );
-    DTRACE_BLOCK( g_trace_ctx, D_REC_CB_LUMA,   piReco, uiStride, uiWidth, uiHeight );
-  }
-  if( ua.blocks[COMP_Cb].valid() )
-  {
-    const int     x0           = ua.blocks[1].x;
-    const int     y0           = ua.blocks[1].y;
-    const uint32_t    uiWidth      = ua.blocks[1].width;
-    const uint32_t    uiHeight     = ua.blocks[1].height;
-    const uint32_t    uiCStride    = pelUnitBuf.Cb().stride;
-    const Pel*    piRecoU      = pelUnitBuf.Cb().buf;
-    const Pel*    piRecoV      = pelUnitBuf.Cr().buf;
-    DTRACE      ( g_trace_ctx, D_REC_CB_CHROMA, "%d, x=%d, y=%d, size=%dx%d, predmode=%d \n", zIdx, x0, y0, uiWidth, uiHeight, predMode );
-    DTRACE_BLOCK( g_trace_ctx, D_REC_CB_CHROMA, piRecoU, uiCStride, uiWidth, uiHeight );
-    DTRACE_BLOCK( g_trace_ctx, D_REC_CB_CHROMA, piRecoV, uiCStride, uiWidth, uiHeight );
-  }
-}
-
-inline void dtraceUnitComp( DTRACE_CHANNEL channel, CPelUnitBuf& pelUnitBuf, const UnitArea& ua, ComponentID compId, PredMode predMode, uint32_t zIdx = 0 )
-{
-  if( !g_trace_ctx ) return;
-  if( pelUnitBuf.chromaFormat == CHROMA_400 && compId != COMP_Y )  return;
-  const Pel* piReco   = pelUnitBuf.bufs[compId].buf;
-  uint32_t       uiStride = pelUnitBuf.bufs[compId].stride;
-  uint32_t       uiWidth  = ua.blocks[compId].width;
-  uint32_t       uiHeight = ua.blocks[compId].height;
-  int x0              = ua.lumaPos().x;
-  int y0              = ua.lumaPos().y;
-
-  DTRACE      ( g_trace_ctx, channel, "%s: %d, x=%d, y=%d, size=%dx%d, predmode=%d \n", g_trace_ctx->getChannelName(channel), zIdx, x0, y0, uiWidth, uiHeight, predMode );
-  DTRACE_BLOCK( g_trace_ctx, channel, piReco, uiStride, uiWidth, uiHeight );
-}
-
-inline void dtraceCRC( CDTrace *trace_ctx, DTRACE_CHANNEL channel, const CodingStructure& cs, const CPelUnitBuf& pelUnitBuf, const Area* parea = NULL )
-{
-  const Area& area = parea ? *parea : cs.area.Y();
-  DTRACE( trace_ctx, channel, " CRC: %6lld %3d @(%4d,%4d) [%2dx%2d] ,Checksum(%x %x %x)\n",
-      DTRACE_GET_COUNTER( g_trace_ctx, channel ),
-      cs.slice->poc,
-      area.x, area.y, area.width, area.height,
-      calcCheckSum( pelUnitBuf.bufs[COMP_Y],  cs.sps->bitDepths[CH_L]),
-      calcCheckSum( pelUnitBuf.bufs[COMP_Cb], cs.sps->bitDepths[CH_C]),
-      calcCheckSum( pelUnitBuf.bufs[COMP_Cr], cs.sps->bitDepths[CH_C]));
-}
-
-inline void dtraceCCRC( CDTrace *trace_ctx, DTRACE_CHANNEL channel, const CodingStructure& cs, const CPelBuf& pelBuf, ComponentID compId, const Area* parea = NULL )
-{
-  const Area& area = parea ? *parea : cs.area.Y();
-  DTRACE( trace_ctx, channel, "CRC: %6lld %3d @(%4d,%4d) [%2dx%2d] ,comp %d Checksum(%x)\n",
-      DTRACE_GET_COUNTER( g_trace_ctx, channel ),
-      cs.slice->poc,
-      area.x, area.y, area.width, area.height, compId,
-      calcCheckSum( pelBuf, cs.sps->bitDepths[ toChannelType(compId) ]));
-}
-
-inline void dtraceMotField( CDTrace *trace_ctx, const CodingUnit& cu )
-{
-  DTRACE( trace_ctx, D_MOT_FIELD, "CU %d,%d @ %d,%d\n", cu.lwidth(), cu.lheight(), cu.lx(), cu.ly() );
-  const CMotionBuf mb = cu.getMotionBuf();
-  for( uint32_t listIdx = 0; listIdx < 2; listIdx++ )
-  {
-    RefPicList eListIdx = RefPicList( listIdx );
-    for( int y = 0, i = 0; y < cu.lheight(); y += 4 )
-    {
-      for( int x = 0; x < cu.lwidth(); x += 4, i++ )
-      {
-        const MotionInfo &mi = mb.at( x >> 2, y >> 2 );
-        DTRACE( trace_ctx, D_MOT_FIELD, "%d,%d:%d  ", mi.mv[eListIdx].hor, mi.mv[eListIdx].ver, mi.refIdx[eListIdx] );
-      }
-      DTRACE( trace_ctx, D_MOT_FIELD, "\n" );
+    if( ua.blocks[COMP_Y].valid() ) {
+        const int x0 = ua.lumaPos().x;
+        const int y0 = ua.lumaPos().y;
+        const uint32_t uiStride = pelUnitBuf.Y().stride;
+        const Pel* piReco = pelUnitBuf.Y().buf;
+        const uint32_t uiWidth = ua.lumaSize().width;
+        const uint32_t uiHeight = ua.lumaSize().height;
+        DTRACE(g_trace_ctx, D_REC_CB_LUMA, "%d, x=%d, y=%d, size=%dx%d, predmode=%d \n", zIdx, x0, y0, uiWidth,
+               uiHeight, predMode);
+        DTRACE_BLOCK(g_trace_ctx, D_REC_CB_LUMA, piReco, uiStride, uiWidth, uiHeight);
     }
-    DTRACE( trace_ctx, D_MOT_FIELD, "\n" );
-  }
+    if( ua.blocks[COMP_Cb].valid() ) {
+        const int x0 = ua.blocks[1].x;
+        const int y0 = ua.blocks[1].y;
+        const uint32_t uiWidth = ua.blocks[1].width;
+        const uint32_t uiHeight = ua.blocks[1].height;
+        const uint32_t uiCStride = pelUnitBuf.Cb().stride;
+        const Pel* piRecoU = pelUnitBuf.Cb().buf;
+        const Pel* piRecoV = pelUnitBuf.Cr().buf;
+        DTRACE(g_trace_ctx, D_REC_CB_CHROMA, "%d, x=%d, y=%d, size=%dx%d, predmode=%d \n", zIdx, x0, y0, uiWidth,
+               uiHeight, predMode);
+        DTRACE_BLOCK(g_trace_ctx, D_REC_CB_CHROMA, piRecoU, uiCStride, uiWidth, uiHeight);
+        DTRACE_BLOCK(g_trace_ctx, D_REC_CB_CHROMA, piRecoV, uiCStride, uiWidth, uiHeight);
+    }
 }
 
-#define DTRACE_PEL_BUF(...)              dtracePelBuf( __VA_ARGS__ )
-#define DTRACE_COEFF_BUF(...)            dtraceCoeffBuf( __VA_ARGS__ )
-#define DTRACE_BLOCK_REC(...)            dtraceBlockRec( __VA_ARGS__ )
-#define DTRACE_PEL_BUF_COND(_cond,...)   { if((_cond)) dtracePelBuf( __VA_ARGS__ ); }
-#define DTRACE_COEFF_BUF_COND(_cond,...) { if((_cond)) dtraceCoeffBuf( __VA_ARGS__ ); }
-#define DTRACE_BLOCK_REC_COND(_cond,...) { if((_cond)) dtraceBlockRec( __VA_ARGS__ ); }
-#define DTRACE_UNIT_COMP(...)            dtraceUnitComp( __VA_ARGS__ )
-#define DTRACE_CRC(...)                  dtraceCRC( __VA_ARGS__ )
-#define DTRACE_CCRC(...)                 dtraceCCRC( __VA_ARGS__ )
-#define DTRACE_MOT_FIELD(...)            dtraceMotField( __VA_ARGS__ )
+inline void dtraceUnitComp(DTRACE_CHANNEL channel, CPelUnitBuf& pelUnitBuf, const UnitArea& ua, ComponentID compId,
+                           PredMode predMode, uint32_t zIdx = 0)
+{
+    if( !g_trace_ctx )
+        return;
+    if( pelUnitBuf.chromaFormat == CHROMA_400 && compId != COMP_Y )
+        return;
+    const Pel* piReco = pelUnitBuf.bufs[compId].buf;
+    uint32_t uiStride = pelUnitBuf.bufs[compId].stride;
+    uint32_t uiWidth = ua.blocks[compId].width;
+    uint32_t uiHeight = ua.blocks[compId].height;
+    int x0 = ua.lumaPos().x;
+    int y0 = ua.lumaPos().y;
+
+    DTRACE(g_trace_ctx, channel, "%s: %d, x=%d, y=%d, size=%dx%d, predmode=%d \n", g_trace_ctx->getChannelName(channel),
+           zIdx, x0, y0, uiWidth, uiHeight, predMode);
+    DTRACE_BLOCK(g_trace_ctx, channel, piReco, uiStride, uiWidth, uiHeight);
+}
+
+inline void dtraceCRC(CDTrace* trace_ctx, DTRACE_CHANNEL channel, const CodingStructure& cs,
+                      const CPelUnitBuf& pelUnitBuf, const Area* parea = NULL)
+{
+    const Area& area = parea ? *parea : cs.area.Y();
+    DTRACE(trace_ctx, channel, " CRC: %6lld %3d @(%4d,%4d) [%2dx%2d] ,Checksum(%x %x %x)\n",
+           DTRACE_GET_COUNTER(g_trace_ctx, channel), cs.slice->poc, area.x, area.y, area.width, area.height,
+           calcCheckSum(pelUnitBuf.bufs[COMP_Y], cs.sps->bitDepths[CH_L]),
+           calcCheckSum(pelUnitBuf.bufs[COMP_Cb], cs.sps->bitDepths[CH_C]),
+           calcCheckSum(pelUnitBuf.bufs[COMP_Cr], cs.sps->bitDepths[CH_C]));
+}
+
+inline void dtraceCCRC(CDTrace* trace_ctx, DTRACE_CHANNEL channel, const CodingStructure& cs, const CPelBuf& pelBuf,
+                       ComponentID compId, const Area* parea = NULL)
+{
+    const Area& area = parea ? *parea : cs.area.Y();
+    DTRACE(trace_ctx, channel, "CRC: %6lld %3d @(%4d,%4d) [%2dx%2d] ,comp %d Checksum(%x)\n",
+           DTRACE_GET_COUNTER(g_trace_ctx, channel), cs.slice->poc, area.x, area.y, area.width, area.height, compId,
+           calcCheckSum(pelBuf, cs.sps->bitDepths[toChannelType(compId)]));
+}
+
+inline void dtraceMotField(CDTrace* trace_ctx, const CodingUnit& cu)
+{
+    DTRACE(trace_ctx, D_MOT_FIELD, "CU %d,%d @ %d,%d\n", cu.lwidth(), cu.lheight(), cu.lx(), cu.ly());
+    const CMotionBuf mb = cu.getMotionBuf();
+    for( uint32_t listIdx = 0; listIdx < 2; listIdx++ ) {
+        RefPicList eListIdx = RefPicList(listIdx);
+        for( int y = 0, i = 0; y < cu.lheight(); y += 4 ) {
+            for( int x = 0; x < cu.lwidth(); x += 4, i++ ) {
+                const MotionInfo& mi = mb.at(x >> 2, y >> 2);
+                DTRACE(trace_ctx, D_MOT_FIELD, "%d,%d:%d  ", mi.mv[eListIdx].hor, mi.mv[eListIdx].ver,
+                       mi.refIdx[eListIdx]);
+            }
+            DTRACE(trace_ctx, D_MOT_FIELD, "\n");
+        }
+        DTRACE(trace_ctx, D_MOT_FIELD, "\n");
+    }
+}
+
+#define DTRACE_PEL_BUF(...) dtracePelBuf(__VA_ARGS__)
+#define DTRACE_COEFF_BUF(...) dtraceCoeffBuf(__VA_ARGS__)
+#define DTRACE_BLOCK_REC(...) dtraceBlockRec(__VA_ARGS__)
+#define DTRACE_PEL_BUF_COND(_cond, ...) \
+    { \
+        if( (_cond) ) \
+            dtracePelBuf(__VA_ARGS__); \
+    }
+#define DTRACE_COEFF_BUF_COND(_cond, ...) \
+    { \
+        if( (_cond) ) \
+            dtraceCoeffBuf(__VA_ARGS__); \
+    }
+#define DTRACE_BLOCK_REC_COND(_cond, ...) \
+    { \
+        if( (_cond) ) \
+            dtraceBlockRec(__VA_ARGS__); \
+    }
+#define DTRACE_UNIT_COMP(...) dtraceUnitComp(__VA_ARGS__)
+#define DTRACE_CRC(...) dtraceCRC(__VA_ARGS__)
+#define DTRACE_CCRC(...) dtraceCCRC(__VA_ARGS__)
+#define DTRACE_MOT_FIELD(...) dtraceMotField(__VA_ARGS__)
 
 #else
 
@@ -228,4 +242,3 @@ inline void dtraceMotField( CDTrace *trace_ctx, const CodingUnit& cu )
 } // namespace vvenc
 
 //! \}
-

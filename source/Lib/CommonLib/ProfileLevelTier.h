@@ -44,7 +44,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-
 #pragma once
 
 #include "CommonLib/CommonDef.h"
@@ -54,59 +53,54 @@ namespace vvenc {
 
 struct SPS; // Forward declaration.
 
-struct LevelTierFeatures
-{
-  Level::Name   level;
-  uint32_t      maxLumaPs;
-  uint32_t      maxCpb[Level::NUMBER_OF_TIERS];    // in units of CpbVclFactor or CpbNalFactor bits
-  uint32_t      maxSlicesPerAu;
-  uint32_t      maxTilesPerAu;
-  uint32_t      maxTileCols;
-  uint64_t      maxLumaSr;
-  uint32_t      maxBr[Level::NUMBER_OF_TIERS];     // in units of BrVclFactor or BrNalFactor bits/s
-  uint32_t      minCrBase[Level::NUMBER_OF_TIERS];
-  uint32_t      getMaxPicWidthInLumaSamples()  const;
-  uint32_t      getMaxPicHeightInLumaSamples() const;
+struct LevelTierFeatures {
+    Level::Name level;
+    uint32_t maxLumaPs;
+    uint32_t maxCpb[Level::NUMBER_OF_TIERS]; // in units of CpbVclFactor or CpbNalFactor bits
+    uint32_t maxSlicesPerAu;
+    uint32_t maxTilesPerAu;
+    uint32_t maxTileCols;
+    uint64_t maxLumaSr;
+    uint32_t maxBr[Level::NUMBER_OF_TIERS]; // in units of BrVclFactor or BrNalFactor bits/s
+    uint32_t minCrBase[Level::NUMBER_OF_TIERS];
+    uint32_t getMaxPicWidthInLumaSamples() const;
+    uint32_t getMaxPicHeightInLumaSamples() const;
 };
 
+struct ProfileFeatures {
+    Profile::Name profile;
+    const char *pNameString;
+    uint32_t maxBitDepth;
+    ChromaFormat maxChromaFormat;
 
-struct ProfileFeatures
-{
-  Profile::Name            profile;
-  const char              *pNameString;
-  uint32_t                 maxBitDepth;
-  ChromaFormat             maxChromaFormat;
+    bool canUseLevel15p5;
+    uint32_t cpbVclFactor;
+    uint32_t cpbNalFactor;
+    uint32_t formatCapabilityFactorx1000;
+    uint32_t minCrScaleFactorx100;
+    const LevelTierFeatures *pLevelTiersListInfo;
+    bool onePictureOnlyFlagMustBe1;
 
-  bool                     canUseLevel15p5;
-  uint32_t                 cpbVclFactor;
-  uint32_t                 cpbNalFactor;
-  uint32_t                 formatCapabilityFactorx1000;
-  uint32_t                 minCrScaleFactorx100;
-  const LevelTierFeatures *pLevelTiersListInfo;
-  bool                     onePictureOnlyFlagMustBe1;
-
-  static const ProfileFeatures *getProfileFeatures(const Profile::Name p);
+    static const ProfileFeatures *getProfileFeatures(const Profile::Name p);
 };
 
-
-class ProfileLevelTierFeatures
-{
-  private:
-    const ProfileFeatures   *m_pProfile;
+class ProfileLevelTierFeatures {
+private:
+    const ProfileFeatures *m_pProfile;
     const LevelTierFeatures *m_pLevelTier;
-    Level::Tier              m_tier;
-  public:
+    Level::Tier m_tier;
+
+public:
     ProfileLevelTierFeatures() : m_pProfile(nullptr), m_pLevelTier(nullptr), m_tier(Level::MAIN) {}
 
     void extractPTLInformation(const SPS &sps);
 
-    const ProfileFeatures     *getProfileFeatures()   const { return m_pProfile; }
-    const LevelTierFeatures   *getLevelTierFeatures() const { return m_pLevelTier; }
-    Level::Tier                getTier()              const { return m_tier; }
-    uint64_t getCpbSizeInBits()                       const;
-    double getMinCr()                                 const;
-    uint32_t getMaxDpbSize( uint32_t picSizeMaxInSamplesY ) const;
+    const ProfileFeatures *getProfileFeatures() const { return m_pProfile; }
+    const LevelTierFeatures *getLevelTierFeatures() const { return m_pLevelTier; }
+    Level::Tier getTier() const { return m_tier; }
+    uint64_t getCpbSizeInBits() const;
+    double getMinCr() const;
+    uint32_t getMaxDpbSize(uint32_t picSizeMaxInSamplesY) const;
 };
-
 
 } // namespace

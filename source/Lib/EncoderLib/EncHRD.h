@@ -53,15 +53,13 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-  class EncHRD :public HRD
-  {
-  public:
-    void initHRDParameters( const EncCfg& encCfg, const SPS& sps );
+class EncHRD : public HRD {
+public:
+    void initHRDParameters(const EncCfg& encCfg, const SPS& sps);
 
-  protected:
+protected:
     // calculate scale value of bitrate and initial delay
-    int xCalcScale( int x );
-
-  };
+    int xCalcScale(int x);
+};
 
 }

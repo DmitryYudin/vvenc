@@ -44,7 +44,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-
 /** \file     EncoderIf.cpp
     \brief    encoder lib interface
 */
@@ -53,7 +52,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EncoderLib/EncLib.h"
 #include "CommonLib/CommonDef.h"
-#if defined( TARGET_SIMD_X86 ) && ENABLE_SIMD_TRAFO
+#if defined(TARGET_SIMD_X86) && ENABLE_SIMD_TRAFO
 #include "CommonLib/TrQuant_EMT.h"
 #endif
 
@@ -62,110 +61,104 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-bool tryDecodePicture( Picture* pic, const int expectedPoc, const std::string& bitstreamFileName, FFwdDecoder& ffwdDecoder, ParameterSetMap<APS>* apsMap, bool bDecodeUntilPocFound = false, int debugPOC = -1, bool copyToEnc = true );
+bool tryDecodePicture(Picture* pic, const int expectedPoc, const std::string& bitstreamFileName,
+                      FFwdDecoder& ffwdDecoder, ParameterSetMap<APS>* apsMap, bool bDecodeUntilPocFound = false,
+                      int debugPOC = -1, bool copyToEnc = true);
 
 // ====================================================================================================================
 
-EncoderIf::EncoderIf()
-  : m_pEncLib( nullptr )
-{
-}
+EncoderIf::EncoderIf() : m_pEncLib(nullptr) {}
 
-EncoderIf::~EncoderIf()
-{
-  uninitEncoderLib();
-}
+EncoderIf::~EncoderIf() { uninitEncoderLib(); }
 
-void EncoderIf::initEncoderLib( const EncCfg& encCfg, YUVWriterIf* yuvWriterIf )
+void EncoderIf::initEncoderLib(const EncCfg& encCfg, YUVWriterIf* yuvWriterIf)
 {
-  CHECK( m_pEncLib != nullptr, "encoder library already initialized" );
-  m_pEncLib = new EncLib;
-  m_pEncLib->initEncoderLib( encCfg, yuvWriterIf );
+    CHECK(m_pEncLib != nullptr, "encoder library already initialized");
+    m_pEncLib = new EncLib;
+    m_pEncLib->initEncoderLib(encCfg, yuvWriterIf);
 }
 
 void EncoderIf::uninitEncoderLib()
 {
-  if ( m_pEncLib )
-  {
-    m_pEncLib->uninitEncoderLib();
-    delete m_pEncLib;
-    m_pEncLib = nullptr;
-  }
+    if( m_pEncLib ) {
+        m_pEncLib->uninitEncoderLib();
+        delete m_pEncLib;
+        m_pEncLib = nullptr;
+    }
 }
 
-void EncoderIf::initPass( int pass )
+void EncoderIf::initPass(int pass)
 {
-  CHECK( m_pEncLib == nullptr, "encoder library not created" );
-  m_pEncLib->initPass( pass );
+    CHECK(m_pEncLib == nullptr, "encoder library not created");
+    m_pEncLib->initPass(pass);
 }
 
-void EncoderIf::encodePicture( bool flush, const YUVBuffer& yuvInBuf, AccessUnit& au, bool& isQueueEmpty )
+void EncoderIf::encodePicture(bool flush, const YUVBuffer& yuvInBuf, AccessUnit& au, bool& isQueueEmpty)
 {
-  CHECK( m_pEncLib == nullptr, "encoder library not initialized" );
-  m_pEncLib->encodePicture( flush, yuvInBuf, au, isQueueEmpty );
+    CHECK(m_pEncLib == nullptr, "encoder library not initialized");
+    m_pEncLib->encodePicture(flush, yuvInBuf, au, isQueueEmpty);
 }
 
 void EncoderIf::printSummary()
 {
-  CHECK( m_pEncLib == nullptr, "encoder library not initialized" );
-  m_pEncLib->printSummary();
+    CHECK(m_pEncLib == nullptr, "encoder library not initialized");
+    m_pEncLib->printSummary();
 }
 
 // ====================================================================================================================
 
-void registerMsgCbf( std::function<void( int, const char*, va_list )> msgFnc )
-{
-  g_msgFnc = msgFnc;
-}
+void registerMsgCbf(std::function<void(int, const char*, va_list)> msgFnc) { g_msgFnc = msgFnc; }
 
-std::string setSIMDExtension( const std::string& simdId )
+std::string setSIMDExtension(const std::string& simdId)
 {
-  std::string ret = "NA";
+    std::string ret = "NA";
 #if ENABLE_SIMD_OPT
 #ifdef TARGET_SIMD_X86
-  const char* simdSet = read_x86_extension( simdId );
-  ret = simdSet;
+    const char* simdSet = read_x86_extension(simdId);
+    ret = simdSet;
 #endif
-  g_pelBufOP.initPelBufOpsX86();
+    g_pelBufOP.initPelBufOpsX86();
 #endif
 #if ENABLE_SIMD_TRAFO
-  g_tCoeffOps.initTCoeffOpsX86();
+    g_tCoeffOps.initTCoeffOpsX86();
 #endif
-  return ret;
+    return ret;
 }
 
 bool isTracingEnabled()
 {
 #if ENABLE_TRACING
-  return true;
+    return true;
 #else
-  return false;
+    return false;
 #endif
 }
 
 std::string getCompileInfoString()
 {
-  char convBuf[ 256 ];
-  std::string compileInfo;
-  snprintf( convBuf, sizeof( convBuf ), NVM_ONOS );      compileInfo += convBuf;
-  snprintf( convBuf, sizeof( convBuf ), NVM_COMPILEDBY); compileInfo += convBuf;
-  snprintf( convBuf, sizeof( convBuf ), NVM_BITS );      compileInfo += convBuf;
-  return compileInfo;
+    char convBuf[256];
+    std::string compileInfo;
+    snprintf(convBuf, sizeof(convBuf), NVM_ONOS);
+    compileInfo += convBuf;
+    snprintf(convBuf, sizeof(convBuf), NVM_COMPILEDBY);
+    compileInfo += convBuf;
+    snprintf(convBuf, sizeof(convBuf), NVM_BITS);
+    compileInfo += convBuf;
+    return compileInfo;
 }
 
-void decodeBitstream( const std::string& FileName)
+void decodeBitstream(const std::string& FileName)
 {
-  FFwdDecoder ffwdDecoder; 
-  Picture cPicture; cPicture.poc=-8000;
+    FFwdDecoder ffwdDecoder;
+    Picture cPicture;
+    cPicture.poc = -8000;
 
-  if( tryDecodePicture( &cPicture, -1, FileName, ffwdDecoder, nullptr, false, cPicture.poc, false ))
-  {
-    msg( ERROR, "decoding failed");
-    THROW("error decoding");
-  }
+    if( tryDecodePicture(&cPicture, -1, FileName, ffwdDecoder, nullptr, false, cPicture.poc, false) ) {
+        msg(ERROR, "decoding failed");
+        THROW("error decoding");
+    }
 }
 
 } // namespace vvenc
 
 //! \}
-

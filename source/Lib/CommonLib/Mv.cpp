@@ -44,7 +44,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-
 /** \file     Mv.cpp
     \brief    motion vector class
 */
@@ -58,65 +57,64 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-const MvPrecision Mv::m_amvrPrecision[4] = { MV_PRECISION_QUARTER, MV_PRECISION_INT, MV_PRECISION_4PEL, MV_PRECISION_HALF }; // for cu.imv=0, 1, 2 and 3
-const MvPrecision Mv::m_amvrPrecAffine[3] = { MV_PRECISION_QUARTER, MV_PRECISION_SIXTEENTH, MV_PRECISION_INT }; // for cu.imv=0, 1 and 2
-const MvPrecision Mv::m_amvrPrecIbc[3] = { MV_PRECISION_INT, MV_PRECISION_INT, MV_PRECISION_4PEL }; // for cu.imv=0, 1 and 2
+const MvPrecision Mv::m_amvrPrecision[4] = {MV_PRECISION_QUARTER, MV_PRECISION_INT, MV_PRECISION_4PEL,
+                                            MV_PRECISION_HALF}; // for cu.imv=0, 1, 2 and 3
+const MvPrecision Mv::m_amvrPrecAffine[3] = {MV_PRECISION_QUARTER, MV_PRECISION_SIXTEENTH,
+                                             MV_PRECISION_INT}; // for cu.imv=0, 1 and 2
+const MvPrecision Mv::m_amvrPrecIbc[3] = {MV_PRECISION_INT, MV_PRECISION_INT,
+                                          MV_PRECISION_4PEL}; // for cu.imv=0, 1 and 2
 
-void roundAffineMv( int& mvx, int& mvy, int nShift )
+void roundAffineMv(int& mvx, int& mvy, int nShift)
 {
-  const int nOffset = 1 << (nShift - 1);
-  mvx = (mvx + nOffset - (mvx >= 0)) >> nShift;
-  mvy = (mvy + nOffset - (mvy >= 0)) >> nShift;
+    const int nOffset = 1 << (nShift - 1);
+    mvx = (mvx + nOffset - (mvx >= 0)) >> nShift;
+    mvy = (mvy + nOffset - (mvy >= 0)) >> nShift;
 }
 
-void clipMv( Mv& rcMv, const Position& pos, const struct Size& size, const PreCalcValues& pcv )
+void clipMv(Mv& rcMv, const Position& pos, const struct Size& size, const PreCalcValues& pcv)
 {
-  if( pcv.wrapArround )
-  {
-    return;
-  }
-  int iMvShift = MV_FRACTIONAL_BITS_INTERNAL;
-  int iOffset = 8;
-  int iHorMax = ( pcv.lumaWidth + iOffset - ( int ) pos.x - 1 ) << iMvShift;
-  int iHorMin = ( -( int ) pcv.maxCUSize   - iOffset - ( int ) pos.x + 1 ) << iMvShift;
+    if( pcv.wrapArround ) {
+        return;
+    }
+    int iMvShift = MV_FRACTIONAL_BITS_INTERNAL;
+    int iOffset = 8;
+    int iHorMax = (pcv.lumaWidth + iOffset - (int)pos.x - 1) << iMvShift;
+    int iHorMin = (-(int)pcv.maxCUSize - iOffset - (int)pos.x + 1) << iMvShift;
 
-  int iVerMax = ( pcv.lumaHeight + iOffset - ( int ) pos.y - 1 ) << iMvShift;
-  int iVerMin = ( -( int ) pcv.maxCUSize   - iOffset - ( int ) pos.y + 1 ) << iMvShift;
+    int iVerMax = (pcv.lumaHeight + iOffset - (int)pos.y - 1) << iMvShift;
+    int iVerMin = (-(int)pcv.maxCUSize - iOffset - (int)pos.y + 1) << iMvShift;
 
-  rcMv.hor = ( std::min( iHorMax, std::max( iHorMin, rcMv.hor ) ) );
-  rcMv.ver = ( std::min( iVerMax, std::max( iVerMin, rcMv.ver ) ) );
+    rcMv.hor = (std::min(iHorMax, std::max(iHorMin, rcMv.hor)));
+    rcMv.ver = (std::min(iVerMax, std::max(iVerMin, rcMv.ver)));
 }
 
-bool wrapClipMv( Mv& rcMv, const Position& pos, const struct Size& size, const CodingStructure& cs )
+bool wrapClipMv(Mv& rcMv, const Position& pos, const struct Size& size, const CodingStructure& cs)
 {
-  bool wrapRef = true;
-  int iMvShift = MV_FRACTIONAL_BITS_INTERNAL;
-  int iOffset = 8;
-  int iHorMax = ( cs.pcv->lumaWidth + cs.pcv->maxCUSize - size.width + iOffset - ( int ) pos.x - 1 ) << iMvShift;
-  int iHorMin = ( -( int ) cs.pcv->maxCUSize                     - iOffset - ( int ) pos.x + 1 ) << iMvShift;
-  int iVerMax = ( cs.pcv->lumaHeight + iOffset - ( int ) pos.y - 1 ) << iMvShift;
-  int iVerMin = ( -( int ) cs.pcv->maxCUSize   - iOffset - ( int ) pos.y + 1 ) << iMvShift;
-  int mvX = rcMv.hor;
+    bool wrapRef = true;
+    int iMvShift = MV_FRACTIONAL_BITS_INTERNAL;
+    int iOffset = 8;
+    int iHorMax = (cs.pcv->lumaWidth + cs.pcv->maxCUSize - size.width + iOffset - (int)pos.x - 1) << iMvShift;
+    int iHorMin = (-(int)cs.pcv->maxCUSize - iOffset - (int)pos.x + 1) << iMvShift;
+    int iVerMax = (cs.pcv->lumaHeight + iOffset - (int)pos.y - 1) << iMvShift;
+    int iVerMin = (-(int)cs.pcv->maxCUSize - iOffset - (int)pos.y + 1) << iMvShift;
+    int mvX = rcMv.hor;
 
-  if(mvX > iHorMax)
-  {
-    mvX -= ( cs.pps->wrapAroundOffset << iMvShift );
-    mvX = std::min( iHorMax, std::max( iHorMin, mvX ) );
-    wrapRef = false;
-  }
-  if(mvX < iHorMin)
-  {
-    mvX += ( cs.pps->wrapAroundOffset << iMvShift );
-    mvX = std::min( iHorMax, std::max( iHorMin, mvX ) );
-    wrapRef = false;
-  }
+    if( mvX > iHorMax ) {
+        mvX -= (cs.pps->wrapAroundOffset << iMvShift);
+        mvX = std::min(iHorMax, std::max(iHorMin, mvX));
+        wrapRef = false;
+    }
+    if( mvX < iHorMin ) {
+        mvX += (cs.pps->wrapAroundOffset << iMvShift);
+        mvX = std::min(iHorMax, std::max(iHorMin, mvX));
+        wrapRef = false;
+    }
 
-  rcMv.hor = ( mvX );
-  rcMv.ver = ( std::min( iVerMax, std::max( iVerMin, rcMv.ver ) ) );
-  return wrapRef;
+    rcMv.hor = (mvX);
+    rcMv.ver = (std::min(iVerMax, std::max(iVerMin, rcMv.ver)));
+    return wrapRef;
 }
 
 } // namespace vvenc
 
 //! \}
-

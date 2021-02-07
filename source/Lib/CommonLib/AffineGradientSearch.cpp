@@ -44,7 +44,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-
 /**
  * \file
  * \brief Implementation of AffineGradientSearch class
@@ -58,15 +57,15 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-  //! \ingroup CommonLib
-  //! \{
+//! \ingroup CommonLib
+//! \{
 
-  // ====================================================================================================================
-  // Private member functions
-  // ====================================================================================================================
+// ====================================================================================================================
+// Private member functions
+// ====================================================================================================================
 
-  AffineGradientSearch::AffineGradientSearch()
-  {
+AffineGradientSearch::AffineGradientSearch()
+{
     m_HorizontalSobelFilter = xHorizontalSobelFilter;
     m_VerticalSobelFilter = xVerticalSobelFilter;
     m_EqualCoeffComputer = xEqualCoeffComputer;
@@ -76,26 +75,21 @@ namespace vvenc {
     initAffineGradientSearchX86();
 #endif
 #endif
-  }
+}
 
-  void AffineGradientSearch::xHorizontalSobelFilter(Pel* const pPred, const int predStride, int *const pDerivate, const int derivateBufStride, const int width, const int height)
-  {
-    for (int j = 1; j < height - 1; j++)
-    {
-      for (int k = 1; k < width - 1; k++)
-      {
-        int iCenter = j * predStride + k;
+void AffineGradientSearch::xHorizontalSobelFilter(Pel* const pPred, const int predStride, int* const pDerivate,
+                                                  const int derivateBufStride, const int width, const int height)
+{
+    for( int j = 1; j < height - 1; j++ ) {
+        for( int k = 1; k < width - 1; k++ ) {
+            int iCenter = j * predStride + k;
 
-        pDerivate[j * derivateBufStride + k] =
-            (pPred[iCenter + 1 - predStride] -
-             pPred[iCenter - 1 - predStride] +
-            (pPred[iCenter + 1] << 1) -
-            (pPred[iCenter - 1] << 1) +
-             pPred[iCenter + 1 + predStride] -
-             pPred[iCenter - 1 + predStride]);
-      }
-      pDerivate[j * derivateBufStride] = pDerivate[j * derivateBufStride + 1];
-      pDerivate[j * derivateBufStride + width - 1] = pDerivate[j * derivateBufStride + width - 2];
+            pDerivate[j * derivateBufStride + k] =
+                (pPred[iCenter + 1 - predStride] - pPred[iCenter - 1 - predStride] + (pPred[iCenter + 1] << 1) -
+                 (pPred[iCenter - 1] << 1) + pPred[iCenter + 1 + predStride] - pPred[iCenter - 1 + predStride]);
+        }
+        pDerivate[j * derivateBufStride] = pDerivate[j * derivateBufStride + 1];
+        pDerivate[j * derivateBufStride + width - 1] = pDerivate[j * derivateBufStride + width - 2];
     }
 
     pDerivate[0] = pDerivate[derivateBufStride + 1];
@@ -103,32 +97,27 @@ namespace vvenc {
     pDerivate[(height - 1) * derivateBufStride] = pDerivate[(height - 2) * derivateBufStride + 1];
     pDerivate[(height - 1) * derivateBufStride + width - 1] = pDerivate[(height - 2) * derivateBufStride + (width - 2)];
 
-    for (int j = 1; j < width - 1; j++)
-    {
-      pDerivate[j] = pDerivate[derivateBufStride + j];
-      pDerivate[(height - 1) * derivateBufStride + j] = pDerivate[(height - 2) * derivateBufStride + j];
+    for( int j = 1; j < width - 1; j++ ) {
+        pDerivate[j] = pDerivate[derivateBufStride + j];
+        pDerivate[(height - 1) * derivateBufStride + j] = pDerivate[(height - 2) * derivateBufStride + j];
     }
-  }
+}
 
-  void AffineGradientSearch::xVerticalSobelFilter(Pel* const pPred, const int predStride, int *const pDerivate, const int derivateBufStride, const int width, const int height)
-  {
-    for (int k = 1; k < width - 1; k++)
-    {
-      for (int j = 1; j < height - 1; j++)
-      {
-        int iCenter = j * predStride + k;
+void AffineGradientSearch::xVerticalSobelFilter(Pel* const pPred, const int predStride, int* const pDerivate,
+                                                const int derivateBufStride, const int width, const int height)
+{
+    for( int k = 1; k < width - 1; k++ ) {
+        for( int j = 1; j < height - 1; j++ ) {
+            int iCenter = j * predStride + k;
 
-        pDerivate[j * derivateBufStride + k] =
-           (pPred[iCenter + predStride - 1] -
-            pPred[iCenter - predStride - 1] +
-           (pPred[iCenter + predStride] << 1) -
-           (pPred[iCenter - predStride] << 1) +
-            pPred[iCenter + predStride + 1] -
-            pPred[iCenter - predStride + 1]);
-      }
+            pDerivate[j * derivateBufStride + k] =
+                (pPred[iCenter + predStride - 1] - pPred[iCenter - predStride - 1] +
+                 (pPred[iCenter + predStride] << 1) - (pPred[iCenter - predStride] << 1) +
+                 pPred[iCenter + predStride + 1] - pPred[iCenter - predStride + 1]);
+        }
 
-      pDerivate[k] = pDerivate[derivateBufStride + k];
-      pDerivate[(height - 1) * derivateBufStride + k] = pDerivate[(height - 2) * derivateBufStride + k];
+        pDerivate[k] = pDerivate[derivateBufStride + k];
+        pDerivate[(height - 1) * derivateBufStride + k] = pDerivate[(height - 2) * derivateBufStride + k];
     }
 
     pDerivate[0] = pDerivate[derivateBufStride + 1];
@@ -136,53 +125,47 @@ namespace vvenc {
     pDerivate[(height - 1) * derivateBufStride] = pDerivate[(height - 2) * derivateBufStride + 1];
     pDerivate[(height - 1) * derivateBufStride + width - 1] = pDerivate[(height - 2) * derivateBufStride + (width - 2)];
 
-    for (int j = 1; j < height - 1; j++)
-    {
-      pDerivate[j * derivateBufStride] = pDerivate[j * derivateBufStride + 1];
-      pDerivate[j * derivateBufStride + width - 1] = pDerivate[j * derivateBufStride + width - 2];
+    for( int j = 1; j < height - 1; j++ ) {
+        pDerivate[j * derivateBufStride] = pDerivate[j * derivateBufStride + 1];
+        pDerivate[j * derivateBufStride + width - 1] = pDerivate[j * derivateBufStride + width - 2];
     }
-  }
+}
 
-  void AffineGradientSearch::xEqualCoeffComputer(Pel* pResidue, int residueStride, int **ppDerivate, int derivateBufStride, int64_t(*pEqualCoeff)[7], int width, int height, bool b6Param)
-  {
+void AffineGradientSearch::xEqualCoeffComputer(Pel* pResidue, int residueStride, int** ppDerivate,
+                                               int derivateBufStride, int64_t (*pEqualCoeff)[7], int width, int height,
+                                               bool b6Param)
+{
     int affineParamNum = b6Param ? 6 : 4;
 
-    for (int j = 0; j != height; j++)
-    {
-      int cy = ((j >> 2) << 2) + 2;
-      for (int k = 0; k != width; k++)
-      {
-        int iC[6];
+    for( int j = 0; j != height; j++ ) {
+        int cy = ((j >> 2) << 2) + 2;
+        for( int k = 0; k != width; k++ ) {
+            int iC[6];
 
-        int idx = j * derivateBufStride + k;
-        int cx = ((k >> 2) << 2) + 2;
-        if (!b6Param)
-        {
-          iC[0] = ppDerivate[0][idx];
-          iC[1] = cx * ppDerivate[0][idx] + cy * ppDerivate[1][idx];
-          iC[2] = ppDerivate[1][idx];
-          iC[3] = cy * ppDerivate[0][idx] - cx * ppDerivate[1][idx];
+            int idx = j * derivateBufStride + k;
+            int cx = ((k >> 2) << 2) + 2;
+            if( !b6Param ) {
+                iC[0] = ppDerivate[0][idx];
+                iC[1] = cx * ppDerivate[0][idx] + cy * ppDerivate[1][idx];
+                iC[2] = ppDerivate[1][idx];
+                iC[3] = cy * ppDerivate[0][idx] - cx * ppDerivate[1][idx];
+            } else {
+                iC[0] = ppDerivate[0][idx];
+                iC[1] = cx * ppDerivate[0][idx];
+                iC[2] = ppDerivate[1][idx];
+                iC[3] = cx * ppDerivate[1][idx];
+                iC[4] = cy * ppDerivate[0][idx];
+                iC[5] = cy * ppDerivate[1][idx];
+            }
+            for( int col = 0; col < affineParamNum; col++ ) {
+                for( int row = 0; row < affineParamNum; row++ ) {
+                    pEqualCoeff[col + 1][row] += (int64_t)iC[col] * iC[row];
+                }
+                pEqualCoeff[col + 1][affineParamNum] += ((int64_t)iC[col] * pResidue[idx]) << 3;
+            }
         }
-        else
-        {
-          iC[0] = ppDerivate[0][idx];
-          iC[1] = cx * ppDerivate[0][idx];
-          iC[2] = ppDerivate[1][idx];
-          iC[3] = cx * ppDerivate[1][idx];
-          iC[4] = cy * ppDerivate[0][idx];
-          iC[5] = cy * ppDerivate[1][idx];
-        }
-        for (int col = 0; col < affineParamNum; col++)
-        {
-          for (int row = 0; row < affineParamNum; row++)
-          {
-            pEqualCoeff[col + 1][row] += (int64_t)iC[col] * iC[row];
-          }
-          pEqualCoeff[col + 1][affineParamNum] += ((int64_t)iC[col] * pResidue[idx]) << 3;
-        }
-      }
     }
-  }
+}
 
 }
 

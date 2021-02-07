@@ -63,24 +63,22 @@ namespace vvenc {
  * A convenience wrapper to NALUnit that also provides a
  * bitstream object.
  */
-class InputNALUnit : public NALUnit
-{
-  private:
+class InputNALUnit : public NALUnit {
+private:
     InputBitstream m_Bitstream;
 
-  public:
-    InputNALUnit(const InputNALUnit &src) : NALUnit(src), m_Bitstream(src.m_Bitstream) {};
-    InputNALUnit() : m_Bitstream() {};
-    virtual ~InputNALUnit() { }
+public:
+    InputNALUnit(const InputNALUnit &src) : NALUnit(src), m_Bitstream(src.m_Bitstream){};
+    InputNALUnit() : m_Bitstream(){};
+    virtual ~InputNALUnit() {}
     const InputBitstream &getBitstream() const { return m_Bitstream; }
-          InputBitstream &getBitstream()       { return m_Bitstream; }
+    InputBitstream &getBitstream() { return m_Bitstream; }
 };
 
-void read(InputNALUnit& nalu);
-void readNalUnitHeader(InputNALUnit& nalu);
-bool checkPictureHeaderInSliceHeaderFlag(InputNALUnit & nalu);
+void read(InputNALUnit &nalu);
+void readNalUnitHeader(InputNALUnit &nalu);
+bool checkPictureHeaderInSliceHeaderFlag(InputNALUnit &nalu);
 
 } // namespace vvenc
 
 //! \}
-

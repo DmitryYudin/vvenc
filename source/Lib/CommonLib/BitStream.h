@@ -65,162 +65,181 @@ namespace vvenc {
  * Model of a writable bitstream that accumulates bits to produce a
  * bytestream.
  */
-class OutputBitstream
-{
-  /**
+class OutputBitstream {
+    /**
    * FIFO for storage of bytes.  Use:
    *  - fifo.push_back(x) to append words
    *  - fifo.clear() to empty the FIFO
    *  - &fifo.front() to get a pointer to the data array.
    *    NB, this pointer is only valid until the next push_back()/clear()
    */
-  std::vector<uint8_t> m_fifo;
+    std::vector<uint8_t> m_fifo;
 
-  uint32_t m_num_held_bits; /// number of bits not flushed to bytestream.
-  uint8_t  m_held_bits; /// the bits held and not flushed to bytestream.
-                             /// this value is always msb-aligned, bigendian.
+    uint32_t m_num_held_bits; /// number of bits not flushed to bytestream.
+    uint8_t m_held_bits;      /// the bits held and not flushed to bytestream.
+                              /// this value is always msb-aligned, bigendian.
 public:
-  // create / destroy
-  OutputBitstream();
-  ~OutputBitstream();
+    // create / destroy
+    OutputBitstream();
+    ~OutputBitstream();
 
-  // interface for encoding
-  /**
+    // interface for encoding
+    /**
    * append uiNumberOfBits least significant bits of uiBits to
    * the current bitstream
    */
-  void        write           ( uint32_t uiBits, uint32_t uiNumberOfBits );
+    void write(uint32_t uiBits, uint32_t uiNumberOfBits);
 
-  /** insert one bits until the bitstream is byte-aligned */
-  void        writeAlignOne   ();
+    /** insert one bits until the bitstream is byte-aligned */
+    void writeAlignOne();
 
-  /** insert zero bits until the bitstream is byte-aligned */
-  void        writeAlignZero  ();
+    /** insert zero bits until the bitstream is byte-aligned */
+    void writeAlignZero();
 
-  // utility functions
+    // utility functions
 
-  /**
+    /**
    * Return a pointer to the start of the byte-stream buffer.
    * Pointer is valid until the next write/flush/reset call.
    * NB, data is arranged such that subsequent bytes in the
    * bytestream are stored in ascending addresses.
    */
-  uint8_t* getByteStream() const;
+    uint8_t* getByteStream() const;
 
-  /**
+    /**
    * Return the number of valid bytes available from  getByteStream()
    */
-  uint32_t getByteStreamLength();
+    uint32_t getByteStreamLength();
 
-  /**
+    /**
    * Reset all internal state.
    */
-  void clear();
+    void clear();
 
-  /**
+    /**
    * returns the number of bits that need to be written to
    * achieve byte alignment.
    */
-  int getNumBitsUntilByteAligned() const { return (8 - m_num_held_bits) & 0x7; }
+    int getNumBitsUntilByteAligned() const { return (8 - m_num_held_bits) & 0x7; }
 
-  /**
+    /**
    * Return the number of bits that have been written since the last clear()
    */
-  uint32_t getNumberOfWrittenBits() const { return uint32_t(m_fifo.size()) * 8 + m_num_held_bits; }
+    uint32_t getNumberOfWrittenBits() const { return uint32_t(m_fifo.size()) * 8 + m_num_held_bits; }
 
-  void insertAt(const OutputBitstream& src, uint32_t pos);
+    void insertAt(const OutputBitstream& src, uint32_t pos);
 
-  /**
+    /**
    * Return a reference to the internal fifo
    */
-  std::vector<uint8_t>& getFIFO() { return m_fifo; }
+    std::vector<uint8_t>& getFIFO() { return m_fifo; }
 
-  uint8_t getHeldBits() const { return m_held_bits; }
+    uint8_t getHeldBits() const { return m_held_bits; }
 
-  //OutputBitstream& operator= (const OutputBitstream& src);
-  /** Return a reference to the internal fifo */
-  const std::vector<uint8_t>& getFIFO() const { return m_fifo; }
+    //OutputBitstream& operator= (const OutputBitstream& src);
+    /** Return a reference to the internal fifo */
+    const std::vector<uint8_t>& getFIFO() const { return m_fifo; }
 
-  void addSubstream( const OutputBitstream* pcSubstream );
-  void writeByteAlignment();
+    void addSubstream(const OutputBitstream* pcSubstream);
+    void writeByteAlignment();
 
-  //! returns the number of start code emulations contained in the current buffer
-  int countStartCodeEmulations();
+    //! returns the number of start code emulations contained in the current buffer
+    int countStartCodeEmulations();
 };
 
 /**
  * Model of an input bitstream that extracts bits from a predefined
  * bytestream.
  */
-class InputBitstream
-{
+class InputBitstream {
 protected:
-  std::vector<uint8_t> m_fifo; /// FIFO for storage of complete bytes
-  std::vector<uint32_t>    m_emulationPreventionByteLocation;
+    std::vector<uint8_t> m_fifo; /// FIFO for storage of complete bytes
+    std::vector<uint32_t> m_emulationPreventionByteLocation;
 
-  uint32_t m_fifo_idx; /// Read index into m_fifo
+    uint32_t m_fifo_idx; /// Read index into m_fifo
 
-  uint32_t m_num_held_bits;
-  uint8_t m_held_bits;
-  uint32_t  m_numBitsRead;
+    uint32_t m_num_held_bits;
+    uint8_t m_held_bits;
+    uint32_t m_numBitsRead;
 
 public:
-  /**
+    /**
    * Create a new bitstream reader object that reads from buf.
    */
-  InputBitstream();
-  virtual ~InputBitstream() { }
-  InputBitstream(const InputBitstream &src);
+    InputBitstream();
+    virtual ~InputBitstream() {}
+    InputBitstream(const InputBitstream& src);
 
-  void resetToStart();
+    void resetToStart();
 
-  // interface for decoding
-  void        pseudoRead      ( uint32_t uiNumberOfBits, uint32_t& ruiBits );
-  void        read            ( uint32_t uiNumberOfBits, uint32_t& ruiBits );
-  void        readByte        ( uint32_t &ruiBits )
-  {
-    CHECK( m_fifo_idx >= m_fifo.size(), "FIFO exceeded" );
-    ruiBits = m_fifo[m_fifo_idx++];
+    // interface for decoding
+    void pseudoRead(uint32_t uiNumberOfBits, uint32_t& ruiBits);
+    void read(uint32_t uiNumberOfBits, uint32_t& ruiBits);
+    void readByte(uint32_t& ruiBits)
+    {
+        CHECK(m_fifo_idx >= m_fifo.size(), "FIFO exceeded");
+        ruiBits = m_fifo[m_fifo_idx++];
 #if ENABLE_TRACING
-    m_numBitsRead += 8;
+        m_numBitsRead += 8;
 #endif
-  }
+    }
 
-  void        peekPreviousByte( uint32_t &byte )
-  {
-    CHECK( m_fifo_idx == 0, "FIFO empty" );
-    byte = m_fifo[m_fifo_idx - 1];
-  }
+    void peekPreviousByte(uint32_t& byte)
+    {
+        CHECK(m_fifo_idx == 0, "FIFO empty");
+        byte = m_fifo[m_fifo_idx - 1];
+    }
 
-  uint32_t readOutTrailingBits ();
-  uint8_t  getHeldBits() const { return m_held_bits; }
-  OutputBitstream& operator= (const OutputBitstream& src);
-  uint32_t getByteLocation              ( )                     { return m_fifo_idx                    ; }
+    uint32_t readOutTrailingBits();
+    uint8_t getHeldBits() const { return m_held_bits; }
+    OutputBitstream& operator=(const OutputBitstream& src);
+    uint32_t getByteLocation() { return m_fifo_idx; }
 
-  // Peek at bits in word-storage. Used in determining if we have completed reading of current bitstream and therefore slice in LCEC.
-  uint32_t peekBits (uint32_t uiBits) { uint32_t tmp; pseudoRead(uiBits, tmp); return tmp; }
+    // Peek at bits in word-storage. Used in determining if we have completed reading of current bitstream and therefore slice in LCEC.
+    uint32_t peekBits(uint32_t uiBits)
+    {
+        uint32_t tmp;
+        pseudoRead(uiBits, tmp);
+        return tmp;
+    }
 
-  // utility functions
-  uint32_t read(uint32_t numberOfBits)      { uint32_t tmp; read(numberOfBits, tmp); return tmp; }
-  uint32_t readByte()                   { uint32_t tmp; readByte( tmp ); return tmp; }
-  uint32_t getNumBitsUntilByteAligned() { return m_num_held_bits & (0x7); }
-  uint32_t getNumBitsLeft()             { return 8*((uint32_t)m_fifo.size() - m_fifo_idx) + m_num_held_bits; }
-  InputBitstream *extractSubstream( uint32_t uiNumBits ); // Read the nominated number of bits, and return as a bitstream.
-  uint32_t getNumBitsRead()            { return m_numBitsRead; }
-  uint32_t readByteAlignment();
+    // utility functions
+    uint32_t read(uint32_t numberOfBits)
+    {
+        uint32_t tmp;
+        read(numberOfBits, tmp);
+        return tmp;
+    }
+    uint32_t readByte()
+    {
+        uint32_t tmp;
+        readByte(tmp);
+        return tmp;
+    }
+    uint32_t getNumBitsUntilByteAligned() { return m_num_held_bits & (0x7); }
+    uint32_t getNumBitsLeft() { return 8 * ((uint32_t)m_fifo.size() - m_fifo_idx) + m_num_held_bits; }
+    InputBitstream* extractSubstream(
+        uint32_t uiNumBits); // Read the nominated number of bits, and return as a bitstream.
+    uint32_t getNumBitsRead() { return m_numBitsRead; }
+    uint32_t readByteAlignment();
 
-  void     pushEmulationPreventionByteLocation ( uint32_t pos )                         { m_emulationPreventionByteLocation.push_back( pos ); }
-  uint32_t numEmulationPreventionBytesRead     ()                                   { return (uint32_t) m_emulationPreventionByteLocation.size();    }
-  const std::vector<uint32_t> &getEmulationPreventionByteLocation  () const              { return m_emulationPreventionByteLocation;           }
-  uint32_t getEmulationPreventionByteLocation  ( uint32_t idx )                         { return m_emulationPreventionByteLocation[ idx ];    }
-  void     clearEmulationPreventionByteLocation()                                   { m_emulationPreventionByteLocation.clear();          }
-  void     setEmulationPreventionByteLocation  ( const std::vector<uint32_t> &vec )     { m_emulationPreventionByteLocation = vec;            }
+    void pushEmulationPreventionByteLocation(uint32_t pos) { m_emulationPreventionByteLocation.push_back(pos); }
+    uint32_t numEmulationPreventionBytesRead() { return (uint32_t)m_emulationPreventionByteLocation.size(); }
+    const std::vector<uint32_t>& getEmulationPreventionByteLocation() const
+    {
+        return m_emulationPreventionByteLocation;
+    }
+    uint32_t getEmulationPreventionByteLocation(uint32_t idx) { return m_emulationPreventionByteLocation[idx]; }
+    void clearEmulationPreventionByteLocation() { m_emulationPreventionByteLocation.clear(); }
+    void setEmulationPreventionByteLocation(const std::vector<uint32_t>& vec)
+    {
+        m_emulationPreventionByteLocation = vec;
+    }
 
-  const std::vector<uint8_t> &getFifo() const { return m_fifo; }
-        std::vector<uint8_t> &getFifo()       { return m_fifo; }
+    const std::vector<uint8_t>& getFifo() const { return m_fifo; }
+    std::vector<uint8_t>& getFifo() { return m_fifo; }
 };
 
 } // namespace vvenc
 
 //! \}
-

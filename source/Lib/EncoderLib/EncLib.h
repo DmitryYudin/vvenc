@@ -69,74 +69,75 @@ class YUVWriterIf;
 class NoMallocThreadPool;
 
 /// encoder class
-class EncLib
-{
+class EncLib {
 private:
-  int                       m_numPicsRcvd;
-  int                       m_numPicsInQueue;
-  int                       m_numPicsCoded;
-  int                       m_pocEncode;
-  int                       m_pocRecOut;
-  int                       m_GOPSizeLog2;
-  int                       m_TicksPerFrameMul4;
+    int m_numPicsRcvd;
+    int m_numPicsInQueue;
+    int m_numPicsCoded;
+    int m_pocEncode;
+    int m_pocRecOut;
+    int m_GOPSizeLog2;
+    int m_TicksPerFrameMul4;
 
-  const EncCfg              m_cEncCfg;
-  EncCfg                    m_cBckCfg;
-  EncGOP*                   m_cGOPEncoder;
-  EncHRD                    m_cEncHRD;
-  MCTF                      m_MCTF;
-  PicList                   m_cListPic;
-  YUVWriterIf*              m_yuvWriterIf;
-  NoMallocThreadPool*       m_threadPool;
-  RateCtrl                  m_cRateCtrl;                          ///< Rate control class
+    const EncCfg m_cEncCfg;
+    EncCfg m_cBckCfg;
+    EncGOP* m_cGOPEncoder;
+    EncHRD m_cEncHRD;
+    MCTF m_MCTF;
+    PicList m_cListPic;
+    YUVWriterIf* m_yuvWriterIf;
+    NoMallocThreadPool* m_threadPool;
+    RateCtrl m_cRateCtrl; ///< Rate control class
 
-  VPS                       m_cVPS;
-  DCI                       m_cDCI;
-  ParameterSetMap<SPS>      m_spsMap;
-  ParameterSetMap<PPS>      m_ppsMap;
+    VPS m_cVPS;
+    DCI m_cDCI;
+    ParameterSetMap<SPS> m_spsMap;
+    ParameterSetMap<PPS> m_ppsMap;
 
-  XUCache                   m_shrdUnitCache;
-  std::mutex                m_unitCacheMutex;
+    XUCache m_shrdUnitCache;
+    std::mutex m_unitCacheMutex;
 
-  std::vector<int>          m_pocToGopId;
-  std::vector<int>          m_nextPocOffset;
+    std::vector<int> m_pocToGopId;
+    std::vector<int> m_nextPocOffset;
 
 public:
-  EncLib();
-  virtual ~EncLib();
+    EncLib();
+    virtual ~EncLib();
 
-  void     initEncoderLib      ( const EncCfg& encCfg, YUVWriterIf* yuvWriterIf );
-  void     initPass            ( int pass );
-  void     encodePicture       ( bool flush, const YUVBuffer& yuvInBuf, AccessUnit& au, bool& isQueueEmpty );
-  void     uninitEncoderLib    ();
-  void     printSummary        ();
+    void initEncoderLib(const EncCfg& encCfg, YUVWriterIf* yuvWriterIf);
+    void initPass(int pass);
+    void encodePicture(bool flush, const YUVBuffer& yuvInBuf, AccessUnit& au, bool& isQueueEmpty);
+    void uninitEncoderLib();
+    void printSummary();
 
 private:
-  void     xUninitLib          ();
-  void     xResetLib           ();
-  void     xSetRCEncCfg        ( int pass );
+    void xUninitLib();
+    void xResetLib();
+    void xSetRCEncCfg(int pass);
 
-  int      xGetGopIdFromPoc    ( int poc ) const { return m_pocToGopId[ poc % m_cEncCfg.m_GOPSize ]; }
-  int      xGetNextPocICO      ( int poc, bool flush, int max ) const;
-  void     xCreateCodingOrder  ( int start, int max, int numInQueue, bool flush, std::vector<Picture*>& encList );
-  void     xInitPicture        ( Picture& pic, int picNum, const PPS& pps, const SPS& sps, const VPS& vps, const DCI& dci );
-  void     xDeletePicBuffer    ();
-  Picture* xGetNewPicBuffer    ( const PPS& pps, const SPS& sps );            ///< get picture buffer which will be processed. If ppsId<0, then the ppsMap will be queried for the first match.
-  Picture* xGetPictureBuffer   ( int poc );
+    int xGetGopIdFromPoc(int poc) const { return m_pocToGopId[poc % m_cEncCfg.m_GOPSize]; }
+    int xGetNextPocICO(int poc, bool flush, int max) const;
+    void xCreateCodingOrder(int start, int max, int numInQueue, bool flush, std::vector<Picture*>& encList);
+    void xInitPicture(Picture& pic, int picNum, const PPS& pps, const SPS& sps, const VPS& vps, const DCI& dci);
+    void xDeletePicBuffer();
+    Picture* xGetNewPicBuffer(
+        const PPS& pps,
+        const SPS&
+            sps); ///< get picture buffer which will be processed. If ppsId<0, then the ppsMap will be queried for the first match.
+    Picture* xGetPictureBuffer(int poc);
 
-  void     xInitVPS            ( VPS &vps )                                  const; ///< initialize VPS from encoder options
-  void     xInitDCI            ( DCI &dci, const SPS &sps, const int dciId ) const; ///< initialize DCI from encoder options
-  void     xInitConstraintInfo ( ConstraintInfo &ci )                        const;  ///< initialize SPS from encoder options
-  void     xInitSPS            ( SPS &sps )                                  const; ///< initialize SPS from encoder options
-  void     xInitPPS            ( PPS &pps, const SPS &sps )                  const;  ///< initialize PPS from encoder options
-  void     xInitPPSforTiles    ( PPS &pps ) const;
-  void     xInitRPL            ( SPS &sps ) const;
-  void     xInitHrdParameters  ( SPS &sps );
-  void     xOutputRecYuv       ();
-  void     xDetectScreenC      ( Picture& pic , PelUnitBuf yuvOrgBuf, int useTS);
+    void xInitVPS(VPS& vps) const;                                  ///< initialize VPS from encoder options
+    void xInitDCI(DCI& dci, const SPS& sps, const int dciId) const; ///< initialize DCI from encoder options
+    void xInitConstraintInfo(ConstraintInfo& ci) const;             ///< initialize SPS from encoder options
+    void xInitSPS(SPS& sps) const;                                  ///< initialize SPS from encoder options
+    void xInitPPS(PPS& pps, const SPS& sps) const;                  ///< initialize PPS from encoder options
+    void xInitPPSforTiles(PPS& pps) const;
+    void xInitRPL(SPS& sps) const;
+    void xInitHrdParameters(SPS& sps);
+    void xOutputRecYuv();
+    void xDetectScreenC(Picture& pic, PelUnitBuf yuvOrgBuf, int useTS);
 };
 
 } // namespace vvenc
 
 //! \}
-

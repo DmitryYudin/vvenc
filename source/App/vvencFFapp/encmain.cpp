@@ -44,7 +44,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-
 /** \file     encmain.cpp
     \brief    Encoder application main
 */
@@ -71,78 +70,69 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // Main function
 // ====================================================================================================================
 
-
 int main(int argc, char* argv[])
 {
-  vvenc::registerMsgCbf( msgFnc );
+    vvenc::registerMsgCbf(msgFnc);
 
-  std::string simdOpt;
-  VVCEncoderFFApp::df::program_options_lite::Options opts;
-  opts.addOptions()
-    ( "c",           VVCEncoderFFApp::df::program_options_lite::parseConfigFile, "" )
-    ( "Verbosity,v", g_verbosity,                               "" )
-    ( "SIMD",        simdOpt,                                   "" );
-  VVCEncoderFFApp::df::program_options_lite::SilentReporter err;
-  VVCEncoderFFApp::df::program_options_lite::scanArgv( opts, argc, ( const char** ) argv, err );
+    std::string simdOpt;
+    VVCEncoderFFApp::df::program_options_lite::Options opts;
+    opts.addOptions()("c", VVCEncoderFFApp::df::program_options_lite::parseConfigFile, "")("Verbosity,v", g_verbosity,
+                                                                                           "")("SIMD", simdOpt, "");
+    VVCEncoderFFApp::df::program_options_lite::SilentReporter err;
+    VVCEncoderFFApp::df::program_options_lite::scanArgv(opts, argc, (const char**)argv, err);
 
-  simdOpt = vvenc::setSIMDExtension( simdOpt );
+    simdOpt = vvenc::setSIMDExtension(simdOpt);
 
-  // print information
-  msgApp( INFO, "\n");
-  msgApp( INFO, "vvencFFapp: Encoder Version %s ", VVENC_VERSION );
-  msgApp( INFO, "%s", getCompileInfoString().c_str() );
-  msgApp( INFO, "[SIMD=%s]", simdOpt.c_str() );
-  if ( vvenc::isTracingEnabled() )
-  {
-    msgApp( INFO, "[ENABLE_TRACING]" );
-  }
-  msgApp( INFO, "\n" );
+    // print information
+    msgApp(INFO, "\n");
+    msgApp(INFO, "vvencFFapp: Encoder Version %s ", VVENC_VERSION);
+    msgApp(INFO, "%s", getCompileInfoString().c_str());
+    msgApp(INFO, "[SIMD=%s]", simdOpt.c_str());
+    if( vvenc::isTracingEnabled() ) {
+        msgApp(INFO, "[ENABLE_TRACING]");
+    }
+    msgApp(INFO, "\n");
 
-  EncApp* pcEncApp = new EncApp;
+    EncApp* pcEncApp = new EncApp;
 
-  // parse configuration
-  if ( ! pcEncApp->parseCfg( argc, argv ) )
-  {
-    return 1;
-  }
+    // parse configuration
+    if( !pcEncApp->parseCfg(argc, argv) ) {
+        return 1;
+    }
 
-  // starting time
-  auto startTime  = std::chrono::steady_clock::now();
-  std::time_t startTime2 = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  msgApp( INFO, " started @ %s", std::ctime(&startTime2) );
-  clock_t startClock = clock();
+    // starting time
+    auto startTime = std::chrono::steady_clock::now();
+    std::time_t startTime2 = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    msgApp(INFO, " started @ %s", std::ctime(&startTime2));
+    clock_t startClock = clock();
 
-  // call encoding function
+    // call encoding function
 #if HANDLE_EXCEPTION
-  try
-  {
+    try {
 #endif
-    pcEncApp->encode();
+        pcEncApp->encode();
 #if HANDLE_EXCEPTION
-  }
-  catch( std::exception &e )
-  {
-    msgApp( ERROR, "%s\n", e.what() );
-    return 1;
-  }
-  catch( ... )
-  {
-    msgApp( ERROR, "Unspecified error occurred\n" );
-    return 1;
-  }
+    } catch( std::exception& e ) {
+        msgApp(ERROR, "%s\n", e.what());
+        return 1;
+    } catch( ... ) {
+        msgApp(ERROR, "Unspecified error occurred\n");
+        return 1;
+    }
 #endif
-  // ending time
-  clock_t endClock = clock();
-  auto endTime = std::chrono::steady_clock::now();
-  std::time_t endTime2 = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  auto encTime = std::chrono::duration_cast<std::chrono::milliseconds>( endTime - startTime).count();
+    // ending time
+    clock_t endClock = clock();
+    auto endTime = std::chrono::steady_clock::now();
+    std::time_t endTime2 = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto encTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
 
-  delete pcEncApp;
+    delete pcEncApp;
 
-  msgApp( INFO, "\n finished @ %s", std::ctime(&endTime2) );
-  msgApp( INFO, " Total Time: %12.3f sec. [user] %12.3f sec. [elapsed]\n", (endClock - startClock) * 1.0 / CLOCKS_PER_SEC, encTime / 1000.0);
+    msgApp(INFO, "\n finished @ %s", std::ctime(&endTime2));
+    msgApp(INFO, " Total Time: %12.3f sec. [user] %12.3f sec. [elapsed]\n",
+           (endClock - startClock) * 1.0 / CLOCKS_PER_SEC, encTime / 1000.0);
 
-  return 0;
+    return 0;
 }
 
 //! \}

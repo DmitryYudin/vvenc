@@ -44,7 +44,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-
 /** \file     SEI.cpp
     \brief    helper functions for SEI handling
 */
@@ -59,95 +58,107 @@ THE POSSIBILITY OF SUCH DAMAGE.
 namespace vvenc {
 
 #if ENABLE_TRACING
-void xTraceSEIHeader()
-{
-  DTRACE( g_trace_ctx, D_HEADER, "=========== SEI message ===========\n" );
-}
+void xTraceSEIHeader() { DTRACE(g_trace_ctx, D_HEADER, "=========== SEI message ===========\n"); }
 
-void xTraceSEIMessageType( SEI::PayloadType payloadType )
+void xTraceSEIMessageType(SEI::PayloadType payloadType)
 {
-  DTRACE( g_trace_ctx, D_HEADER, "=========== %s SEI message ===========\n", SEI::getSEIMessageString( payloadType ) );
+    DTRACE(g_trace_ctx, D_HEADER, "=========== %s SEI message ===========\n", SEI::getSEIMessageString(payloadType));
 }
 #endif
 
 SEIMessages getSeisByType(const SEIMessages &seiList, SEI::PayloadType seiType)
 {
-  SEIMessages result;
+    SEIMessages result;
 
-  for (SEIMessages::const_iterator it=seiList.begin(); it!=seiList.end(); it++)
-  {
-    if ((*it)->payloadType() == seiType)
-    {
-      result.push_back(*it);
+    for( SEIMessages::const_iterator it = seiList.begin(); it != seiList.end(); it++ ) {
+        if( (*it)->payloadType() == seiType ) {
+            result.push_back(*it);
+        }
     }
-  }
-  return result;
+    return result;
 }
 
 SEIMessages extractSeisByType(SEIMessages &seiList, SEI::PayloadType seiType)
 {
-  SEIMessages result;
+    SEIMessages result;
 
-  SEIMessages::iterator it=seiList.begin();
-  while ( it!=seiList.end() )
-  {
-    if ((*it)->payloadType() == seiType)
-    {
-      result.push_back(*it);
-      it = seiList.erase(it);
+    SEIMessages::iterator it = seiList.begin();
+    while( it != seiList.end() ) {
+        if( (*it)->payloadType() == seiType ) {
+            result.push_back(*it);
+            it = seiList.erase(it);
+        } else {
+            it++;
+        }
     }
-    else
-    {
-      it++;
-    }
-  }
-  return result;
+    return result;
 }
 
-
-void deleteSEIs (SEIMessages &seiList)
+void deleteSEIs(SEIMessages &seiList)
 {
-  for (SEIMessages::iterator it=seiList.begin(); it!=seiList.end(); it++)
-  {
-    delete (*it);
-  }
-  seiList.clear();
+    for( SEIMessages::iterator it = seiList.begin(); it != seiList.end(); it++ ) {
+        delete(*it);
+    }
+    seiList.clear();
 }
 
 // Static member
 const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
 {
-  switch (payloadType)
-  {
-    case SEI::BUFFERING_PERIOD:                     return "Buffering period";
-    case SEI::PICTURE_TIMING:                       return "Picture timing";
-    case SEI::FILLER_PAYLOAD:                       return "Filler payload";                       // not currently decoded
-    case SEI::USER_DATA_REGISTERED_ITU_T_T35:       return "User data registered";                 // not currently decoded
-    case SEI::USER_DATA_UNREGISTERED:               return "User data unregistered";
-    case SEI::FILM_GRAIN_CHARACTERISTICS:           return "Film grain characteristics";           // not currently decoded
-    case SEI::FRAME_PACKING:                        return "Frame packing arrangement";
-    case SEI::PARAMETER_SETS_INCLUSION_INDICATION:  return "Parameter sets inclusion indication";
-    case SEI::DECODING_UNIT_INFO:                   return "Decoding unit information";
-    case SEI::SCALABLE_NESTING:                     return "Scalable nesting";
-    case SEI::DECODED_PICTURE_HASH:                 return "Decoded picture hash";
-    case SEI::DEPENDENT_RAP_INDICATION:             return "Dependent RAP indication";
-    case SEI::MASTERING_DISPLAY_COLOUR_VOLUME:      return "Mastering display colour volume";
-    case SEI::ALTERNATIVE_TRANSFER_CHARACTERISTICS: return "Alternative transfer characteristics";
-    case SEI::CONTENT_LIGHT_LEVEL_INFO:             return "Content light level information";
-    case SEI::AMBIENT_VIEWING_ENVIRONMENT:          return "Ambient viewing environment";
-    case SEI::CONTENT_COLOUR_VOLUME:                return "Content colour volume";
-    case SEI::EQUIRECTANGULAR_PROJECTION:           return "Equirectangular projection";
-    case SEI::SPHERE_ROTATION:                      return "Sphere rotation";
-    case SEI::REGION_WISE_PACKING:                  return "Region wise packing information";
-    case SEI::OMNI_VIEWPORT:                        return "Omni viewport";
-    case SEI::GENERALIZED_CUBEMAP_PROJECTION:       return "Generalized cubemap projection";
-    case SEI::SAMPLE_ASPECT_RATIO_INFO:             return "Sample aspect ratio information";
-    case SEI::SUBPICTURE_LEVEL_INFO:                return "Subpicture level information";
-    default:                                        return "Unknown";
-  }
+    switch( payloadType ) {
+        case SEI::BUFFERING_PERIOD:
+            return "Buffering period";
+        case SEI::PICTURE_TIMING:
+            return "Picture timing";
+        case SEI::FILLER_PAYLOAD:
+            return "Filler payload"; // not currently decoded
+        case SEI::USER_DATA_REGISTERED_ITU_T_T35:
+            return "User data registered"; // not currently decoded
+        case SEI::USER_DATA_UNREGISTERED:
+            return "User data unregistered";
+        case SEI::FILM_GRAIN_CHARACTERISTICS:
+            return "Film grain characteristics"; // not currently decoded
+        case SEI::FRAME_PACKING:
+            return "Frame packing arrangement";
+        case SEI::PARAMETER_SETS_INCLUSION_INDICATION:
+            return "Parameter sets inclusion indication";
+        case SEI::DECODING_UNIT_INFO:
+            return "Decoding unit information";
+        case SEI::SCALABLE_NESTING:
+            return "Scalable nesting";
+        case SEI::DECODED_PICTURE_HASH:
+            return "Decoded picture hash";
+        case SEI::DEPENDENT_RAP_INDICATION:
+            return "Dependent RAP indication";
+        case SEI::MASTERING_DISPLAY_COLOUR_VOLUME:
+            return "Mastering display colour volume";
+        case SEI::ALTERNATIVE_TRANSFER_CHARACTERISTICS:
+            return "Alternative transfer characteristics";
+        case SEI::CONTENT_LIGHT_LEVEL_INFO:
+            return "Content light level information";
+        case SEI::AMBIENT_VIEWING_ENVIRONMENT:
+            return "Ambient viewing environment";
+        case SEI::CONTENT_COLOUR_VOLUME:
+            return "Content colour volume";
+        case SEI::EQUIRECTANGULAR_PROJECTION:
+            return "Equirectangular projection";
+        case SEI::SPHERE_ROTATION:
+            return "Sphere rotation";
+        case SEI::REGION_WISE_PACKING:
+            return "Region wise packing information";
+        case SEI::OMNI_VIEWPORT:
+            return "Omni viewport";
+        case SEI::GENERALIZED_CUBEMAP_PROJECTION:
+            return "Generalized cubemap projection";
+        case SEI::SAMPLE_ASPECT_RATIO_INFO:
+            return "Sample aspect ratio information";
+        case SEI::SUBPICTURE_LEVEL_INFO:
+            return "Subpicture level information";
+        default:
+            return "Unknown";
+    }
 }
 
 } // namespace vvenc
 
 //! \}
-

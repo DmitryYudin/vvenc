@@ -65,40 +65,38 @@ namespace vvenc {
 // ====================================================================================================================
 
 /// CU decoder class
-class DecCu
-{
+class DecCu {
 public:
-  DecCu();
-  virtual ~DecCu();
+    DecCu();
+    virtual ~DecCu();
 
-  void  init              ( TrQuant* pcTrQuant, IntraPrediction* pcIntra, InterPrediction* pcInter, ChromaFormat chrFormat );
-  void  decompressCtu     ( CodingStructure& cs, const UnitArea& ctuArea );
+    void init(TrQuant* pcTrQuant, IntraPrediction* pcIntra, InterPrediction* pcInter, ChromaFormat chrFormat);
+    void decompressCtu(CodingStructure& cs, const UnitArea& ctuArea);
 
 protected:
-  void xIntraRecQT        ( CodingUnit&      cu, const ChannelType chType );
+    void xIntraRecQT(CodingUnit& cu, const ChannelType chType);
 
-  void xReconInter        ( CodingUnit&      cu );
-  void xDecodeInterTexture( CodingUnit&      cu );
-  void xReconIntraQT      ( CodingUnit&      cu );
+    void xReconInter(CodingUnit& cu);
+    void xDecodeInterTexture(CodingUnit& cu);
+    void xReconIntraQT(CodingUnit& cu);
 
-  void xIntraRecBlk       ( TransformUnit&   tu, const ComponentID compID );
-  void xDecodeInterTU     ( TransformUnit&   tu, const ComponentID compID );
+    void xIntraRecBlk(TransformUnit& tu, const ComponentID compID);
+    void xDecodeInterTU(TransformUnit& tu, const ComponentID compID);
 
-  void xDeriveCUMV        ( CodingUnit&      cu );
+    void xDeriveCUMV(CodingUnit& cu);
 
 private:
-  TrQuant*          m_pcTrQuant;
-  IntraPrediction*  m_pcIntraPred;
-  InterPrediction*  m_pcInterPred;
+    TrQuant* m_pcTrQuant;
+    IntraPrediction* m_pcIntraPred;
+    InterPrediction* m_pcInterPred;
 
-  MergeCtx          m_triangleMrgCtx;
-  PelStorage        m_TmpBuffer;
-  PelStorage        m_PredBuffer;
-  MotionInfo        m_subPuMiBuf[(MAX_CU_SIZE * MAX_CU_SIZE) >> (MIN_CU_LOG2 << 1)];
-  MergeCtx          m_geoMrgCtx;
+    MergeCtx m_triangleMrgCtx;
+    PelStorage m_TmpBuffer;
+    PelStorage m_PredBuffer;
+    MotionInfo m_subPuMiBuf[(MAX_CU_SIZE * MAX_CU_SIZE) >> (MIN_CU_LOG2 << 1)];
+    MergeCtx m_geoMrgCtx;
 };
 
 } // namespace vvenc
 
 //! \}
-

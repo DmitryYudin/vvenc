@@ -61,248 +61,203 @@ namespace vvenc {
 // ====================================================================================================================
 class CodingStructure;
 
-enum MvPrecision
-{
-  MV_PRECISION_4PEL     = 0,      // 4-pel
-  MV_PRECISION_INT      = 2,      // 1-pel, shift 2 bits from 4-pel
-  MV_PRECISION_HALF     = 3,      // 1/2-pel
-  MV_PRECISION_QUARTER  = 4,      // 1/4-pel (the precision of regular MV difference signaling), shift 4 bits from 4-pel
-  MV_PRECISION_SIXTEENTH = 6,     // 1/16-pel (the precision of internal MV), shift 6 bits from 4-pel
-  MV_PRECISION_INTERNAL = 2 + MV_FRACTIONAL_BITS_INTERNAL,
+enum MvPrecision {
+    MV_PRECISION_4PEL = 0,      // 4-pel
+    MV_PRECISION_INT = 2,       // 1-pel, shift 2 bits from 4-pel
+    MV_PRECISION_HALF = 3,      // 1/2-pel
+    MV_PRECISION_QUARTER = 4,   // 1/4-pel (the precision of regular MV difference signaling), shift 4 bits from 4-pel
+    MV_PRECISION_SIXTEENTH = 6, // 1/16-pel (the precision of internal MV), shift 6 bits from 4-pel
+    MV_PRECISION_INTERNAL = 2 + MV_FRACTIONAL_BITS_INTERNAL,
 };
 
 /// basic motion vector class
-class Mv
-{
+class Mv {
 private:
-  static const MvPrecision m_amvrPrecision[4];
-  static const MvPrecision m_amvrPrecAffine[3];
-  static const MvPrecision m_amvrPrecIbc[3];
+    static const MvPrecision m_amvrPrecision[4];
+    static const MvPrecision m_amvrPrecAffine[3];
+    static const MvPrecision m_amvrPrecIbc[3];
 
-  static const int mvClipPeriod    = (1 << MV_BITS);
-  static const int halMvClipPeriod = (1 << (MV_BITS - 1));
+    static const int mvClipPeriod = (1 << MV_BITS);
+    static const int halMvClipPeriod = (1 << (MV_BITS - 1));
 
 public:
-  int   hor;     ///< horizontal component of motion vector
-  int   ver;     ///< vertical component of motion vector
+    int hor; ///< horizontal component of motion vector
+    int ver; ///< vertical component of motion vector
 
-  // ------------------------------------------------------------------------------------------------------------------
-  // constructors
-  // ------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------
+    // constructors
+    // ------------------------------------------------------------------------------------------------------------------
 
-  Mv(                    ) : hor( 0    ), ver( 0    ) {}
-  Mv( int iHor, int iVer ) : hor( iHor ), ver( iVer ) {}
+    Mv() : hor(0), ver(0) {}
+    Mv(int iHor, int iVer) : hor(iHor), ver(iVer) {}
 
-  // ------------------------------------------------------------------------------------------------------------------
-  // set
-  // ------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------
+    // set
+    // ------------------------------------------------------------------------------------------------------------------
 
-  void  set       ( int iHor, int iVer)     { hor = iHor;  ver = iVer; }
-  void  setZero   ()                        { hor = ver = 0;           }
-
-  // ------------------------------------------------------------------------------------------------------------------
-  // get
-  // ------------------------------------------------------------------------------------------------------------------
-
-  int   getAbsHor () const { return abs( hor );   }
-  int   getAbsVer () const { return abs( ver );   }
-
-  // ------------------------------------------------------------------------------------------------------------------
-  // operations
-  // ------------------------------------------------------------------------------------------------------------------
-
-  const Mv& operator += (const Mv& _rcMv)
-  {
+    void set(int iHor, int iVer)
     {
-      Mv rcMv = _rcMv;
-
-      hor += rcMv.hor;
-      ver += rcMv.ver;
+        hor = iHor;
+        ver = iVer;
     }
-    return  *this;
-  }
+    void setZero() { hor = ver = 0; }
 
-  const Mv& operator-= (const Mv& _rcMv)
-  {
+    // ------------------------------------------------------------------------------------------------------------------
+    // get
+    // ------------------------------------------------------------------------------------------------------------------
+
+    int getAbsHor() const { return abs(hor); }
+    int getAbsVer() const { return abs(ver); }
+
+    // ------------------------------------------------------------------------------------------------------------------
+    // operations
+    // ------------------------------------------------------------------------------------------------------------------
+
+    const Mv& operator+=(const Mv& _rcMv)
     {
-      Mv rcMv = _rcMv;
+        {
+            Mv rcMv = _rcMv;
 
-      hor -= rcMv.hor;
-      ver -= rcMv.ver;
+            hor += rcMv.hor;
+            ver += rcMv.ver;
+        }
+        return *this;
     }
-    return  *this;
-  }
 
-
-  //! shift right with rounding
-  void divideByPowerOf2 (const int i)
-  {
-    if (i != 0)
+    const Mv& operator-=(const Mv& _rcMv)
     {
-      const int offset = (1 << (i - 1));
-      hor = (hor + offset - (hor >= 0)) >> i;
-      ver = (ver + offset - (ver >= 0)) >> i;
+        {
+            Mv rcMv = _rcMv;
+
+            hor -= rcMv.hor;
+            ver -= rcMv.ver;
+        }
+        return *this;
     }
-  }
 
-  const Mv& operator<<= (const int i)
-  {
-    hor <<= i;
-    ver <<= i;
-    return  *this;
-  }
-
-  const Mv& operator>>= ( const int i )
-  {
-    if (i != 0)
+    //! shift right with rounding
+    void divideByPowerOf2(const int i)
     {
-      const int offset = (1 << (i - 1));
-      hor = (hor + offset - (hor >= 0)) >> i;
-      ver = (ver + offset - (ver >= 0)) >> i;
+        if( i != 0 ) {
+            const int offset = (1 << (i - 1));
+            hor = (hor + offset - (hor >= 0)) >> i;
+            ver = (ver + offset - (ver >= 0)) >> i;
+        }
     }
-    return  *this;
-  }
 
-  const Mv operator - ( const Mv& rcMv ) const
-  {
-    return Mv( hor - rcMv.hor, ver - rcMv.ver );
-  }
-
-  const Mv operator + ( const Mv& rcMv ) const
-  {
-    return Mv( hor + rcMv.hor, ver + rcMv.ver );
-  }
-
-  bool operator== ( const Mv& rcMv ) const
-  {
-    return ( hor == rcMv.hor && ver == rcMv.ver );
-  }
-
-  bool operator!= ( const Mv& rcMv ) const
-  {
-    return !( *this == rcMv );
-  }
-
-  const Mv scaleMv( int iScale ) const
-  {
-    const int mvx = Clip3(MV_MIN, MV_MAX, (iScale * hor + 128 - (iScale * hor >= 0)) >> 8);
-    const int mvy = Clip3(MV_MIN, MV_MAX, (iScale * ver + 128 - (iScale * ver >= 0)) >> 8);
-    return Mv( mvx, mvy );
-  }
-
-  void changePrecision(const MvPrecision& src, const MvPrecision& dst)
-  {
-    const int shift = (int)dst - (int)src;
-    if (shift >= 0)
+    const Mv& operator<<=(const int i)
     {
-      *this <<= shift;
+        hor <<= i;
+        ver <<= i;
+        return *this;
     }
-    else
+
+    const Mv& operator>>=(const int i)
     {
-      const int rightShift = -shift;
-      const int nOffset = 1 << (rightShift - 1);
-      hor = hor >= 0 ? (hor + nOffset - 1) >> rightShift : (hor + nOffset) >> rightShift;
-      ver = ver >= 0 ? (ver + nOffset - 1) >> rightShift : (ver + nOffset) >> rightShift;
+        if( i != 0 ) {
+            const int offset = (1 << (i - 1));
+            hor = (hor + offset - (hor >= 0)) >> i;
+            ver = (ver + offset - (ver >= 0)) >> i;
+        }
+        return *this;
     }
-  }
 
-  void roundToPrecision(const MvPrecision& src, const MvPrecision& dst)
-  {
-    changePrecision(src, dst);
-    changePrecision(dst, src);
-  }
+    const Mv operator-(const Mv& rcMv) const { return Mv(hor - rcMv.hor, ver - rcMv.ver); }
 
-  // translational MV
-  void changeTransPrecInternal2Amvr(const int amvr)
-  {
-    changePrecision(MV_PRECISION_INTERNAL, m_amvrPrecision[amvr]);
-  }
+    const Mv operator+(const Mv& rcMv) const { return Mv(hor + rcMv.hor, ver + rcMv.ver); }
 
-  void changeTransPrecAmvr2Internal(const int amvr)
-  {
-    changePrecision(m_amvrPrecision[amvr], MV_PRECISION_INTERNAL);
-  }
+    bool operator==(const Mv& rcMv) const { return (hor == rcMv.hor && ver == rcMv.ver); }
 
-  void roundTransPrecInternal2Amvr(const int amvr)
-  {
-    roundToPrecision(MV_PRECISION_INTERNAL, m_amvrPrecision[amvr]);
-  }
+    bool operator!=(const Mv& rcMv) const { return !(*this == rcMv); }
 
-  // affine MV
-  void changeAffinePrecInternal2Amvr(const int amvr)
-  {
-    changePrecision(MV_PRECISION_INTERNAL, m_amvrPrecAffine[amvr]);
-  }
+    const Mv scaleMv(int iScale) const
+    {
+        const int mvx = Clip3(MV_MIN, MV_MAX, (iScale * hor + 128 - (iScale * hor >= 0)) >> 8);
+        const int mvy = Clip3(MV_MIN, MV_MAX, (iScale * ver + 128 - (iScale * ver >= 0)) >> 8);
+        return Mv(mvx, mvy);
+    }
 
-  void changeAffinePrecAmvr2Internal(const int amvr)
-  {
-    changePrecision(m_amvrPrecAffine[amvr], MV_PRECISION_INTERNAL);
-  }
+    void changePrecision(const MvPrecision& src, const MvPrecision& dst)
+    {
+        const int shift = (int)dst - (int)src;
+        if( shift >= 0 ) {
+            *this <<= shift;
+        } else {
+            const int rightShift = -shift;
+            const int nOffset = 1 << (rightShift - 1);
+            hor = hor >= 0 ? (hor + nOffset - 1) >> rightShift : (hor + nOffset) >> rightShift;
+            ver = ver >= 0 ? (ver + nOffset - 1) >> rightShift : (ver + nOffset) >> rightShift;
+        }
+    }
 
-  void roundAffinePrecInternal2Amvr(const int amvr)
-  {
-    roundToPrecision(MV_PRECISION_INTERNAL, m_amvrPrecAffine[amvr]);
-  }
+    void roundToPrecision(const MvPrecision& src, const MvPrecision& dst)
+    {
+        changePrecision(src, dst);
+        changePrecision(dst, src);
+    }
 
-  // IBC block vector
-  void changeIbcPrecInternal2Amvr(const int amvr)
-  {
-    changePrecision(MV_PRECISION_INTERNAL, m_amvrPrecIbc[amvr]);
-  }
+    // translational MV
+    void changeTransPrecInternal2Amvr(const int amvr) { changePrecision(MV_PRECISION_INTERNAL, m_amvrPrecision[amvr]); }
 
-   void changeIbcPrecAmvr2Internal(const int amvr)
-   {
-     changePrecision(m_amvrPrecIbc[amvr], MV_PRECISION_INTERNAL);
-   }
+    void changeTransPrecAmvr2Internal(const int amvr) { changePrecision(m_amvrPrecision[amvr], MV_PRECISION_INTERNAL); }
 
-   void roundIbcPrecInternal2Amvr(const int amvr)
-   {
-     roundToPrecision(MV_PRECISION_INTERNAL, m_amvrPrecIbc[amvr]);
-   }
+    void roundTransPrecInternal2Amvr(const int amvr) { roundToPrecision(MV_PRECISION_INTERNAL, m_amvrPrecision[amvr]); }
 
+    // affine MV
+    void changeAffinePrecInternal2Amvr(const int amvr)
+    {
+        changePrecision(MV_PRECISION_INTERNAL, m_amvrPrecAffine[amvr]);
+    }
 
-  Mv getSymmvdMv(const Mv& curMvPred, const Mv& tarMvPred)
-  {
-    return Mv(tarMvPred.hor - hor + curMvPred.hor, tarMvPred.ver - ver + curMvPred.ver);
-  }
+    void changeAffinePrecAmvr2Internal(const int amvr)
+    {
+        changePrecision(m_amvrPrecAffine[amvr], MV_PRECISION_INTERNAL);
+    }
 
-  void clipToStorageBitDepth()
-  {
-    hor = Clip3( -(1 << 17), (1 << 17) - 1, hor );
-    ver = Clip3( -(1 << 17), (1 << 17) - 1, ver );
-  }
-  void mvCliptoStorageBitDepth()  // periodic clipping
-  {
-    hor = (hor + mvClipPeriod) & (mvClipPeriod - 1);
-    hor = (hor >= halMvClipPeriod) ? (hor - mvClipPeriod) : hor;
-    ver = (ver + mvClipPeriod) & (mvClipPeriod - 1);
-    ver = (ver >= halMvClipPeriod) ? (ver - mvClipPeriod) : ver;
-  }
-};// END CLASS DEFINITION MV
+    void roundAffinePrecInternal2Amvr(const int amvr)
+    {
+        roundToPrecision(MV_PRECISION_INTERNAL, m_amvrPrecAffine[amvr]);
+    }
 
-void clipMv ( Mv& rcMv, const Position& pos,
-              const Size& size,
-              const PreCalcValues& pcv );
+    // IBC block vector
+    void changeIbcPrecInternal2Amvr(const int amvr) { changePrecision(MV_PRECISION_INTERNAL, m_amvrPrecIbc[amvr]); }
 
-bool wrapClipMv( Mv& rcMv, const Position& pos,
-                 const Size& size,
-                 const CodingStructure& cs );
+    void changeIbcPrecAmvr2Internal(const int amvr) { changePrecision(m_amvrPrecIbc[amvr], MV_PRECISION_INTERNAL); }
 
-void roundAffineMv( int& mvx, int& mvy, int nShift );
+    void roundIbcPrecInternal2Amvr(const int amvr) { roundToPrecision(MV_PRECISION_INTERNAL, m_amvrPrecIbc[amvr]); }
+
+    Mv getSymmvdMv(const Mv& curMvPred, const Mv& tarMvPred)
+    {
+        return Mv(tarMvPred.hor - hor + curMvPred.hor, tarMvPred.ver - ver + curMvPred.ver);
+    }
+
+    void clipToStorageBitDepth()
+    {
+        hor = Clip3(-(1 << 17), (1 << 17) - 1, hor);
+        ver = Clip3(-(1 << 17), (1 << 17) - 1, ver);
+    }
+    void mvCliptoStorageBitDepth() // periodic clipping
+    {
+        hor = (hor + mvClipPeriod) & (mvClipPeriod - 1);
+        hor = (hor >= halMvClipPeriod) ? (hor - mvClipPeriod) : hor;
+        ver = (ver + mvClipPeriod) & (mvClipPeriod - 1);
+        ver = (ver >= halMvClipPeriod) ? (ver - mvClipPeriod) : ver;
+    }
+}; // END CLASS DEFINITION MV
+
+void clipMv(Mv& rcMv, const Position& pos, const Size& size, const PreCalcValues& pcv);
+
+bool wrapClipMv(Mv& rcMv, const Position& pos, const Size& size, const CodingStructure& cs);
+
+void roundAffineMv(int& mvx, int& mvy, int nShift);
 
 } // namespace vvenc
 
-namespace std
-{
-  template <>
-  struct hash<vvenc::Mv> : public std::unary_function<vvenc::Mv, uint64_t>
-  {
-    uint64_t operator()(const vvenc::Mv& value) const
-    {
-      return (((uint64_t)value.hor << 32) + value.ver);
-    }
-  };
+namespace std {
+template <>
+struct hash<vvenc::Mv> : public std::unary_function<vvenc::Mv, uint64_t> {
+    uint64_t operator()(const vvenc::Mv& value) const { return (((uint64_t)value.hor << 32) + value.ver); }
+};
 }
 
 //! \}
-

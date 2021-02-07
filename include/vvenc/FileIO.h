@@ -61,30 +61,31 @@ namespace vvenc {
 
 // ====================================================================================================================
 
-class VVENC_DECL YuvIO
-{
+class VVENC_DECL YuvIO {
 private:
-  std::fstream  m_cHandle;                            ///< file handle
-  int           m_fileBitdepth[ MAX_NUM_CH ];         ///< bitdepth of input/output video file
-  int           m_MSBExtendedBitDepth[ MAX_NUM_CH ];  ///< bitdepth after addition of MSBs (with value 0)
-  int           m_bitdepthShift[ MAX_NUM_CH ];        ///< number of bits to increase or decrease image by before/after write/read
+    std::fstream m_cHandle;                ///< file handle
+    int m_fileBitdepth[MAX_NUM_CH];        ///< bitdepth of input/output video file
+    int m_MSBExtendedBitDepth[MAX_NUM_CH]; ///< bitdepth after addition of MSBs (with value 0)
+    int m_bitdepthShift[MAX_NUM_CH];       ///< number of bits to increase or decrease image by before/after write/read
 
 public:
-  void  open( const std::string &fileName, bool bWriteMode, const int fileBitDepth[ MAX_NUM_CH ], const int MSBExtendedBitDepth[ MAX_NUM_CH ], const int internalBitDepth[ MAX_NUM_CH ] );
-  void  close();
-  bool  isEof();
-  bool  isFail();
-  void  skipYuvFrames( int numFrames, const ChromaFormat& inputChFmt, int width, int height );
-  bool  readYuvBuf   ( YUVBuffer& yuvInBuf,        const ChromaFormat& inputChFmt,  const ChromaFormat& internChFmt, const int pad[ 2 ], bool bClipToRec709 );
-  bool  writeYuvBuf  ( const YUVBuffer& yuvOutBuf, const ChromaFormat& internChFmt, const ChromaFormat& outputChFmt, bool bPackedYUVOutputMode, bool bClipToRec709 );
+    void open(const std::string& fileName, bool bWriteMode, const int fileBitDepth[MAX_NUM_CH],
+              const int MSBExtendedBitDepth[MAX_NUM_CH], const int internalBitDepth[MAX_NUM_CH]);
+    void close();
+    bool isEof();
+    bool isFail();
+    void skipYuvFrames(int numFrames, const ChromaFormat& inputChFmt, int width, int height);
+    bool readYuvBuf(YUVBuffer& yuvInBuf, const ChromaFormat& inputChFmt, const ChromaFormat& internChFmt,
+                    const int pad[2], bool bClipToRec709);
+    bool writeYuvBuf(const YUVBuffer& yuvOutBuf, const ChromaFormat& internChFmt, const ChromaFormat& outputChFmt,
+                     bool bPackedYUVOutputMode, bool bClipToRec709);
 };
 
 // ====================================================================================================================
 
 class AccessUnit;
-std::vector<uint32_t> VVENC_DECL writeAnnexB( std::ostream& out, const AccessUnit& au );
+std::vector<uint32_t> VVENC_DECL writeAnnexB(std::ostream& out, const AccessUnit& au);
 
 } // namespace vvenc
 
 //! \}
-

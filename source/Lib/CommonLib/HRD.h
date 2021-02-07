@@ -44,7 +44,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-
 #pragma once
 
 #include "Common.h"
@@ -52,111 +51,101 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-struct OlsHrdParams
-{
-  bool     fixedPicRateGeneralFlag;
-  bool     fixedPicRateWithinCvsFlag;
-  bool     lowDelayHrdFlag;
+struct OlsHrdParams {
+    bool fixedPicRateGeneralFlag;
+    bool fixedPicRateWithinCvsFlag;
+    bool lowDelayHrdFlag;
 
-  uint32_t elementDurationInTcMinus1;
-  uint32_t bitRateValueMinus1[MAX_CPB_CNT][2];
-  uint32_t cpbSizeValueMinus1[MAX_CPB_CNT][2];
-  uint32_t duCpbSizeValueMinus1[MAX_CPB_CNT][2];
-  uint32_t duBitRateValueMinus1[MAX_CPB_CNT][2];
-  bool     cbrFlag[MAX_CPB_CNT][2];
+    uint32_t elementDurationInTcMinus1;
+    uint32_t bitRateValueMinus1[MAX_CPB_CNT][2];
+    uint32_t cpbSizeValueMinus1[MAX_CPB_CNT][2];
+    uint32_t duCpbSizeValueMinus1[MAX_CPB_CNT][2];
+    uint32_t duBitRateValueMinus1[MAX_CPB_CNT][2];
+    bool cbrFlag[MAX_CPB_CNT][2];
 
-  OlsHrdParams()
-    : fixedPicRateGeneralFlag   (false)
-    , fixedPicRateWithinCvsFlag (false)
-    , lowDelayHrdFlag           (false)
-    , elementDurationInTcMinus1 (0)
-  {
-    memset( bitRateValueMinus1,   0, sizeof(bitRateValueMinus1));
-    memset( cpbSizeValueMinus1,   0, sizeof(cpbSizeValueMinus1));
-    memset( duCpbSizeValueMinus1, 0, sizeof(duCpbSizeValueMinus1));
-    memset( duBitRateValueMinus1, 0, sizeof(duBitRateValueMinus1));
-    memset( cbrFlag,              0, sizeof(cbrFlag));
-  }
+    OlsHrdParams()
+        : fixedPicRateGeneralFlag(false),
+          fixedPicRateWithinCvsFlag(false),
+          lowDelayHrdFlag(false),
+          elementDurationInTcMinus1(0)
+    {
+        memset(bitRateValueMinus1, 0, sizeof(bitRateValueMinus1));
+        memset(cpbSizeValueMinus1, 0, sizeof(cpbSizeValueMinus1));
+        memset(duCpbSizeValueMinus1, 0, sizeof(duCpbSizeValueMinus1));
+        memset(duBitRateValueMinus1, 0, sizeof(duBitRateValueMinus1));
+        memset(cbrFlag, 0, sizeof(cbrFlag));
+    }
 };
 
-struct GeneralHrdParams
-{
-  uint32_t numUnitsInTick;
-  uint32_t timeScale;
-  bool     generalNalHrdParamsPresent;
-  bool     generalVclHrdParamsPresent;
-  bool     generalSamePicTimingInAllOlsFlag;
-  uint32_t tickDivisorMinus2;
-  bool     generalDecodingUnitHrdParamsPresent;
-  uint32_t bitRateScale;
-  uint32_t cpbSizeScale;
-  uint32_t cpbSizeDuScale;
-  uint32_t hrdCpbCntMinus1;
+struct GeneralHrdParams {
+    uint32_t numUnitsInTick;
+    uint32_t timeScale;
+    bool generalNalHrdParamsPresent;
+    bool generalVclHrdParamsPresent;
+    bool generalSamePicTimingInAllOlsFlag;
+    uint32_t tickDivisorMinus2;
+    bool generalDecodingUnitHrdParamsPresent;
+    uint32_t bitRateScale;
+    uint32_t cpbSizeScale;
+    uint32_t cpbSizeDuScale;
+    uint32_t hrdCpbCntMinus1;
 
-  GeneralHrdParams()
-    : generalNalHrdParamsPresent              (false)
-    , generalVclHrdParamsPresent              (false)
-    , generalSamePicTimingInAllOlsFlag        (true)
-    , tickDivisorMinus2                       (0)
-    , generalDecodingUnitHrdParamsPresent     (false)
-    , bitRateScale                            (0)
-    , cpbSizeScale                            (0)
-    , cpbSizeDuScale                          (0)
-    , hrdCpbCntMinus1                         (0)
-  {}
-
-  bool operator==(const GeneralHrdParams& other) const
-  {
-    return (numUnitsInTick == other.numUnitsInTick
-      && timeScale == other.timeScale
-      && generalNalHrdParamsPresent == other.generalNalHrdParamsPresent
-      && generalVclHrdParamsPresent == other.generalVclHrdParamsPresent
-      && generalSamePicTimingInAllOlsFlag == other.generalSamePicTimingInAllOlsFlag
-      && generalDecodingUnitHrdParamsPresent == other.generalDecodingUnitHrdParamsPresent
-      && (generalDecodingUnitHrdParamsPresent ? (tickDivisorMinus2 == other.tickDivisorMinus2): 1)
-      && bitRateScale == other.bitRateScale
-      && cpbSizeScale == other.cpbSizeScale
-      && (generalDecodingUnitHrdParamsPresent ? (cpbSizeDuScale == other.cpbSizeDuScale) : 1)
-      && hrdCpbCntMinus1 == other.hrdCpbCntMinus1
-      );
-  }
-
-  GeneralHrdParams& operator=(const GeneralHrdParams& input)
-  {
-    numUnitsInTick = input.numUnitsInTick;
-    timeScale = input.timeScale;
-    generalNalHrdParamsPresent = input.generalNalHrdParamsPresent;
-    generalVclHrdParamsPresent = input.generalVclHrdParamsPresent;
-    generalSamePicTimingInAllOlsFlag = input.generalSamePicTimingInAllOlsFlag;
-    generalDecodingUnitHrdParamsPresent = input.generalDecodingUnitHrdParamsPresent;
-    if (input.generalDecodingUnitHrdParamsPresent)
+    GeneralHrdParams()
+        : generalNalHrdParamsPresent(false),
+          generalVclHrdParamsPresent(false),
+          generalSamePicTimingInAllOlsFlag(true),
+          tickDivisorMinus2(0),
+          generalDecodingUnitHrdParamsPresent(false),
+          bitRateScale(0),
+          cpbSizeScale(0),
+          cpbSizeDuScale(0),
+          hrdCpbCntMinus1(0)
     {
-      tickDivisorMinus2 = input.tickDivisorMinus2;
     }
-    bitRateScale = input.bitRateScale;
-    cpbSizeScale = input.cpbSizeScale;
-    if (input.generalDecodingUnitHrdParamsPresent)
+
+    bool operator==(const GeneralHrdParams& other) const
     {
-      cpbSizeDuScale = input.cpbSizeDuScale;
+        return (numUnitsInTick == other.numUnitsInTick && timeScale == other.timeScale &&
+                generalNalHrdParamsPresent == other.generalNalHrdParamsPresent &&
+                generalVclHrdParamsPresent == other.generalVclHrdParamsPresent &&
+                generalSamePicTimingInAllOlsFlag == other.generalSamePicTimingInAllOlsFlag &&
+                generalDecodingUnitHrdParamsPresent == other.generalDecodingUnitHrdParamsPresent &&
+                (generalDecodingUnitHrdParamsPresent ? (tickDivisorMinus2 == other.tickDivisorMinus2) : 1) &&
+                bitRateScale == other.bitRateScale && cpbSizeScale == other.cpbSizeScale &&
+                (generalDecodingUnitHrdParamsPresent ? (cpbSizeDuScale == other.cpbSizeDuScale) : 1) &&
+                hrdCpbCntMinus1 == other.hrdCpbCntMinus1);
     }
-    hrdCpbCntMinus1 = input.hrdCpbCntMinus1;
-    return *this;
-  }
+
+    GeneralHrdParams& operator=(const GeneralHrdParams& input)
+    {
+        numUnitsInTick = input.numUnitsInTick;
+        timeScale = input.timeScale;
+        generalNalHrdParamsPresent = input.generalNalHrdParamsPresent;
+        generalVclHrdParamsPresent = input.generalVclHrdParamsPresent;
+        generalSamePicTimingInAllOlsFlag = input.generalSamePicTimingInAllOlsFlag;
+        generalDecodingUnitHrdParamsPresent = input.generalDecodingUnitHrdParamsPresent;
+        if( input.generalDecodingUnitHrdParamsPresent ) {
+            tickDivisorMinus2 = input.tickDivisorMinus2;
+        }
+        bitRateScale = input.bitRateScale;
+        cpbSizeScale = input.cpbSizeScale;
+        if( input.generalDecodingUnitHrdParamsPresent ) {
+            cpbSizeDuScale = input.cpbSizeDuScale;
+        }
+        hrdCpbCntMinus1 = input.hrdCpbCntMinus1;
+        return *this;
+    }
 };
 
-struct HRD
-{
-  HRD()
-  : bufferingPeriodInitialized  (false)
-  , pictureTimingAvailable      (false)	
-  {};
+struct HRD {
+    HRD() : bufferingPeriodInitialized(false), pictureTimingAvailable(false){};
 
-  GeneralHrdParams      generalHrdParams;
-  OlsHrdParams          olsHrdParams[MAX_TLAYER];
-  bool                  bufferingPeriodInitialized;
-  bool                  pictureTimingAvailable;
-  SEIBufferingPeriod    bufferingPeriodSEI;
-  SEIPictureTiming      pictureTimingSEI;
+    GeneralHrdParams generalHrdParams;
+    OlsHrdParams olsHrdParams[MAX_TLAYER];
+    bool bufferingPeriodInitialized;
+    bool pictureTimingAvailable;
+    SEIBufferingPeriod bufferingPeriodSEI;
+    SEIPictureTiming pictureTimingSEI;
 };
 
 } // namespace vvenc

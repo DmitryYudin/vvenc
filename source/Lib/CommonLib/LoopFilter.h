@@ -58,57 +58,59 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-
-#define DEBLOCK_SMALLEST_BLOCK  8
+#define DEBLOCK_SMALLEST_BLOCK 8
 
 // ====================================================================================================================
 // Class definition
 // ====================================================================================================================
 
 /// deblocking filter class
-class LoopFilter
-{
+class LoopFilter {
 private:
-  template<DeblockEdgeDir edgeDir>
-  void xEdgeFilterLuma            ( CodingStructure& cs, const Position& pos, const LoopFilterParam& lfp, PelUnitBuf& picReco ) const;
-  template<DeblockEdgeDir edgeDir>
-  void xEdgeFilterChroma          ( CodingStructure& cs, const Position& pos, const LoopFilterParam& lfp, PelUnitBuf& picReco ) const;
+    template <DeblockEdgeDir edgeDir>
+    void xEdgeFilterLuma(CodingStructure& cs, const Position& pos, const LoopFilterParam& lfp,
+                         PelUnitBuf& picReco) const;
+    template <DeblockEdgeDir edgeDir>
+    void xEdgeFilterChroma(CodingStructure& cs, const Position& pos, const LoopFilterParam& lfp,
+                           PelUnitBuf& picReco) const;
 
-  static const uint16_t sm_tcTable  [MAX_QP + 3];
-  static const uint8_t  sm_betaTable[MAX_QP + 1];
+    static const uint16_t sm_tcTable[MAX_QP + 3];
+    static const uint8_t sm_betaTable[MAX_QP + 1];
 
-  void( *xPelFilterLuma  )( Pel* piSrc, const ptrdiff_t step, const ptrdiff_t offset, const int tc, const bool sw, const int iThrCut, const bool bFilterSecondP, const bool bFilterSecondQ, const ClpRng& clpRng );
-  void( *xFilteringPandQ )( Pel* src, ptrdiff_t step, const ptrdiff_t offset, int numberPSide, int numberQSide, int tc );
+    void (*xPelFilterLuma)(Pel* piSrc, const ptrdiff_t step, const ptrdiff_t offset, const int tc, const bool sw,
+                           const int iThrCut, const bool bFilterSecondP, const bool bFilterSecondQ,
+                           const ClpRng& clpRng);
+    void (*xFilteringPandQ)(Pel* src, ptrdiff_t step, const ptrdiff_t offset, int numberPSide, int numberQSide, int tc);
 
 #ifdef TARGET_SIMD_X86
-  void initLoopFilterX86();
-  template <X86_VEXT vext>
-  void _initLoopFilterX86();
+    void initLoopFilterX86();
+    template <X86_VEXT vext>
+    void _initLoopFilterX86();
 #endif
 
 public:
+    LoopFilter();
+    ~LoopFilter();
 
-  LoopFilter();
-  ~LoopFilter();
+    /// picture-level deblocking filter
+    void loopFilterPic(CodingStructure& cs, bool calcFilterStrength) const;
+    void loopFilterPicLine(CodingStructure& cs, const ChannelType chType, const int ctuLine, const int offset = 0,
+                           DeblockEdgeDir edgeDir = NUM_EDGE_DIR) const;
+    void loopFilterCTU(CodingStructure& cs, const ChannelType chType, const int ctuCol, const int ctuLine,
+                       const int offset = 0, DeblockEdgeDir edgeDir = NUM_EDGE_DIR) const;
+    static void calcFilterStrengthsCTU(CodingStructure& cs, const UnitArea& ctuArea, const bool clearLFP);
 
-  /// picture-level deblocking filter
-  void loopFilterPic                  ( CodingStructure& cs, bool calcFilterStrength ) const;
-  void loopFilterPicLine              ( CodingStructure& cs, const ChannelType chType,                   const int ctuLine, const int offset = 0, DeblockEdgeDir edgeDir = NUM_EDGE_DIR ) const;
-  void loopFilterCTU                  ( CodingStructure& cs, const ChannelType chType, const int ctuCol, const int ctuLine, const int offset = 0, DeblockEdgeDir edgeDir = NUM_EDGE_DIR ) const;
-  static void calcFilterStrengthsCTU  ( CodingStructure& cs, const UnitArea& ctuArea, const bool clearLFP );
+    static void calcFilterStrengths(const CodingUnit& cu, bool clearLF = false);
 
-  static void calcFilterStrengths     ( const CodingUnit& cu, bool clearLF = false );
+    static void getMaxFilterLength(const CodingUnit& cu, int& maxFilterLenghtLumaHor, int& maxFilterLenghtLumaVer);
 
-  static void getMaxFilterLength      ( const CodingUnit& cu, int& maxFilterLenghtLumaHor, int& maxFilterLenghtLumaVer );
+    /// ctu-level deblocking filter
+    template <DeblockEdgeDir edgeDir>
+    void xDeblockArea(CodingStructure& cs, const UnitArea& area, const ChannelType chType, PelUnitBuf& picReco) const;
 
-  /// ctu-level deblocking filter
-  template<DeblockEdgeDir edgeDir>
-  void xDeblockArea                   ( CodingStructure& cs, const UnitArea& area, const ChannelType chType, PelUnitBuf& picReco ) const;
-
-  void loopFilterCu                   ( const CodingUnit& cu, ChannelType chType, DeblockEdgeDir edgeDir, PelUnitBuf& dbBuffer );
+    void loopFilterCu(const CodingUnit& cu, ChannelType chType, DeblockEdgeDir edgeDir, PelUnitBuf& dbBuffer);
 };
 
 } // namespace vvenc
 
 //! \}
-

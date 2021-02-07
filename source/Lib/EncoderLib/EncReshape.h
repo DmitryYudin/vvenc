@@ -43,7 +43,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ------------------------------------------------------------------------------------------- */
- /** \file     EncReshape.h
+/** \file     EncReshape.h
      \brief    encoder reshaping header and class (header)
  */
 
@@ -60,75 +60,74 @@ namespace vvenc {
 // ====================================================================================================================
 // Class definition
 // ====================================================================================================================
-struct SeqInfo
-{
-  SeqInfo()
-  : binVar { 0.0 }
-  , binHist { 0.0 }
-  , normVar { 0.0 }
-  , nonZeroCnt(0)
-  , weightVar ( 0.0 )
-  , weightNorm ( 0.0 )
-  , minBinVar ( 0.0 )
-  , maxBinVar ( 0.0 )
-  , meanBinVar ( 0.0 )
-  , ratioStdU ( 0.0 )
-  , ratioStdV ( 0.0 )
-  {
-  }
-  double binVar[PIC_ANALYZE_CW_BINS];
-  double binHist[PIC_ANALYZE_CW_BINS];
-  double normVar[PIC_ANALYZE_CW_BINS];
-  int    nonZeroCnt;
-  double weightVar;
-  double weightNorm;
-  double minBinVar;
-  double maxBinVar;
-  double meanBinVar;
-  double ratioStdU;
-  double ratioStdV;
+struct SeqInfo {
+    SeqInfo()
+        : binVar{0.0},
+          binHist{0.0},
+          normVar{0.0},
+          nonZeroCnt(0),
+          weightVar(0.0),
+          weightNorm(0.0),
+          minBinVar(0.0),
+          maxBinVar(0.0),
+          meanBinVar(0.0),
+          ratioStdU(0.0),
+          ratioStdV(0.0)
+    {
+    }
+    double binVar[PIC_ANALYZE_CW_BINS];
+    double binHist[PIC_ANALYZE_CW_BINS];
+    double normVar[PIC_ANALYZE_CW_BINS];
+    int nonZeroCnt;
+    double weightVar;
+    double weightNorm;
+    double minBinVar;
+    double maxBinVar;
+    double meanBinVar;
+    double ratioStdU;
+    double ratioStdV;
 };
 
-class EncReshape : public Reshape
-{
+class EncReshape : public Reshape {
 private:
-  bool                    m_exceedSTD;
-  std::vector<uint32_t>   m_binImportance;
-  int                     m_tcase;
-  int                     m_rateAdpMode;
-  bool                    m_useAdpCW;
-  uint16_t                m_initCWAnalyze;
-  ReshapeCW               m_reshapeCW;
-  Pel                     m_cwLumaWeight[PIC_CODE_CW_BINS];
-  double                  m_chromaWeight;
-  int                     m_chromaAdj;
-  int                     m_binNum;
-  SeqInfo                 m_srcSeqStats;
-  SeqInfo                 m_rspSeqStats;
+    bool m_exceedSTD;
+    std::vector<uint32_t> m_binImportance;
+    int m_tcase;
+    int m_rateAdpMode;
+    bool m_useAdpCW;
+    uint16_t m_initCWAnalyze;
+    ReshapeCW m_reshapeCW;
+    Pel m_cwLumaWeight[PIC_CODE_CW_BINS];
+    double m_chromaWeight;
+    int m_chromaAdj;
+    int m_binNum;
+    SeqInfo m_srcSeqStats;
+    SeqInfo m_rspSeqStats;
+
 public:
+    EncReshape();
+    ~EncReshape();
 
-  EncReshape();
-  ~EncReshape();
+    void init(const EncCfg& encCfg);
+    void destroy();
 
-  void init( const EncCfg& encCfg );
-  void destroy();
+    void calcSeqStats(Picture& pic, SeqInfo& stats);
+    void preAnalyzerLMCS(Picture& pic, const uint32_t signalType, const SliceType sliceType,
+                         const ReshapeCW& reshapeCW);
+    void preAnalyzerHDR(Picture& pic, const SliceType sliceType, const ReshapeCW& reshapeCW, bool isDualT);
+    void bubbleSortDsd(double* array, int* idx, int n);
+    void cwPerturbation(int startBinIdx, int endBinIdx, uint16_t maxCW);
+    void cwReduction(int startBinIdx, int endBinIdx);
+    void deriveReshapeParametersSDR(bool* intraAdp, bool* interAdp);
+    void deriveReshapeParameters(double* array, int start, int end, ReshapeCW respCW, double& alpha, double& beta);
+    void initLUTfromdQPModel();
+    void constructReshaperLMCS();
+    void adjustLmcsPivot();
+    ReshapeCW* getReshapeCW() { return &m_reshapeCW; }
+    Pel* getWeightTable() { return m_cwLumaWeight; }
+    double getCWeight() { return m_chromaWeight; }
 
-  void calcSeqStats     ( Picture& pic, SeqInfo &stats);
-  void preAnalyzerLMCS  ( Picture& pic, const uint32_t signalType, const SliceType sliceType, const ReshapeCW& reshapeCW);
-  void preAnalyzerHDR   ( Picture& pic, const SliceType sliceType, const ReshapeCW& reshapeCW, bool isDualT);
-  void bubbleSortDsd    ( double *array, int * idx, int n);
-  void cwPerturbation   ( int startBinIdx, int endBinIdx, uint16_t maxCW);
-  void cwReduction      ( int startBinIdx, int endBinIdx);
-  void deriveReshapeParametersSDR ( bool *intraAdp, bool *interAdp);
-  void deriveReshapeParameters    ( double *array, int start, int end, ReshapeCW respCW, double &alpha, double &beta);
-  void initLUTfromdQPModel  ();
-  void constructReshaperLMCS();
-  void adjustLmcsPivot      ();
-  ReshapeCW * getReshapeCW  () { return &m_reshapeCW; }
-  Pel*        getWeightTable() { return m_cwLumaWeight; }
-  double      getCWeight    () { return m_chromaWeight; }
-
-};// END CLASS DEFINITION EncReshape
+}; // END CLASS DEFINITION EncReshape
 
 } // namespace vvenc
 

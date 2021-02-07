@@ -58,7 +58,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "vvenc/vvencDecl.h"
 
-
 namespace vvenc {
 
 /**
@@ -68,18 +67,15 @@ namespace vvenc {
   and retrieve uncompressed pictures. The decoding can be end by calling flush() that causes the decoder to finish decoding of all pending packets.
   Finally calling uninit() releases all allocated resources held by the decoder internally.
 */
-class VVENC_DECL ParcatSegmentFilter
-{
+class VVENC_DECL ParcatSegmentFilter {
 public:
+    ParcatSegmentFilter();
+    virtual ~ParcatSegmentFilter();
 
-  ParcatSegmentFilter();
-  virtual ~ParcatSegmentFilter();
-
-  std::vector<uint8_t> filter_segment(const std::vector<uint8_t> & v, int idx, int * poc_base, int * last_idr_poc);
+    std::vector<uint8_t> filter_segment(const std::vector<uint8_t>& v, int idx, int* poc_base, int* last_idr_poc);
 
 private:
-
-  /**
+    /**
    Find the beginning and end of a NAL (Network Abstraction Layer) unit in a byte buffer containing H264 bitstream data.
    @param[in]   buf        the buffer
    @param[in]   size       the size of the buffer
@@ -87,15 +83,11 @@ private:
    @param[out]  nal_end    the end offset of the nal
    @return                 the length of the nal, or 0 if did not find start of nal, or -1 if did not find end of nal
    */
-  // DEPRECATED - this will be replaced by a similar function with a slightly different API
-  int find_nal_unit(const uint8_t* buf, int size, int* nal_start, int* nal_end);
+    // DEPRECATED - this will be replaced by a similar function with a slightly different API
+    int find_nal_unit(const uint8_t* buf, int size, int* nal_start, int* nal_end);
 
 private:
-
-  bool verbose = false;
+    bool verbose = false;
 };
 
-
-
 } // namespace
-

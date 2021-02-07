@@ -64,27 +64,25 @@ namespace vvenc {
 // ====================================================================================================================
 
 /// slice decoder class
-class DecSlice
-{
+class DecSlice {
 private:
-  // access channel
-  CABACDecoder*   m_CABACDecoder;
-  DecCu*          m_pcCuDecoder;
+    // access channel
+    CABACDecoder* m_CABACDecoder;
+    DecCu* m_pcCuDecoder;
 
-  Ctx             m_entropyCodingSyncContextState;      ///< context storage for state of contexts at the wavefront/WPP/entropy-coding-sync second CTU of tile-row
+    Ctx m_entropyCodingSyncContextState; ///< context storage for state of contexts at the wavefront/WPP/entropy-coding-sync second CTU of tile-row
 
 public:
-  DecSlice();
-  virtual ~DecSlice();
+    DecSlice();
+    virtual ~DecSlice();
 
-  void  init              ( CABACDecoder* cabacDecoder, DecCu* pcMbDecoder );
-  void  create            ();
-  void  destroy           ();
+    void init(CABACDecoder* cabacDecoder, DecCu* pcMbDecoder);
+    void create();
+    void destroy();
 
-  void  decompressSlice   ( Slice* slice, InputBitstream* bitstream );
+    void decompressSlice(Slice* slice, InputBitstream* bitstream);
 };
 
 } // namespace vvenc
 
 //! \}
-

@@ -44,7 +44,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-
 #include "NALwrite.h"
 #include "CommonLib/BitStream.h"
 #include <vector>
@@ -59,19 +58,19 @@ namespace vvenc {
 
 static const uint8_t emulation_prevention_three_byte = 3;
 
-void writeNalUnitHeader(std::ostream& out, OutputNALUnit& nalu)       // nal_unit_header()
+void writeNalUnitHeader(std::ostream& out, OutputNALUnit& nalu) // nal_unit_header()
 {
-OutputBitstream bsNALUHeader;
-  int forbiddenZero = 0;
-  bsNALUHeader.write(forbiddenZero, 1);   // forbidden_zero_bit
-  int nuhReservedZeroBit = 0;
-  bsNALUHeader.write(nuhReservedZeroBit, 1);   // nuh_reserved_zero_bit
-  CHECK(nalu.m_nuhLayerId > 63, "nuh_layer_id > 63");
-  bsNALUHeader.write(nalu.m_nuhLayerId, 6);       // nuh_layer_id
-  bsNALUHeader.write(nalu.m_nalUnitType, 5);      // nal_unit_type
-  bsNALUHeader.write(nalu.m_temporalId + 1, 3);   // nuh_temporal_id_plus1
+    OutputBitstream bsNALUHeader;
+    int forbiddenZero = 0;
+    bsNALUHeader.write(forbiddenZero, 1); // forbidden_zero_bit
+    int nuhReservedZeroBit = 0;
+    bsNALUHeader.write(nuhReservedZeroBit, 1); // nuh_reserved_zero_bit
+    CHECK(nalu.m_nuhLayerId > 63, "nuh_layer_id > 63");
+    bsNALUHeader.write(nalu.m_nuhLayerId, 6);     // nuh_layer_id
+    bsNALUHeader.write(nalu.m_nalUnitType, 5);    // nal_unit_type
+    bsNALUHeader.write(nalu.m_temporalId + 1, 3); // nuh_temporal_id_plus1
 
-  out.write(reinterpret_cast<const char*>(bsNALUHeader.getByteStream()), bsNALUHeader.getByteStreamLength());
+    out.write(reinterpret_cast<const char*>(bsNALUHeader.getByteStream()), bsNALUHeader.getByteStreamLength());
 }
 /**
  * write nalu to bytestream out, performing RBSP anti startcode
@@ -79,10 +78,10 @@ OutputBitstream bsNALUHeader;
  */
 void write(std::ostream& out, OutputNALUnit& nalu)
 {
-  writeNalUnitHeader(out, nalu);
-  /* write out rsbp_byte's, inserting any required
+    writeNalUnitHeader(out, nalu);
+    /* write out rsbp_byte's, inserting any required
    * emulation_prevention_three_byte's */
-  /* 7.4.1 ...
+    /* 7.4.1 ...
    * emulation_prevention_three_byte is a byte equal to 0x03. When an
    * emulation_prevention_three_byte is present in the NAL unit, it shall be
    * discarded by the decoding process.
@@ -100,45 +99,39 @@ void write(std::ostream& out, OutputNALUnit& nalu)
    *  - 0x00000302
    *  - 0x00000303
    */
-  std::vector<uint8_t>& rbsp   = nalu.m_Bitstream.getFIFO();
+    std::vector<uint8_t>& rbsp = nalu.m_Bitstream.getFIFO();
 
-  std::vector<uint8_t> outputBuffer;
-  outputBuffer.resize(rbsp.size()*2+1); //there can never be enough emulation_prevention_three_bytes to require this much space
-  std::size_t outputAmount = 0;
-  int         zeroCount    = 0;
-  for (std::vector<uint8_t>::iterator it = rbsp.begin(); it != rbsp.end(); it++)
-  {
-    const uint8_t v=(*it);
-    if (zeroCount==2 && v<=3)
-    {
-      outputBuffer[outputAmount++]=emulation_prevention_three_byte;
-      zeroCount=0;
+    std::vector<uint8_t> outputBuffer;
+    outputBuffer.resize(rbsp.size() * 2 +
+                        1); //there can never be enough emulation_prevention_three_bytes to require this much space
+    std::size_t outputAmount = 0;
+    int zeroCount = 0;
+    for( std::vector<uint8_t>::iterator it = rbsp.begin(); it != rbsp.end(); it++ ) {
+        const uint8_t v = (*it);
+        if( zeroCount == 2 && v <= 3 ) {
+            outputBuffer[outputAmount++] = emulation_prevention_three_byte;
+            zeroCount = 0;
+        }
+
+        if( v == 0 ) {
+            zeroCount++;
+        } else {
+            zeroCount = 0;
+        }
+        outputBuffer[outputAmount++] = v;
     }
 
-    if (v==0)
-    {
-      zeroCount++;
-    }
-    else
-    {
-      zeroCount=0;
-    }
-    outputBuffer[outputAmount++]=v;
-  }
-
-  /* 7.4.1.1
+    /* 7.4.1.1
    * ... when the last byte of the RBSP data is equal to 0x00 (which can
    * only occur when the RBSP ends in a cabac_zero_word), a final byte equal
    * to 0x03 is appended to the end of the data.
    */
-  if (zeroCount>0)
-  {
-    outputBuffer[outputAmount++]=emulation_prevention_three_byte;
-  }
-  out.write(reinterpret_cast<const char*>(&(*outputBuffer.begin())), outputAmount);
+    if( zeroCount > 0 ) {
+        outputBuffer[outputAmount++] = emulation_prevention_three_byte;
+    }
+    out.write(reinterpret_cast<const char*>(&(*outputBuffer.begin())), outputAmount);
 }
 
 } // namespace vvenc
 
 //! \}
-

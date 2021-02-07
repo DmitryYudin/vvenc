@@ -56,27 +56,34 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-#if defined( TARGET_SIMD_X86 ) && ENABLE_SIMD_TRAFO
-struct TCoeffOps
-{
-  TCoeffOps();
+#if defined(TARGET_SIMD_X86) && ENABLE_SIMD_TRAFO
+struct TCoeffOps {
+    TCoeffOps();
 
-  void initTCoeffOpsX86();
-  template<X86_VEXT vext>
-  void _initTCoeffOpsX86();
+    void initTCoeffOpsX86();
+    template <X86_VEXT vext>
+    void _initTCoeffOpsX86();
 
-  void( *cpyResi8 )       ( const TCoeff*      src,        Pel*    dst, ptrdiff_t stride, unsigned width, unsigned height );
-  void( *cpyResi4 )       ( const TCoeff*      src,        Pel*    dst, ptrdiff_t stride, unsigned width, unsigned height );
-  void( *cpyCoeff8 )      ( const Pel*         src, ptrdiff_t stride,   TCoeff* dst, unsigned width, unsigned height );
-  void( *cpyCoeff4 )      ( const Pel*         src, ptrdiff_t stride,   TCoeff* dst, unsigned width, unsigned height );
-  void( *fastInvCore4 )   ( const TMatrixCoeff* it,  const TCoeff* src, TCoeff* dst, unsigned trSize, unsigned lines, unsigned reducedLines, unsigned rows );
-  void( *fastInvCore8 )   ( const TMatrixCoeff* it,  const TCoeff* src, TCoeff* dst, unsigned trSize, unsigned lines, unsigned reducedLines, unsigned rows );
-  void( *fastFwdCore4_2D )( const TMatrixCoeff* it,  const TCoeff* src, TCoeff* dst, unsigned trSize, unsigned lines, unsigned reducedLines, unsigned cutoff, int shift );
-  void( *fastFwdCore8_2D )( const TMatrixCoeff* it,  const TCoeff* src, TCoeff* dst, unsigned trSize, unsigned lines, unsigned reducedLines, unsigned cutoff, int shift );
-  void( *fastFwdCore4_1D )( const TMatrixCoeff* it,  const TCoeff* src, TCoeff* dst, unsigned trSize, unsigned lines, unsigned reducedLines, unsigned cutoff, int shift );
-  void( *fastFwdCore8_1D )( const TMatrixCoeff* it,  const TCoeff* src, TCoeff* dst, unsigned trSize, unsigned lines, unsigned reducedLines, unsigned cutoff, int shift );
-  void( *roundClip4 )  (                                             TCoeff *dst, unsigned width, unsigned height, unsigned stride, const TCoeff outputMin, const TCoeff outputMax, const TCoeff round, const TCoeff shift );
-  void( *roundClip8 )  (                                             TCoeff *dst, unsigned width, unsigned height, unsigned stride, const TCoeff outputMin, const TCoeff outputMax, const TCoeff round, const TCoeff shift );
+    void (*cpyResi8)(const TCoeff *src, Pel *dst, ptrdiff_t stride, unsigned width, unsigned height);
+    void (*cpyResi4)(const TCoeff *src, Pel *dst, ptrdiff_t stride, unsigned width, unsigned height);
+    void (*cpyCoeff8)(const Pel *src, ptrdiff_t stride, TCoeff *dst, unsigned width, unsigned height);
+    void (*cpyCoeff4)(const Pel *src, ptrdiff_t stride, TCoeff *dst, unsigned width, unsigned height);
+    void (*fastInvCore4)(const TMatrixCoeff *it, const TCoeff *src, TCoeff *dst, unsigned trSize, unsigned lines,
+                         unsigned reducedLines, unsigned rows);
+    void (*fastInvCore8)(const TMatrixCoeff *it, const TCoeff *src, TCoeff *dst, unsigned trSize, unsigned lines,
+                         unsigned reducedLines, unsigned rows);
+    void (*fastFwdCore4_2D)(const TMatrixCoeff *it, const TCoeff *src, TCoeff *dst, unsigned trSize, unsigned lines,
+                            unsigned reducedLines, unsigned cutoff, int shift);
+    void (*fastFwdCore8_2D)(const TMatrixCoeff *it, const TCoeff *src, TCoeff *dst, unsigned trSize, unsigned lines,
+                            unsigned reducedLines, unsigned cutoff, int shift);
+    void (*fastFwdCore4_1D)(const TMatrixCoeff *it, const TCoeff *src, TCoeff *dst, unsigned trSize, unsigned lines,
+                            unsigned reducedLines, unsigned cutoff, int shift);
+    void (*fastFwdCore8_1D)(const TMatrixCoeff *it, const TCoeff *src, TCoeff *dst, unsigned trSize, unsigned lines,
+                            unsigned reducedLines, unsigned cutoff, int shift);
+    void (*roundClip4)(TCoeff *dst, unsigned width, unsigned height, unsigned stride, const TCoeff outputMin,
+                       const TCoeff outputMax, const TCoeff round, const TCoeff shift);
+    void (*roundClip8)(TCoeff *dst, unsigned width, unsigned height, unsigned stride, const TCoeff outputMin,
+                       const TCoeff outputMax, const TCoeff round, const TCoeff shift);
 };
 
 extern TCoeffOps g_tCoeffOps;
@@ -84,40 +91,53 @@ extern TCoeffOps g_tCoeffOps;
 #endif
 
 ////DCT-II transforms
-void fastForwardDCT2_B2  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDCT2_B2  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDCT2_B4  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDCT2_B4  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDCT2_B8  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDCT2_B8  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDCT2_B16 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDCT2_B16 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDCT2_B32 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDCT2_B32 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDCT2_B64 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDCT2_B64 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDCT2_B2(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDCT2_B2(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                        const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDCT2_B4(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDCT2_B4(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                        const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDCT2_B8(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDCT2_B8(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                        const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDCT2_B16(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDCT2_B16(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                         const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDCT2_B32(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDCT2_B32(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                         const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDCT2_B64(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDCT2_B64(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                         const TCoeff outputMinimum, const TCoeff outputMaximum);
 
 //DST-VII transforms (EMT)
-void fastForwardDST7_B4  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDST7_B4  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDST7_B8  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDST7_B8  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDST7_B16 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDST7_B16 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDST7_B32 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDST7_B32 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDST7_B4(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDST7_B4(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                        const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDST7_B8(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDST7_B8(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                        const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDST7_B16(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDST7_B16(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                         const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDST7_B32(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDST7_B32(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                         const TCoeff outputMinimum, const TCoeff outputMaximum);
 
 //DCT-VIII transforms (EMT)
-void fastForwardDCT8_B4  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDCT8_B4  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDCT8_B8  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDCT8_B8  (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDCT8_B16 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDCT8_B16 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
-void fastForwardDCT8_B32 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
-void fastInverseDCT8_B32 (const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDCT8_B4(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDCT8_B4(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                        const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDCT8_B8(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDCT8_B8(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                        const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDCT8_B16(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDCT8_B16(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                         const TCoeff outputMinimum, const TCoeff outputMaximum);
+void fastForwardDCT8_B32(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2);
+void fastInverseDCT8_B32(const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2,
+                         const TCoeff outputMinimum, const TCoeff outputMaximum);
 
 } // namespace vvenc
 
 //! \}
-

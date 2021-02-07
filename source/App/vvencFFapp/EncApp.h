@@ -62,77 +62,65 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // ====================================================================================================================
 
 extern int g_verbosity;
-void msgFnc( int level, const char* fmt, va_list args );
-void msgApp( int level, const char* fmt, ... );
+void msgFnc(int level, const char* fmt, va_list args);
+void msgApp(int level, const char* fmt, ...);
 
 // ====================================================================================================================
 
-struct YUVBufferStorage : public YUVBuffer
-{
-  YUVBufferStorage( const ChromaFormat& chFmt, const int frameWidth, const int frameHeight )
-    : YUVBuffer()
-  {
-    for ( int i = 0; i < MAX_NUM_COMP; i++ )
+struct YUVBufferStorage : public YUVBuffer {
+    YUVBufferStorage(const ChromaFormat& chFmt, const int frameWidth, const int frameHeight) : YUVBuffer()
     {
-      YUVPlane& yuvPlane = yuvPlanes[ i ];
-      yuvPlane.width     = getWidthOfComponent ( chFmt, frameWidth,  i );
-      yuvPlane.height    = getHeightOfComponent( chFmt, frameHeight, i );
-      yuvPlane.stride    = yuvPlane.width;
-      const int size     = yuvPlane.stride * yuvPlane.height;
-      yuvPlane.planeBuf  = ( size > 0 ) ? new int16_t[ size ] : nullptr;
+        for( int i = 0; i < MAX_NUM_COMP; i++ ) {
+            YUVPlane& yuvPlane = yuvPlanes[i];
+            yuvPlane.width = getWidthOfComponent(chFmt, frameWidth, i);
+            yuvPlane.height = getHeightOfComponent(chFmt, frameHeight, i);
+            yuvPlane.stride = yuvPlane.width;
+            const int size = yuvPlane.stride * yuvPlane.height;
+            yuvPlane.planeBuf = (size > 0) ? new int16_t[size] : nullptr;
+        }
     }
-  }
 
-  ~YUVBufferStorage()
-  {
-    for ( int i = 0; i < MAX_NUM_COMP; i++ )
+    ~YUVBufferStorage()
     {
-      YUVPlane& yuvPlane = yuvPlanes[ i ];
-      if ( yuvPlane.planeBuf )
-        delete [] yuvPlane.planeBuf;
+        for( int i = 0; i < MAX_NUM_COMP; i++ ) {
+            YUVPlane& yuvPlane = yuvPlanes[i];
+            if( yuvPlane.planeBuf )
+                delete[] yuvPlane.planeBuf;
+        }
     }
-  }
 };
 
 // ====================================================================================================================
 
-class EncApp : public YUVWriterIf
-{
+class EncApp : public YUVWriterIf {
 private:
-  EncAppCfg    m_cEncAppCfg;                      ///< encoder configuration
-  EncoderIf    m_cEncoderIf;                      ///< encoder library class
-  YuvIO        m_yuvInputFile;                    ///< input YUV file
-  YuvIO        m_yuvReconFile;                    ///< output YUV reconstruction file
-  std::fstream m_bitstream;                       ///< output bitstream file
-  unsigned     m_essentialBytes;
-  unsigned     m_totalBytes;
+    EncAppCfg m_cEncAppCfg;   ///< encoder configuration
+    EncoderIf m_cEncoderIf;   ///< encoder library class
+    YuvIO m_yuvInputFile;     ///< input YUV file
+    YuvIO m_yuvReconFile;     ///< output YUV reconstruction file
+    std::fstream m_bitstream; ///< output bitstream file
+    unsigned m_essentialBytes;
+    unsigned m_totalBytes;
 
 public:
-  EncApp()
-    : m_essentialBytes( 0 )
-    , m_totalBytes    ( 0 )
-  {
-  }
+    EncApp() : m_essentialBytes(0), m_totalBytes(0) {}
 
-  virtual ~EncApp()
-  {
-  }
+    virtual ~EncApp() {}
 
-  bool  parseCfg( int argc, char* argv[] );           ///< parse configuration file to fill member variables
-  void  encode();                                     ///< main encoding function
-  void  outputAU ( const AccessUnit& au );            ///< write encoded access units to bitstream
-  void  outputYuv( const YUVBuffer& yuvOutBuf );      ///< write reconstructed yuv output
+    bool parseCfg(int argc, char* argv[]);      ///< parse configuration file to fill member variables
+    void encode();                              ///< main encoding function
+    void outputAU(const AccessUnit& au);        ///< write encoded access units to bitstream
+    void outputYuv(const YUVBuffer& yuvOutBuf); ///< write reconstructed yuv output
 
 private:
-  // file I/O
-  bool openFileIO();
-  void closeFileIO();
+    // file I/O
+    bool openFileIO();
+    void closeFileIO();
 
-  // statistics
-  void rateStatsAccum  ( const AccessUnit& au, const std::vector<uint32_t>& stats );
-  void printRateSummary( int framesRcvd );
-  void printChromaFormat();
+    // statistics
+    void rateStatsAccum(const AccessUnit& au, const std::vector<uint32_t>& stats);
+    void printRateSummary(int framesRcvd);
+    void printChromaFormat();
 };
 
 //! \}
-

@@ -58,43 +58,37 @@ namespace vvenc {
 class EncCfg;
 class EncHRD;
 
-struct DUData
-{
-  DUData() : accumBitsDU(0), accumNalsDU(0) {};
+struct DUData {
+    DUData() : accumBitsDU(0), accumNalsDU(0){};
 
-  int accumBitsDU;
-  int accumNalsDU;
+    int accumBitsDU;
+    int accumNalsDU;
 };
 
 //! Initializes different SEI message types based on given encoder configuration parameters
-class SEIEncoder
-{
+class SEIEncoder {
 public:
-  SEIEncoder()
-    : m_pcEncCfg      ( nullptr )
-    , m_pcEncHRD      ( nullptr )
-    , m_isInitialized ( false )
-    , m_rapWithLeading( false )
-  {};
-  virtual ~SEIEncoder(){};
+    SEIEncoder() : m_pcEncCfg(nullptr), m_pcEncHRD(nullptr), m_isInitialized(false), m_rapWithLeading(false){};
+    virtual ~SEIEncoder(){};
 
-  void init( const EncCfg& encCfg, EncHRD& encHRD);
-  void initDecodedPictureHashSEI  ( SEIDecodedPictureHash& dphSei, const CPelUnitBuf& pic, std::string &rHashString, const BitDepths &bitDepths);
+    void init(const EncCfg& encCfg, EncHRD& encHRD);
+    void initDecodedPictureHashSEI(SEIDecodedPictureHash& dphSei, const CPelUnitBuf& pic, std::string& rHashString,
+                                   const BitDepths& bitDepths);
 
-  void initBufferingPeriodSEI     ( SEIBufferingPeriod& bpSei, bool noLeadingPictures);
-  void initPictureTimingSEI       ( SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, SEIMessages& duInfoSeiMessages, const Slice *slice, const uint32_t numDU, const bool bpPresentInAU);
-  void initDrapSEI                ( SEIDependentRAPIndication& drapSei) {};
+    void initBufferingPeriodSEI(SEIBufferingPeriod& bpSei, bool noLeadingPictures);
+    void initPictureTimingSEI(SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, SEIMessages& duInfoSeiMessages,
+                              const Slice* slice, const uint32_t numDU, const bool bpPresentInAU);
+    void initDrapSEI(SEIDependentRAPIndication& drapSei){};
 
 private:
-  const EncCfg* m_pcEncCfg;
-  EncHRD*       m_pcEncHRD;
-  bool          m_isInitialized;
-  bool          m_rapWithLeading;
-  uint32_t      m_lastBPSEI[MAX_TLAYER];
-  uint32_t      m_totalCoded[MAX_TLAYER];
+    const EncCfg* m_pcEncCfg;
+    EncHRD* m_pcEncHRD;
+    bool m_isInitialized;
+    bool m_rapWithLeading;
+    uint32_t m_lastBPSEI[MAX_TLAYER];
+    uint32_t m_totalCoded[MAX_TLAYER];
 };
 
 } // namespace vvenc
 
 //! \}
-

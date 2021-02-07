@@ -57,23 +57,21 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-
-class DepQuant : public QuantRDOQ2
-{
+class DepQuant : public QuantRDOQ2 {
 public:
-  DepQuant( const Quant* other, bool enc );
-  virtual ~DepQuant();
+    DepQuant(const Quant* other, bool enc);
+    virtual ~DepQuant();
 
-  virtual void quant  ( TransformUnit& tu, const ComponentID compID, const CCoeffBuf& pSrc, TCoeff &uiAbsSum, const QpParam& cQP, const Ctx& ctx );
-  virtual void dequant( const TransformUnit& tu, CoeffBuf& dstCoeff, const ComponentID compID, const QpParam& cQP );
-  
-  virtual void init   ( int rdoq = 0, bool useRDOQTS = false, bool useSelectiveRDOQ = false, int dqThrVal = 8 );
+    virtual void quant(TransformUnit& tu, const ComponentID compID, const CCoeffBuf& pSrc, TCoeff& uiAbsSum,
+                       const QpParam& cQP, const Ctx& ctx);
+    virtual void dequant(const TransformUnit& tu, CoeffBuf& dstCoeff, const ComponentID compID, const QpParam& cQP);
+
+    virtual void init(int rdoq = 0, bool useRDOQTS = false, bool useSelectiveRDOQ = false, int dqThrVal = 8);
 
 private:
-  void* p;
+    void* p;
 };
 
 } // namespace vvenc
 
 //! \}
-

@@ -75,79 +75,73 @@ struct CtuTaskRsrc;
 struct CtuEncParam;
 
 enum ProcessCtuState {
-  CTU_ENCODE     = 0,
-  RESHAPE_LF_VER,
-  LF_HOR,
-  SAO_FILTER,
-  ALF_GET_STATISTICS,
-  ALF_DERIVE_FILTER,
-  ALF_RECONSTRUCT,
-  PROCESS_DONE
+    CTU_ENCODE = 0,
+    RESHAPE_LF_VER,
+    LF_HOR,
+    SAO_FILTER,
+    ALF_GET_STATISTICS,
+    ALF_DERIVE_FILTER,
+    ALF_RECONSTRUCT,
+    PROCESS_DONE
 };
 
 /// slice encoder class
-class EncSlice
-{
+class EncSlice {
 private:
-  // encoder configuration
-  const EncCfg*                m_pcEncCfg;                           ///< encoder configuration class
+    // encoder configuration
+    const EncCfg* m_pcEncCfg; ///< encoder configuration class
 
-  std::vector<CtuTaskRsrc*>    m_CtuTaskRsrc;
-  std::vector<LineEncRsrc*>    m_LineEncRsrc;
-  NoMallocThreadPool*          m_threadPool;
-  std::vector<ProcessCtuState> m_processStates;
+    std::vector<CtuTaskRsrc*> m_CtuTaskRsrc;
+    std::vector<LineEncRsrc*> m_LineEncRsrc;
+    NoMallocThreadPool* m_threadPool;
+    std::vector<ProcessCtuState> m_processStates;
 
-  LoopFilter*                  m_pLoopFilter;
-  EncAdaptiveLoopFilter*       m_pALF;
-  RateCtrl*                    m_pcRateCtrl;
-  BinEncoder                   m_BinEncoder;
-  CABACWriter                  m_CABACWriter;
+    LoopFilter* m_pLoopFilter;
+    EncAdaptiveLoopFilter* m_pALF;
+    RateCtrl* m_pcRateCtrl;
+    BinEncoder m_BinEncoder;
+    CABACWriter m_CABACWriter;
 
-  Ctx                          m_entropyCodingSyncContextState;      ///< context storage for state of contexts at the wavefront/WPP/entropy-coding-sync second CTU of tile-row used for writing
-  std::vector<Ctx>             m_syncPicCtx;                         ///< context storage for state of contexts at the wavefront/WPP/entropy-coding-sync second CTU of tile-row used for estimation
-  SliceType                    m_encCABACTableIdx;
-  int                          m_appliedSwitchDQQ;
+    Ctx m_entropyCodingSyncContextState; ///< context storage for state of contexts at the wavefront/WPP/entropy-coding-sync second CTU of tile-row used for writing
+    std::vector<Ctx>
+        m_syncPicCtx; ///< context storage for state of contexts at the wavefront/WPP/entropy-coding-sync second CTU of tile-row used for estimation
+    SliceType m_encCABACTableIdx;
+    int m_appliedSwitchDQQ;
 
-  double                       m_saoDisabledRate[ MAX_NUM_COMP ][ MAX_TLAYER ];
-  bool                         m_saoEnabled[ MAX_NUM_COMP ];
-  bool                         m_saoAllDisabled;
-  std::vector<SAOBlkParam>     m_saoReconParams;
-  std::vector<SAOStatData**>   m_saoStatData;
+    double m_saoDisabledRate[MAX_NUM_COMP][MAX_TLAYER];
+    bool m_saoEnabled[MAX_NUM_COMP];
+    bool m_saoAllDisabled;
+    std::vector<SAOBlkParam> m_saoReconParams;
+    std::vector<SAOStatData**> m_saoStatData;
 
 public:
-  EncSlice();
-  virtual ~EncSlice();
+    EncSlice();
+    virtual ~EncSlice();
 
-  void    init                ( const EncCfg& encCfg,
-                                const SPS& sps,
-                                const PPS& pps,
-                                std::vector<int>* const globalCtuQpVector,
-                                LoopFilter& loopFilter,
-                                EncAdaptiveLoopFilter& alf,
-                                RateCtrl& rateCtrl,
-                                NoMallocThreadPool* threadPool );
+    void init(const EncCfg& encCfg, const SPS& sps, const PPS& pps, std::vector<int>* const globalCtuQpVector,
+              LoopFilter& loopFilter, EncAdaptiveLoopFilter& alf, RateCtrl& rateCtrl, NoMallocThreadPool* threadPool);
 
-  void    initPic             ( Picture* pic, int gopId );
+    void initPic(Picture* pic, int gopId);
 
-  // compress and encode slice
-  void    compressSlice       ( Picture* pic );      ///< analysis stage of slice                     s
-  void    encodeSliceData     ( Picture* pic );
-  void    saoDisabledRate     ( CodingStructure& cs, SAOBlkParam* reconParams );
+    // compress and encode slice
+    void compressSlice(Picture* pic); ///< analysis stage of slice                     s
+    void encodeSliceData(Picture* pic);
+    void saoDisabledRate(CodingStructure& cs, SAOBlkParam* reconParams);
 
-  void    resetQP              ( Picture* pic, int sliceQP, double lambda );
+    void resetQP(Picture* pic, int sliceQP, double lambda);
 
 private:
-  void    xInitSliceLambdaQP   ( Slice* slice, int gopId );
-  double  xCalculateLambda     ( const Slice* slice, const int GOPid, const int depth, const double refQP, const double dQP, int& iQP );
-  void    xProcessCtus         ( Picture* pic, const unsigned startCtuTsAddr, const unsigned boundingCtuTsAddr );
+    void xInitSliceLambdaQP(Slice* slice, int gopId);
+    double xCalculateLambda(const Slice* slice, const int GOPid, const int depth, const double refQP, const double dQP,
+                            int& iQP);
+    void xProcessCtus(Picture* pic, const unsigned startCtuTsAddr, const unsigned boundingCtuTsAddr);
 
-  template<bool checkReadyState=false>
-  static bool xProcessCtuTask  ( int taskIdx, CtuEncParam* ctuEncParam );
+    template <bool checkReadyState = false>
+    static bool xProcessCtuTask(int taskIdx, CtuEncParam* ctuEncParam);
 
-  int     xGetQPForPicture     ( const Slice* slice, unsigned gopId );
+    int xGetQPForPicture(const Slice* slice, unsigned gopId);
 };
 
 } // namespace vvenc
 
 //! \}
-

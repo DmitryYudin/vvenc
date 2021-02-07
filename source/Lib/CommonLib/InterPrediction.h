@@ -63,122 +63,125 @@ namespace vvenc {
 // forward declaration
 class Mv;
 
-
 // ====================================================================================================================
 // Class definition
 // ====================================================================================================================
-class InterPredInterpolation
-{
-  Pel*                 m_gradX0;
-  Pel*                 m_gradY0;
-  Pel*                 m_gradX1;
-  Pel*                 m_gradY1;
-  Pel                  m_gradBuf[2][(AFFINE_MIN_BLOCK_SIZE + 2) * (AFFINE_MIN_BLOCK_SIZE + 2)];
-  int                  m_dMvBuf[2][16 * 2];
-  Mv*                  m_storedMv;
+class InterPredInterpolation {
+    Pel* m_gradX0;
+    Pel* m_gradY0;
+    Pel* m_gradX1;
+    Pel* m_gradY1;
+    Pel m_gradBuf[2][(AFFINE_MIN_BLOCK_SIZE + 2) * (AFFINE_MIN_BLOCK_SIZE + 2)];
+    int m_dMvBuf[2][16 * 2];
+    Mv* m_storedMv;
 
 protected:
-  bool                 m_skipPROF;
-  bool                 m_encOnly;
-  bool                 m_isBi;
-  InterpolationFilter  m_if;
-  Pel*                 m_filteredBlock        [LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][MAX_NUM_COMP];
-  Pel*                 m_filteredBlockTmp     [LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][MAX_NUM_COMP];
+    bool m_skipPROF;
+    bool m_encOnly;
+    bool m_isBi;
+    InterpolationFilter m_if;
+    Pel* m_filteredBlock[LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL]
+                        [LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][MAX_NUM_COMP];
+    Pel* m_filteredBlockTmp[LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][MAX_NUM_COMP];
 
 private:
-  int  xRightShiftMSB         ( int numer, int denom );
-  void xApplyBDOF             ( PelBuf& yuvDst, const ClpRng& clpRng );
-  void(*xFpBiDirOptFlow)      ( const Pel* srcY0, const Pel* srcY1, const Pel* gradX0, const Pel* gradX1, const Pel* gradY0, const Pel* gradY1, const int width, const int height, Pel* dstY, const ptrdiff_t dstStride, const int shiftNum, const int  offset, const int  limit, const ClpRng& clpRng, const int bitDepth ) = nullptr;
-  void(*xFpBDOFGradFilter)    ( const Pel* pSrc, int srcStride, int width, int height, int gradStride, Pel* gradX, Pel* gradY, const int bitDepth );
-  void(*xFpProfGradFilter)    ( const Pel* pSrc, int srcStride, int width, int height, int gradStride, Pel* gradX, Pel* gradY, const int bitDepth );
-  void(*xFpApplyPROF)         ( Pel* dst, int dstStride, const Pel* src, int srcStride, int width, int height, const Pel* gradX, const Pel* gradY, int gradStride, const int* dMvX, const int* dMvY, int dMvStride, const bool& bi, int shiftNum, Pel offset, const ClpRng& clpRng );
+    int xRightShiftMSB(int numer, int denom);
+    void xApplyBDOF(PelBuf& yuvDst, const ClpRng& clpRng);
+    void (*xFpBiDirOptFlow)(const Pel* srcY0, const Pel* srcY1, const Pel* gradX0, const Pel* gradX1, const Pel* gradY0,
+                            const Pel* gradY1, const int width, const int height, Pel* dstY, const ptrdiff_t dstStride,
+                            const int shiftNum, const int offset, const int limit, const ClpRng& clpRng,
+                            const int bitDepth) = nullptr;
+    void (*xFpBDOFGradFilter)(const Pel* pSrc, int srcStride, int width, int height, int gradStride, Pel* gradX,
+                              Pel* gradY, const int bitDepth);
+    void (*xFpProfGradFilter)(const Pel* pSrc, int srcStride, int width, int height, int gradStride, Pel* gradX,
+                              Pel* gradY, const int bitDepth);
+    void (*xFpApplyPROF)(Pel* dst, int dstStride, const Pel* src, int srcStride, int width, int height,
+                         const Pel* gradX, const Pel* gradY, int gradStride, const int* dMvX, const int* dMvY,
+                         int dMvStride, const bool& bi, int shiftNum, Pel offset, const ClpRng& clpRng);
 
 #if ENABLE_SIMD_OPT_BDOF
-  void initInterPredictionX86();
-  template <X86_VEXT vext>
-  void _initInterPredictionX86();
+    void initInterPredictionX86();
+    template <X86_VEXT vext>
+    void _initInterPredictionX86();
 #endif
 
 protected:
-  void xWeightedAverage       ( const CodingUnit& cu, const CPelUnitBuf& pcYuvSrc0, const CPelUnitBuf& pcYuvSrc1, PelUnitBuf& pcYuvDst, const bool bdofApplied );
-  void xPredAffineBlk         ( const ComponentID compID, const CodingUnit& cu, const Picture* refPic, const Mv* _mv, PelUnitBuf& dstPic, const bool bi, const ClpRng& clpRng, const RefPicList refPicList = REF_PIC_LIST_X);
-  void xPredInterBlk          ( const ComponentID compID, const CodingUnit& cu, const Picture* refPic, const Mv& _mv, PelUnitBuf& dstPic, const bool bi, const ClpRng& clpRng
-                              , const bool bdofApplied
-                              , const bool isIBC
-                              , const RefPicList refPicList = REF_PIC_LIST_X
-                              , const SizeType dmvrWidth = 0
-                              , const SizeType dmvrHeight = 0
-                              , const bool bilinearMC = false
-                              , const Pel* srcPadBuf = NULL
-                              , const int32_t srcPadStride = 0
-                              );
+    void xWeightedAverage(const CodingUnit& cu, const CPelUnitBuf& pcYuvSrc0, const CPelUnitBuf& pcYuvSrc1,
+                          PelUnitBuf& pcYuvDst, const bool bdofApplied);
+    void xPredAffineBlk(const ComponentID compID, const CodingUnit& cu, const Picture* refPic, const Mv* _mv,
+                        PelUnitBuf& dstPic, const bool bi, const ClpRng& clpRng,
+                        const RefPicList refPicList = REF_PIC_LIST_X);
+    void xPredInterBlk(const ComponentID compID, const CodingUnit& cu, const Picture* refPic, const Mv& _mv,
+                       PelUnitBuf& dstPic, const bool bi, const ClpRng& clpRng, const bool bdofApplied,
+                       const bool isIBC, const RefPicList refPicList = REF_PIC_LIST_X, const SizeType dmvrWidth = 0,
+                       const SizeType dmvrHeight = 0, const bool bilinearMC = false, const Pel* srcPadBuf = NULL,
+                       const int32_t srcPadStride = 0);
 
 public:
-  InterPredInterpolation();
-  virtual ~InterPredInterpolation();
-  void    destroy         ();
-  void    init            ();
+    InterPredInterpolation();
+    virtual ~InterPredInterpolation();
+    void destroy();
+    void init();
 
-  void    weightedGeoBlk  ( const ClpRngs &clpRngs, CodingUnit& cu, const uint8_t splitDir, int32_t channel,
-                            PelUnitBuf &predDst, PelUnitBuf &predSrc0, PelUnitBuf &predSrc1);
+    void weightedGeoBlk(const ClpRngs& clpRngs, CodingUnit& cu, const uint8_t splitDir, int32_t channel,
+                        PelUnitBuf& predDst, PelUnitBuf& predSrc0, PelUnitBuf& predSrc1);
 
-  static bool isSubblockVectorSpreadOverLimit(int a, int b, int c, int d, int predType);
+    static bool isSubblockVectorSpreadOverLimit(int a, int b, int c, int d, int predType);
 };
 
-class DMVR : public InterPredInterpolation
-{
-  RdCost*                 m_pcRdCost;
+class DMVR : public InterPredInterpolation {
+    RdCost* m_pcRdCost;
 
-  PelStorage              m_yuvPred[NUM_REF_PIC_LIST_01];
-  PelStorage              m_yuvTmp[NUM_REF_PIC_LIST_01];
-  PelStorage              m_yuvPad[NUM_REF_PIC_LIST_01];
-  const Mv m_pSearchOffset[25] = { Mv(-2,-2), Mv(-1,-2), Mv(0,-2), Mv(1,-2), Mv(2,-2),
-                                   Mv(-2,-1), Mv(-1,-1), Mv(0,-1), Mv(1,-1), Mv(2,-1),
-                                   Mv(-2, 0), Mv(-1, 0), Mv(0, 0), Mv(1, 0), Mv(2, 0),
-                                   Mv(-2, 1), Mv(-1, 1), Mv(0, 1), Mv(1, 1), Mv(2, 1),
-                                   Mv(-2, 2), Mv(-1, 2), Mv(0, 2), Mv(1, 2), Mv(2, 2) };
+    PelStorage m_yuvPred[NUM_REF_PIC_LIST_01];
+    PelStorage m_yuvTmp[NUM_REF_PIC_LIST_01];
+    PelStorage m_yuvPad[NUM_REF_PIC_LIST_01];
+    const Mv m_pSearchOffset[25] = {Mv(-2, -2), Mv(-1, -2), Mv(0, -2), Mv(1, -2), Mv(2, -2), Mv(-2, -1), Mv(-1, -1),
+                                    Mv(0, -1),  Mv(1, -1),  Mv(2, -1), Mv(-2, 0), Mv(-1, 0), Mv(0, 0),   Mv(1, 0),
+                                    Mv(2, 0),   Mv(-2, 1),  Mv(-1, 1), Mv(0, 1),  Mv(1, 1),  Mv(2, 1),   Mv(-2, 2),
+                                    Mv(-1, 2),  Mv(0, 2),   Mv(1, 2),  Mv(2, 2)};
+
 private:
-  void     xCopyAndPad          ( const CodingUnit& cu, PelUnitBuf& pcPad, RefPicList refId, bool forLuma);
-  void     xFinalPaddedMCForDMVR( const CodingUnit& cu, PelUnitBuf* dstBuf, const PelUnitBuf *refBuf, const bool bioApplied, const Mv startMV[NUM_REF_PIC_LIST_01], const Mv& refMV );
+    void xCopyAndPad(const CodingUnit& cu, PelUnitBuf& pcPad, RefPicList refId, bool forLuma);
+    void xFinalPaddedMCForDMVR(const CodingUnit& cu, PelUnitBuf* dstBuf, const PelUnitBuf* refBuf,
+                               const bool bioApplied, const Mv startMV[NUM_REF_PIC_LIST_01], const Mv& refMV);
 
 protected:
-  DMVR();
-  virtual ~DMVR();
-  void destroy();
-  void init                    ( RdCost* pcRdCost, const ChromaFormat chFormat );
-  void xProcessDMVR            ( const CodingUnit& cu, PelUnitBuf& pcYuvDst, const ClpRngs &clpRngs, const bool bioApplied );
+    DMVR();
+    virtual ~DMVR();
+    void destroy();
+    void init(RdCost* pcRdCost, const ChromaFormat chFormat);
+    void xProcessDMVR(const CodingUnit& cu, PelUnitBuf& pcYuvDst, const ClpRngs& clpRngs, const bool bioApplied);
 };
 
-class InterPrediction : public DMVR
-{
+class InterPrediction : public DMVR {
 protected:
-  ChromaFormat m_currChromaFormat;
+    ChromaFormat m_currChromaFormat;
 
 private:
-  PelStorage   m_yuvPred[NUM_REF_PIC_LIST_01];
-  bool         m_subPuMC;
-  PelStorage   m_geoPartBuf[2]; 
+    PelStorage m_yuvPred[NUM_REF_PIC_LIST_01];
+    bool m_subPuMC;
+    PelStorage m_geoPartBuf[2];
 
-  void xPredInterUni            ( const CodingUnit& cu, const RefPicList& refPicList, PelUnitBuf& pcYuvPred, const bool bi, const bool bdofApplied );
-  void xPredInterBi             ( const CodingUnit& cu, PelUnitBuf& yuvPred, const bool bdofApplied = false );
-  void xSubPuBDOF               ( const CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList& refPicList = REF_PIC_LIST_X );
-  bool xCheckIdenticalMotion    ( const CodingUnit& cu ) const;
+    void xPredInterUni(const CodingUnit& cu, const RefPicList& refPicList, PelUnitBuf& pcYuvPred, const bool bi,
+                       const bool bdofApplied);
+    void xPredInterBi(const CodingUnit& cu, PelUnitBuf& yuvPred, const bool bdofApplied = false);
+    void xSubPuBDOF(const CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList& refPicList = REF_PIC_LIST_X);
+    bool xCheckIdenticalMotion(const CodingUnit& cu) const;
 
 public:
-  InterPrediction();
-  virtual ~InterPrediction();
+    InterPrediction();
+    virtual ~InterPrediction();
 
-  void    init                  ( RdCost* pcRdCost, ChromaFormat chromaFormatIDC, const int ctuSize);
-  void    destroy               ();
+    void init(RdCost* pcRdCost, ChromaFormat chromaFormatIDC, const int ctuSize);
+    void destroy();
 
-  // inter
-  bool    motionCompensation    ( CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList refPicList = REF_PIC_LIST_X );
-  void    motionCompensationIBC ( CodingUnit& cu, PelUnitBuf& predBuf );
-  void    xSubPuMC              ( CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList& eRefPicList = REF_PIC_LIST_X );
-  void    motionCompensationGeo ( CodingUnit& cu, PelUnitBuf& predBuf, const MergeCtx& geoMrgCtx );
+    // inter
+    bool motionCompensation(CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList refPicList = REF_PIC_LIST_X);
+    void motionCompensationIBC(CodingUnit& cu, PelUnitBuf& predBuf);
+    void xSubPuMC(CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList& eRefPicList = REF_PIC_LIST_X);
+    void motionCompensationGeo(CodingUnit& cu, PelUnitBuf& predBuf, const MergeCtx& geoMrgCtx);
 };
 
 } // namespace vvenc
 
 //! \}
-

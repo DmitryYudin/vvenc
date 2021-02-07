@@ -68,179 +68,216 @@ class DistParam;
 // ====================================================================================================================
 
 // for function pointer
-typedef Distortion (*FpDistFunc) (const DistParam&);
+typedef Distortion (*FpDistFunc)(const DistParam&);
 
 // ====================================================================================================================
 // Class definition
 // ====================================================================================================================
 
 /// distortion parameter class
-class DistParam
-{
+class DistParam {
 public:
-  CPelBuf               org;
-  CPelBuf               cur;
-  FpDistFunc            distFunc;
-  int                   bitDepth;
-  int                   subShift;
-  ComponentID           compID;
-  bool                  applyWeight;     // whether weighted prediction is used or not
-  Distortion            maximumDistortionForEarlyExit; /// During cost calculations, if distortion exceeds this value, cost calculations may early-terminate.
-  const WPScalingParam* wpCur;           // weighted prediction scaling parameters for current ref
-  const CPelBuf*        orgLuma;
+    CPelBuf org;
+    CPelBuf cur;
+    FpDistFunc distFunc;
+    int bitDepth;
+    int subShift;
+    ComponentID compID;
+    bool applyWeight; // whether weighted prediction is used or not
+    Distortion
+        maximumDistortionForEarlyExit; /// During cost calculations, if distortion exceeds this value, cost calculations may early-terminate.
+    const WPScalingParam* wpCur; // weighted prediction scaling parameters for current ref
+    const CPelBuf* orgLuma;
 
-  const Pel*            mask;
-  int                   maskStride;
-  int                   stepX;
-  int                   maskStride2;
+    const Pel* mask;
+    int maskStride;
+    int stepX;
+    int maskStride2;
 
-  DistParam( const CPelBuf& _org, const CPelBuf& _cur,  FpDistFunc _distFunc, int _bitDepth, int _subShift, ComponentID _compID )
-  : org(_org), cur(_cur), distFunc(_distFunc), bitDepth(_bitDepth), subShift(_subShift), compID(_compID), applyWeight( false )
-    ,maximumDistortionForEarlyExit( MAX_DISTORTION ), wpCur( nullptr ), orgLuma( nullptr)
-  { }
+    DistParam(const CPelBuf& _org, const CPelBuf& _cur, FpDistFunc _distFunc, int _bitDepth, int _subShift,
+              ComponentID _compID)
+        : org(_org),
+          cur(_cur),
+          distFunc(_distFunc),
+          bitDepth(_bitDepth),
+          subShift(_subShift),
+          compID(_compID),
+          applyWeight(false),
+          maximumDistortionForEarlyExit(MAX_DISTORTION),
+          wpCur(nullptr),
+          orgLuma(nullptr)
+    {
+    }
 
-  DistParam() : org(), cur(), bitDepth( 0 ), subShift( 0 ), compID( MAX_NUM_COMP ), applyWeight( false )
-  ,maximumDistortionForEarlyExit( MAX_DISTORTION ), wpCur( nullptr ), orgLuma( nullptr)
-  { }
+    DistParam()
+        : org(),
+          cur(),
+          bitDepth(0),
+          subShift(0),
+          compID(MAX_NUM_COMP),
+          applyWeight(false),
+          maximumDistortionForEarlyExit(MAX_DISTORTION),
+          wpCur(nullptr),
+          orgLuma(nullptr)
+    {
+    }
 };
 
 /// RD cost computation class
-class RdCost
-{
+class RdCost {
 private:
-  // for distortion
+    // for distortion
 
-  FpDistFunc              m_afpDistortFunc[2][DF_TOTAL_FUNCTIONS]; // [eDFunc]
-  CostMode                m_costMode;
-  double                  m_distortionWeight[MAX_NUM_COMP]; // only chroma values are used.
-  double                  m_dLambda;
-  double                  m_dLambda_unadjusted; // TODO: check is necessary
-  double                  m_DistScaleUnadjusted;
+    FpDistFunc m_afpDistortFunc[2][DF_TOTAL_FUNCTIONS]; // [eDFunc]
+    CostMode m_costMode;
+    double m_distortionWeight[MAX_NUM_COMP]; // only chroma values are used.
+    double m_dLambda;
+    double m_dLambda_unadjusted; // TODO: check is necessary
+    double m_DistScaleUnadjusted;
 
-  const uint32_t*         m_reshapeLumaLevelToWeightPLUT;
-  const double*           m_lumaLevelToWeightPLUT; //ALF
+    const uint32_t* m_reshapeLumaLevelToWeightPLUT;
+    const double* m_lumaLevelToWeightPLUT; //ALF
 
-  uint32_t                m_signalType;
-  double                  m_chromaWeight;
-  int                     m_lumaBD;
-  ChromaFormat            m_cf;
-  double                  m_DistScale;
-  double                  m_dLambdaMotionSAD;
+    uint32_t m_signalType;
+    double m_chromaWeight;
+    int m_lumaBD;
+    ChromaFormat m_cf;
+    double m_DistScale;
+    double m_dLambdaMotionSAD;
 
-  // for motion cost
-  Mv                      m_mvPredictor;
-  Mv                      m_bvPredictors[2];
-  double                  m_motionLambda;
-  int                     m_iCostScale;
+    // for motion cost
+    Mv m_mvPredictor;
+    Mv m_bvPredictors[2];
+    double m_motionLambda;
+    int m_iCostScale;
 
-  double                  m_dCost; // for ibc
+    double m_dCost; // for ibc
 public:
-  RdCost();
-  virtual ~RdCost();
+    RdCost();
+    virtual ~RdCost();
 
-  void          create();
+    void create();
 #ifdef TARGET_SIMD_X86
-  void          initRdCostX86();
-  template <X86_VEXT vext>
-  void          _initRdCostX86();
+    void initRdCostX86();
+    template <X86_VEXT vext>
+    void _initRdCostX86();
 #endif
 
-  void          setReshapeParams    ( const uint32_t* pPLUT, double chrWght)    { m_reshapeLumaLevelToWeightPLUT = pPLUT; m_chromaWeight = chrWght; }
-  void          setDistortionWeight ( const ComponentID compID, const double distortionWeight ) { m_distortionWeight[compID] = distortionWeight; }
-  void          setLambda           ( double dLambda, const BitDepths &bitDepths );
-  void          setCostMode         ( CostMode m )                      { m_costMode = m; }
-
-  double        getLambda           ( bool unadj = false )              { return unadj ? m_dLambda_unadjusted : m_dLambda; }
-  double        getChromaWeight     ()                                  { return ((m_distortionWeight[COMP_Cb] + m_distortionWeight[COMP_Cr]) / 2.0); }
-  double        getDistortionWeight ( const ComponentID compID )  const { return m_distortionWeight[ compID % MAX_NUM_COMP ]; }
-  double        calcRdCost          ( uint64_t fracBits, Distortion distortion, bool useUnadjustedLambda = true ) const
-  {
-    return ( useUnadjustedLambda ? m_DistScaleUnadjusted : m_DistScale ) * double( distortion ) + double( fracBits );
-  }
-
-  void          setDistParam        ( DistParam &rcDP, const CPelBuf& org, const Pel* piRefY , int iRefStride, int bitDepth, ComponentID compID, int subShiftMode = 0, bool useHadamard = false );
-  DistParam     setDistParam        ( const CPelBuf& org, const CPelBuf& cur, int bitDepth, DFunc dfunc );
-  DistParam     setDistParam        ( const Pel* pOrg, const Pel* piRefY, int iOrgStride, int iRefStride, int bitDepth, ComponentID compID, int width, int height, int subShift );
-  void          setDistParamGeo     ( DistParam &rcDP, const CPelBuf& org, const Pel *piRefY, int iRefStride, const Pel *mask, int iMaskStride, int stepX, int iMaskStride2, int bitDepth, ComponentID compID );
-
-  double        getMotionLambda     ()                      const { return m_dLambdaMotionSAD; }
-  void          selectMotionLambda  ()                            { m_motionLambda = getMotionLambda(); }
-  void          setPredictor        ( const Mv& rcMv )            { m_mvPredictor = rcMv; }
-  void          setCostScale        ( int iCostScale )            { m_iCostScale = iCostScale; }
-  Distortion    getCost             ( uint32_t b )          const { return Distortion( m_motionLambda * b ); }
-
-  // for motion cost
-  static uint32_t    xGetExpGolombNumberOfBits( int iVal )
-  {
-    CHECKD( iVal == std::numeric_limits<int>::min(), "Wrong value" );
-    unsigned uiLength2 = 1, uiTemp2 = ( iVal <= 0 ) ? ( unsigned( -iVal ) << 1 ) + 1 : unsigned( iVal << 1 );
-
-    while( uiTemp2 > MAX_CU_SIZE )
+    void setReshapeParams(const uint32_t* pPLUT, double chrWght)
     {
-      uiLength2 += ( MAX_CU_DEPTH << 1 );
-      uiTemp2  >>=   MAX_CU_DEPTH;
+        m_reshapeLumaLevelToWeightPLUT = pPLUT;
+        m_chromaWeight = chrWght;
+    }
+    void setDistortionWeight(const ComponentID compID, const double distortionWeight)
+    {
+        m_distortionWeight[compID] = distortionWeight;
+    }
+    void setLambda(double dLambda, const BitDepths& bitDepths);
+    void setCostMode(CostMode m) { m_costMode = m; }
+
+    double getLambda(bool unadj = false) { return unadj ? m_dLambda_unadjusted : m_dLambda; }
+    double getChromaWeight() { return ((m_distortionWeight[COMP_Cb] + m_distortionWeight[COMP_Cr]) / 2.0); }
+    double getDistortionWeight(const ComponentID compID) const { return m_distortionWeight[compID % MAX_NUM_COMP]; }
+    double calcRdCost(uint64_t fracBits, Distortion distortion, bool useUnadjustedLambda = true) const
+    {
+        return (useUnadjustedLambda ? m_DistScaleUnadjusted : m_DistScale) * double(distortion) + double(fracBits);
     }
 
-    return uiLength2 + ( Log2(uiTemp2) << 1 );
-  }
-  Distortion     getCostOfVectorWithPredictor( const int x, const int y, const unsigned imvShift )  { return Distortion( m_motionLambda * getBitsOfVectorWithPredictor(x, y, imvShift )); }
-  uint32_t       getBitsOfVectorWithPredictor( const int x, const int y, const unsigned imvShift )  { return xGetExpGolombNumberOfBits(((x << m_iCostScale) - m_mvPredictor.hor)>>imvShift) + xGetExpGolombNumberOfBits(((y << m_iCostScale) - m_mvPredictor.ver)>>imvShift); }
+    void setDistParam(DistParam& rcDP, const CPelBuf& org, const Pel* piRefY, int iRefStride, int bitDepth,
+                      ComponentID compID, int subShiftMode = 0, bool useHadamard = false);
+    DistParam setDistParam(const CPelBuf& org, const CPelBuf& cur, int bitDepth, DFunc dfunc);
+    DistParam setDistParam(const Pel* pOrg, const Pel* piRefY, int iOrgStride, int iRefStride, int bitDepth,
+                           ComponentID compID, int width, int height, int subShift);
+    void setDistParamGeo(DistParam& rcDP, const CPelBuf& org, const Pel* piRefY, int iRefStride, const Pel* mask,
+                         int iMaskStride, int stepX, int iMaskStride2, int bitDepth, ComponentID compID);
 
-  void           saveUnadjustedLambda ();
-  void           setReshapeInfo       ( uint32_t type, int lumaBD, ChromaFormat cf )   { m_signalType = type; m_lumaBD = lumaBD; m_cf = cf; }
+    double getMotionLambda() const { return m_dLambdaMotionSAD; }
+    void selectMotionLambda() { m_motionLambda = getMotionLambda(); }
+    void setPredictor(const Mv& rcMv) { m_mvPredictor = rcMv; }
+    void setCostScale(int iCostScale) { m_iCostScale = iCostScale; }
+    Distortion getCost(uint32_t b) const { return Distortion(m_motionLambda * b); }
+
+    // for motion cost
+    static uint32_t xGetExpGolombNumberOfBits(int iVal)
+    {
+        CHECKD(iVal == std::numeric_limits<int>::min(), "Wrong value");
+        unsigned uiLength2 = 1, uiTemp2 = (iVal <= 0) ? (unsigned(-iVal) << 1) + 1 : unsigned(iVal << 1);
+
+        while( uiTemp2 > MAX_CU_SIZE ) {
+            uiLength2 += (MAX_CU_DEPTH << 1);
+            uiTemp2 >>= MAX_CU_DEPTH;
+        }
+
+        return uiLength2 + (Log2(uiTemp2) << 1);
+    }
+    Distortion getCostOfVectorWithPredictor(const int x, const int y, const unsigned imvShift)
+    {
+        return Distortion(m_motionLambda * getBitsOfVectorWithPredictor(x, y, imvShift));
+    }
+    uint32_t getBitsOfVectorWithPredictor(const int x, const int y, const unsigned imvShift)
+    {
+        return xGetExpGolombNumberOfBits(((x << m_iCostScale) - m_mvPredictor.hor) >> imvShift) +
+               xGetExpGolombNumberOfBits(((y << m_iCostScale) - m_mvPredictor.ver) >> imvShift);
+    }
+
+    void saveUnadjustedLambda();
+    void setReshapeInfo(uint32_t type, int lumaBD, ChromaFormat cf)
+    {
+        m_signalType = type;
+        m_lumaBD = lumaBD;
+        m_cf = cf;
+    }
 
 private:
-         Distortion xGetSSE_WTD       ( const DistParam& pcDtParam ) const;
+    Distortion xGetSSE_WTD(const DistParam& pcDtParam) const;
 
-  static Distortion xGetSSE           ( const DistParam& pcDtParam );
-  static Distortion xGetSSE4          ( const DistParam& pcDtParam );
-  static Distortion xGetSSE8          ( const DistParam& pcDtParam );
-  static Distortion xGetSSE16         ( const DistParam& pcDtParam );
-  static Distortion xGetSSE32         ( const DistParam& pcDtParam );
-  static Distortion xGetSSE64         ( const DistParam& pcDtParam );
-  static Distortion xGetSSE128        ( const DistParam& pcDtParam );
+    static Distortion xGetSSE(const DistParam& pcDtParam);
+    static Distortion xGetSSE4(const DistParam& pcDtParam);
+    static Distortion xGetSSE8(const DistParam& pcDtParam);
+    static Distortion xGetSSE16(const DistParam& pcDtParam);
+    static Distortion xGetSSE32(const DistParam& pcDtParam);
+    static Distortion xGetSSE64(const DistParam& pcDtParam);
+    static Distortion xGetSSE128(const DistParam& pcDtParam);
 
+    static Distortion xGetSAD(const DistParam& pcDtParam);
+    static Distortion xGetSAD4(const DistParam& pcDtParam);
+    static Distortion xGetSAD8(const DistParam& pcDtParam);
+    static Distortion xGetSAD16(const DistParam& pcDtParam);
+    static Distortion xGetSAD32(const DistParam& pcDtParam);
+    static Distortion xGetSAD64(const DistParam& pcDtParam);
+    static Distortion xGetSAD128(const DistParam& pcDtParam);
+    static Distortion xGetSADwMask(const DistParam& pcDtParam);
 
-  static Distortion xGetSAD           ( const DistParam& pcDtParam );
-  static Distortion xGetSAD4          ( const DistParam& pcDtParam );
-  static Distortion xGetSAD8          ( const DistParam& pcDtParam );
-  static Distortion xGetSAD16         ( const DistParam& pcDtParam );
-  static Distortion xGetSAD32         ( const DistParam& pcDtParam );
-  static Distortion xGetSAD64         ( const DistParam& pcDtParam );
-  static Distortion xGetSAD128        ( const DistParam& pcDtParam );
-  static Distortion xGetSADwMask      ( const DistParam &pcDtParam );
-  
-  static Distortion xCalcHADs2x2      ( const Pel* piOrg, const Pel* piCur, int iStrideOrg, int iStrideCur );
-  static Distortion xGetHAD2SADs      ( const DistParam& pcDtParam );
-  static Distortion xGetHADs          ( const DistParam& pcDtParam );
+    static Distortion xCalcHADs2x2(const Pel* piOrg, const Pel* piCur, int iStrideOrg, int iStrideCur);
+    static Distortion xGetHAD2SADs(const DistParam& pcDtParam);
+    static Distortion xGetHADs(const DistParam& pcDtParam);
 
 #ifdef TARGET_SIMD_X86
-  template<X86_VEXT vext>
-  static Distortion xGetSSE_SIMD    ( const DistParam& pcDtParam );
-  template<int iWidth, X86_VEXT vext>
-  static Distortion xGetSSE_NxN_SIMD( const DistParam& pcDtParam );
+    template <X86_VEXT vext>
+    static Distortion xGetSSE_SIMD(const DistParam& pcDtParam);
+    template <int iWidth, X86_VEXT vext>
+    static Distortion xGetSSE_NxN_SIMD(const DistParam& pcDtParam);
 
-  template<X86_VEXT vext>
-  static Distortion xGetSAD_SIMD    ( const DistParam& pcDtParam );
-  template<int iWidth, X86_VEXT vext>
-  static Distortion xGetSAD_NxN_SIMD( const DistParam& pcDtParam );
+    template <X86_VEXT vext>
+    static Distortion xGetSAD_SIMD(const DistParam& pcDtParam);
+    template <int iWidth, X86_VEXT vext>
+    static Distortion xGetSAD_NxN_SIMD(const DistParam& pcDtParam);
 
-  template<X86_VEXT vext>
-  static Distortion xGetHADs_SIMD   ( const DistParam& pcDtParam );
-  template<X86_VEXT vext>
-  static Distortion xGetHAD2SADs_SIMD( const DistParam &rcDtParam );
+    template <X86_VEXT vext>
+    static Distortion xGetHADs_SIMD(const DistParam& pcDtParam);
+    template <X86_VEXT vext>
+    static Distortion xGetHAD2SADs_SIMD(const DistParam& rcDtParam);
 
-  template<X86_VEXT vext> 
-  static Distortion xGetSADwMask_SIMD( const DistParam &pcDtParam );
+    template <X86_VEXT vext>
+    static Distortion xGetSADwMask_SIMD(const DistParam& pcDtParam);
 #endif
 
 public:
+    Distortion getDistPart(const CPelBuf& org, const CPelBuf& cur, int bitDepth, const ComponentID compId, DFunc eDFunc,
+                           const CPelBuf* orgLuma = NULL);
 
-  Distortion   getDistPart( const CPelBuf& org, const CPelBuf& cur, int bitDepth, const ComponentID compId, DFunc eDFunc, const CPelBuf* orgLuma = NULL );
-
-};// END CLASS DEFINITION RdCost
+}; // END CLASS DEFINITION RdCost
 
 } // namespace vvenc
 
 //! \}
-

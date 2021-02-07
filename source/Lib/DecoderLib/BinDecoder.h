@@ -57,52 +57,51 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
-
-class BinDecoderBase : public Ctx
-{
+class BinDecoderBase : public Ctx {
 protected:
-  BinDecoderBase ( const BinProbModel* dummy );
-public:
-  ~BinDecoderBase() {}
-public:
-  void      init    ( InputBitstream* bitstream );
-  void      uninit  ();
-  void      start   ();
-  void      finish  ();
-  void      reset   ( int qp, int initId );
+    BinDecoderBase(const BinProbModel* dummy);
 
 public:
-  virtual unsigned  decodeBin           ( unsigned ctxId    ) = 0;
+    ~BinDecoderBase() {}
 
 public:
-  unsigned          decodeBinEP         ();
-  unsigned          decodeBinsEP        ( unsigned numBins  );
-  unsigned          decodeRemAbsEP      ( unsigned goRicePar, unsigned cutoff, int maxLog2TrDynamicRange);
-  unsigned          decodeBinTrm        ();
-  void              align               ();
-  unsigned          getNumBitsRead      () { return m_Bitstream->getNumBitsRead() + m_bitsNeeded; }
+    void init(InputBitstream* bitstream);
+    void uninit();
+    void start();
+    void finish();
+    void reset(int qp, int initId);
+
+public:
+    virtual unsigned decodeBin(unsigned ctxId) = 0;
+
+public:
+    unsigned decodeBinEP();
+    unsigned decodeBinsEP(unsigned numBins);
+    unsigned decodeRemAbsEP(unsigned goRicePar, unsigned cutoff, int maxLog2TrDynamicRange);
+    unsigned decodeBinTrm();
+    void align();
+    unsigned getNumBitsRead() { return m_Bitstream->getNumBitsRead() + m_bitsNeeded; }
+
 private:
-  unsigned          decodeAlignedBinsEP ( unsigned numBins  );
+    unsigned decodeAlignedBinsEP(unsigned numBins);
+
 protected:
-  InputBitstream*   m_Bitstream;
-  uint32_t          m_Range;
-  uint32_t          m_Value;
-  int32_t           m_bitsNeeded;
+    InputBitstream* m_Bitstream;
+    uint32_t m_Range;
+    uint32_t m_Value;
+    int32_t m_bitsNeeded;
 };
 
-
-
-class BinDecoder : public BinDecoderBase
-{
+class BinDecoder : public BinDecoderBase {
 public:
-  BinDecoder ();
-  ~BinDecoder() {}
-  unsigned decodeBin ( unsigned ctxId );
+    BinDecoder();
+    ~BinDecoder() {}
+    unsigned decodeBin(unsigned ctxId);
+
 private:
-  CtxStore& m_Ctx;
+    CtxStore& m_Ctx;
 };
 
 } // namespace vvenc
 
 //! \}
-
