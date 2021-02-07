@@ -1,0 +1,1 @@
+../cmake-it/build.sh "$@"
