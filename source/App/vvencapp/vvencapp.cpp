@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
                                                      cVVEncParameter.m_iTemporalScale / cVVEncParameter.m_iTemporalRate;
                 cInputPicture.m_cPicBuffer.m_bCtsValid = true;
 
-                //std::cout << "process picture " << cInputPicture.m_cPicBuffer.m_uiSequenceNumber << " cts " << cInputPicture.m_cPicBuffer.m_uiCts << std::endl;
+                std::cout << "process picture " << cInputPicture.m_cPicBuffer.m_uiSequenceNumber << " cts " << cInputPicture.m_cPicBuffer.m_uiCts << std::endl;
                 // call encode
                 iRet = cVVEnc.encode(&cInputPicture, cAccessUnit);
                 if( 0 != iRet ) {

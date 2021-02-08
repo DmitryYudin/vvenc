@@ -293,10 +293,23 @@ std::string CDTrace::getErrMessage()
 template <bool bCount>
 void CDTrace::dtrace(int k, const char* format, /*va_list args*/...)
 {
-    if( m_trace_file && chanRules[k].active() ) {
+return;
+  if( /*m_trace_file && chanRules[k].active()*/ 
+#if ENABLE_TRACING   
+      k == D_COMMON ||
+      k == D_HEADER ||
+      k == D_BEST_MODE ||
+      k == D_MODE_COST ||
+      k == D_MISC ||
+      k == D_INTRA_COST ||
+      k == D_PRED ||
+      k == D_RDOQ_COST ||
+#endif
+      false
+      ) {
         va_list args;
         va_start(args, format);
-        vfprintf(m_trace_file, format, args);
+        vfprintf(stdout, format, args);
         fflush(m_trace_file);
         va_end(args);
         if( bCount )

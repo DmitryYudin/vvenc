@@ -85,6 +85,7 @@ namespace vvenc {
 #define VALGRIND_MEMCLEAR(_ref, _size)
 #endif
 
+#define ENABLE_TRACING 0
 #ifndef ENABLE_TRACING
 #define ENABLE_TRACING \
     0 // DISABLED by default (enable only when debugging, requires 15% run-time in decoding) -- see documentation in 'doc/DTrace for NextSoftware.pdf'
