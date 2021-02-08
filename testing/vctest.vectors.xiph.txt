@@ -1,0 +1,139 @@
+vec_176x144="\
+    media.xiph.org/akiyo_176x144_30fps.yuv \
+    media.xiph.org/bowing_176x144_30fps.yuv \
+    media.xiph.org/bridge_close_176x144_30fps.yuv \
+    media.xiph.org/bridge_far_176x144_30fps.yuv \
+    media.xiph.org/bus_176x144_15fps.yuv \
+    media.xiph.org/carphone_176x144_30fps.yuv \
+    media.xiph.org/city_176x144_15fps.yuv \
+    media.xiph.org/claire_176x144_30fps.yuv \
+    media.xiph.org/coastguard_176x144_30fps.yuv \
+    media.xiph.org/container_176x144_30fps.yuv \
+    media.xiph.org/crew_176x144_15fps.yuv \
+    media.xiph.org/deadline_176x144_30fps.yuv \
+    media.xiph.org/flower_garden_176x144_30fps.yuv \
+    media.xiph.org/football_176x144_15fps.yuv \
+    media.xiph.org/football_176x144_30fps.yuv \
+    media.xiph.org/foreman_176x144_30fps.yuv \
+    media.xiph.org/galleon_176x144_30fps.yuv \
+    media.xiph.org/grandma_176x144_30fps.yuv \
+    media.xiph.org/hall_monitor_176x144_30fps.yuv \
+    media.xiph.org/hall_objects_176x144_30fps.yuv \
+    media.xiph.org/harbour_176x144_15fps.yuv \
+    media.xiph.org/highway_176x144_30fps.yuv \
+    media.xiph.org/husky_176x144_30fps.yuv \
+    media.xiph.org/ice_176x144_15fps.yuv \
+    media.xiph.org/intros_176x144_30fps.yuv \
+    media.xiph.org/mad900_176x144_30fps.yuv \
+    media.xiph.org/miss_am_176x144_30fps.yuv \
+    media.xiph.org/mobile_calendar_176x144_30fps.yuv \
+    media.xiph.org/mother_daughter_176x144_30fps.yuv \
+    media.xiph.org/mthr_dotr_176x144_30fps.yuv \
+    media.xiph.org/news_176x144_30fps.yuv \
+    media.xiph.org/pamphlet_176x144_30fps.yuv \
+    media.xiph.org/paris_176x144_30fps.yuv \
+    media.xiph.org/salesman_176x144_30fps.yuv \
+    media.xiph.org/sign_irene_176x144_25fps.yuv \
+    media.xiph.org/silent_176x144_30fps.yuv \
+    media.xiph.org/soccer_176x144_15fps.yuv \
+    media.xiph.org/students_176x144_30fps.yuv \
+    media.xiph.org/suzie_176x144_30fps.yuv \
+    media.xiph.org/trevor_176x144_30fps.yuv \
+    media.xiph.org/vtc1nw_176x144_30fps.yuv \
+    media.xiph.org/washdc_176x144_30fps.yuv \
+"
+vec_352x240="\
+    media.xiph.org/garden_352x240_30fps.yuv \
+    media.xiph.org/mobile_352x240_30fps.yuv \
+    media.xiph.org/stefan_352x240_30fps.yuv \
+    media.xiph.org/tennis_352x240_30fps.yuv \
+    media.xiph.org/tt_352x240_30fps.yuv \
+"
+vec_352x288="\
+    media.xiph.org/akiyo_352x288_30fps.yuv \
+    media.xiph.org/bowing_352x288_30fps.yuv \
+    media.xiph.org/bridge_close_352x288_30fps.yuv \
+    media.xiph.org/bridge_far_352x288_30fps.yuv \
+    media.xiph.org/bus_352x288_30fps.yuv \
+    media.xiph.org/city_352x288_30fps.yuv \
+    media.xiph.org/coastguard_352x288_30fps.yuv \
+    media.xiph.org/container_352x288_30fps.yuv \
+    media.xiph.org/crew_352x288_30fps.yuv \
+    media.xiph.org/deadline_352x288_30fps.yuv \
+    media.xiph.org/flower_352x288_30fps.yuv \
+    media.xiph.org/flower_garden_352x288_30fps.yuv \
+    media.xiph.org/football_352x288_30fps.yuv \
+    media.xiph.org/foreman_352x288_30fps.yuv \
+    media.xiph.org/galleon_352x288_30fps.yuv \
+    media.xiph.org/hall_monitor_352x288_30fps.yuv \
+    media.xiph.org/harbour_352x288_30fps.yuv \
+    media.xiph.org/highway_352x288_30fps.yuv \
+    media.xiph.org/husky_352x288_30fps.yuv \
+    media.xiph.org/ice_352x288_30fps.yuv \
+    media.xiph.org/intros_352x288_30fps.yuv \
+    media.xiph.org/mad900_352x288_30fps.yuv \
+    media.xiph.org/mobile_352x288_30fps.yuv \
+    media.xiph.org/mobile_calendar_352x288_30fps.yuv \
+    media.xiph.org/mother_daughter_352x288_30fps.yuv \
+    media.xiph.org/news_352x288_30fps.yuv \
+    media.xiph.org/pamphlet_352x288_30fps.yuv \
+    media.xiph.org/paris_352x288_30fps.yuv \
+    media.xiph.org/sign_irene_352x288_25fps.yuv \
+    media.xiph.org/silent_352x288_30fps.yuv \
+    media.xiph.org/soccer_352x288_30fps.yuv \
+    media.xiph.org/students_352x288_30fps.yuv \
+    media.xiph.org/tempete_352x288_30fps.yuv \
+    media.xiph.org/vtc1nw_352x288_30fps.yuv \
+    media.xiph.org/washdc_352x288_30fps.yuv \
+    media.xiph.org/waterfall_352x288_30fps.yuv \
+"
+vec_640x480="\
+    media.xiph.org/flower_garden_640x480_30fps.yuv \
+    media.xiph.org/football_640x480_30fps.yuv \
+    media.xiph.org/galleon_640x480_30fps.yuv \
+    media.xiph.org/intros_640x480_30fps.yuv \
+    media.xiph.org/mobile_calendar_640x480_30fps.yuv \
+    media.xiph.org/vtc1nw_640x480_30fps.yuv \
+    media.xiph.org/washdc_640x480_30fps.yuv \
+"
+vec_704x576="\
+    media.xiph.org/city_704x576_30fps.yuv \
+    media.xiph.org/crew_704x576_30fps.yuv \
+    media.xiph.org/harbour_704x576_30fps.yuv \
+    media.xiph.org/ice_704x576_30fps.yuv \
+    media.xiph.org/soccer_704x576_30fps.yuv \
+"
+vec_720x486="\
+    media.xiph.org/flower_garden_720x486_30fps.yuv \
+    media.xiph.org/football_720x486_30fps.yuv \
+    media.xiph.org/galleon_720x486_30fps.yuv \
+    media.xiph.org/intros_720x486_30fps.yuv \
+    media.xiph.org/mobile_calendar_720x486_30fps.yuv \
+    media.xiph.org/vtc1nw_720x486_30fps.yuv \
+    media.xiph.org/washdc_720x486_30fps.yuv \
+"
+vec_1280x720="\
+    media.xiph.org/FourPeople_1280x720_30fps.yuv \
+    media.xiph.org/Johnny_1280x720_30fps.yuv \
+    media.xiph.org/KristenAndSara_1280x720_30fps.yuv \
+    media.xiph.org/ducks_take_off_1280x720_25fps.yuv \
+    media.xiph.org/in_to_tree_1280x720_25fps.yuv \
+    media.xiph.org/mobcal_ter_1280x720_25fps.yuv \
+    media.xiph.org/old_town_cross_1280x720_25fps.yuv \
+    media.xiph.org/park_joy_1280x720_25fps.yuv \
+    media.xiph.org/parkrun_ter_1280x720_25fps.yuv \
+    media.xiph.org/shields_ter_1280x720_25fps.yuv \
+    media.xiph.org/stockholm_ter_1280x720_30fps.yuv \
+    media.xiph.org/vidyo1_1280x720_30fps.yuv \
+    media.xiph.org/vidyo3_1280x720_30fps.yuv \
+    media.xiph.org/vidyo4_1280x720_30fps.yuv \
+"
+# media.xiph.org/
+#   176x144   42 828.0M
+#   352x240    5 123.8M
+#   352x288   36   2.9G
+#   640x480    7   1.1G
+#   704x576    5 881.9M
+#   720x486    7   1.3G
+#  1280x720   14   5.3G
+#    Total:  116  12.6G
