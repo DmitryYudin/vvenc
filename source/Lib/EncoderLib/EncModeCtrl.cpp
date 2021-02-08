@@ -57,6 +57,8 @@ THE POSSIBILITY OF SUCH DAMAGE.
 #include "CommonLib/UnitTools.h"
 #include "CommonLib/dtrace_next.h"
 
+#include "metrics.h"
+
 #include <cmath>
 
 //! \ingroup EncoderLib
@@ -957,9 +959,45 @@ bool EncModeCtrl::useModeResult(const EncTestMode& encTestmode, CodingStructure*
     }
 
     // for now just a simple decision based on RD-cost or choose tempCS if bestCS is not yet coded
-    if( tempCS->features[ENC_FT_RD_COST] != MAX_DOUBLE &&
-        (!cuECtx.bestCS || ((tempCS->features[ENC_FT_RD_COST] + (useEDO ? tempCS->costDbOffset : 0)) <
-                            (cuECtx.bestCS->features[ENC_FT_RD_COST] + (useEDO ? cuECtx.bestCS->costDbOffset : 0)))) ) {
+    if(tempCS->features[ENC_FT_RD_COST] == MAX_DOUBLE) {
+        return false;
+    }
+
+    bool useTemp = !cuECtx.bestCS;
+    if(!useTemp) {
+        const CodingStructure* bestCS = cuECtx.bestCS;
+        double rdCostTemp = tempCS->features[ENC_FT_RD_COST];
+        double rdCostBest = bestCS->features[ENC_FT_RD_COST];
+        double rdoCostTemp = rdCostTemp + ( useEDO ? tempCS->costDbOffset : 0 );
+        double rdoCostBest = rdCostBest + ( useEDO ? bestCS->costDbOffset : 0 );
+        useTemp = rdoCostTemp < rdoCostBest; // default, based on RDO
+
+        Metrics mBest = Metrics::CalculateMetrics(bestCS, PIC_RECONSTRUCTION, *m_pcRdCost);
+        Metrics mTemp = Metrics::CalculateMetrics(tempCS, PIC_RECONSTRUCTION, *m_pcRdCost);
+
+        static unsigned cnt_hit = 0, cnt_miss = 0; // debug
+        if(bestCS->dist == mBest.val[Metrics::SSE] && tempCS->dist == mTemp.val[Metrics::SSE]) {
+            cnt_hit++;
+        } else {
+            cnt_miss++;
+        }
+
+        bool changeDecision = false;
+        if(CU::isIntra( *tempCS->cus[0] ) != CU::isIntra( *bestCS->cus[0] )) {
+            changeDecision = true; // INTRA / INTER
+        }
+        if(bestCS->getOrgBuf(COMP_Y).width < 8 || bestCS->getOrgBuf(COMP_Y).height < 8) {
+            changeDecision = false;
+        }
+        if(changeDecision) {
+            //useTemp = tempCS->dist < bestCS->dist;
+            //useTemp = mTemp.val[Metrics::SSIM] > mBest.val[Metrics::SSIM];
+            //useTemp = mTemp.val[Metrics::SSE] < mBest.val[Metrics::SSE];
+            useTemp = mTemp.val[Metrics::SAD] < mBest.val[Metrics::SAD];
+        }
+    }
+    
+    if( useTemp ) {
         cuECtx.bestCS = tempCS;
         cuECtx.bestCU = tempCS->cus[0];
         cuECtx.bestTU = cuECtx.bestCU->firstTU;
