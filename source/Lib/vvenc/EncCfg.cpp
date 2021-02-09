@@ -1950,6 +1950,7 @@ int EncCfg::initPreset(PresetMode preset)
             return -1;
     }
 
+    m_bUseSAO = 0;
     return 0;
 }
 
