@@ -100,6 +100,9 @@ void printVVEncErrorMsg(const std::string cAppname, const std::string cMessage, 
 
 int main(int argc, char* argv[])
 {
+#if _DEBUG
+    std::getchar();
+#endif //VVENC_DEBUGGING
     std::string cAppname = argv[0];
     std::size_t iPos = (int)cAppname.find_last_of("/");
     if( std::string::npos != iPos ) {

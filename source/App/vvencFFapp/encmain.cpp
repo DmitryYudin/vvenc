@@ -72,6 +72,9 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char* argv[])
 {
+#if _DEBUG
+    std::getchar();
+#endif //VVENC_DEBUGGING
     vvenc::registerMsgCbf(msgFnc);
 
     std::string simdOpt;
