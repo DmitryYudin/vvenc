@@ -972,14 +972,31 @@ bool EncModeCtrl::useModeResult(const EncTestMode& encTestmode, CodingStructure*
         double rdoCostBest = rdCostBest + ( useEDO ? bestCS->costDbOffset : 0 );
         useTemp = rdoCostTemp < rdoCostBest; // default, based on RDO
 
-        Metrics mBest = Metrics::CalculateMetrics(bestCS, PIC_RECONSTRUCTION, *m_pcRdCost);
-        Metrics mTemp = Metrics::CalculateMetrics(tempCS, PIC_RECONSTRUCTION, *m_pcRdCost);
+        Metrics mBest, mTemp;
+        for (const auto &cu : tempCS->cus) {
+          mBest += Metrics::CalculateMetrics(cu, PIC_RECONSTRUCTION, *m_pcRdCost);
+        }
+
+        //Metrics mBest = Metrics::CalculateMetrics(bestCS, PIC_RECONSTRUCTION, *m_pcRdCost);
+        //Metrics mTemp = Metrics::CalculateMetrics(tempCS, PIC_RECONSTRUCTION, *m_pcRdCost);
 
         static unsigned cnt_hit = 0, cnt_miss = 0; // debug
-        if(bestCS->dist == mBest.val[Metrics::SSE] && tempCS->dist == mTemp.val[Metrics::SSE]) {
+        if(bestCS->dist == mBest.val[Metrics::SSE_YUV] && tempCS->dist == mTemp.val[Metrics::SSE_YUV]) {
             cnt_hit++;
         } else {
-            cnt_miss++;
+          if (CU::isIntra(*tempCS->cus[0]) != CU::isIntra(*bestCS->cus[0]) && tempCS->cus.size() == bestCS->cus.size() && tempCS->cus.size() == 1)
+          {
+            const int64_t thrDiff = 20;
+            if(std::abs(static_cast<int64_t>(bestCS->dist) - static_cast<int64_t>(std::round(mBest.val[Metrics::SSE_YUV]))) > thrDiff ||
+               std::abs(static_cast<int64_t>(tempCS->dist) - static_cast<int64_t>(std::round(mTemp.val[Metrics::SSE_YUV]))) > thrDiff) {
+              ++cnt_miss;
+              assert(false); //just for debugging
+            }
+          }
+          else
+          {
+            ++cnt_miss;
+          }
         }
 
         bool changeDecision = false;
@@ -993,7 +1010,7 @@ bool EncModeCtrl::useModeResult(const EncTestMode& encTestmode, CodingStructure*
             //useTemp = tempCS->dist < bestCS->dist;
             //useTemp = mTemp.val[Metrics::SSIM] > mBest.val[Metrics::SSIM];
             //useTemp = mTemp.val[Metrics::SSE] < mBest.val[Metrics::SSE];
-            useTemp = mTemp.val[Metrics::SAD] < mBest.val[Metrics::SAD];
+            useTemp = mTemp.val[Metrics::SAD_YUV] < mBest.val[Metrics::SAD_YUV];
         }
     }
     

@@ -60,6 +60,10 @@ THE POSSIBILITY OF SUCH DAMAGE.
 #include <math.h>
 #include "vvenc/EncCfg.h"
 
+#if _DEBUG
+#include "metrics.h"
+#endif //_DEBUG
+
 //! \ingroup EncoderLib
 //! \{
 
@@ -1349,6 +1353,23 @@ void IntraSearch::xIntraCodingTUBlock(TransformUnit& tu, const ComponentID compI
             ruiDist += m_pcRdCost->getDistPart(crOrg, crReco, bitDepth, COMP_Cr, DF_SSE);
         }
     }
+
+#if _DEBUG && 0
+    //if (COMP_Y == compID)
+    {
+      Metrics mCur = Metrics::CalculateMetrics(&cs, PIC_RECONSTRUCTION, *m_pcRdCost, static_cast<unsigned>(compID) + 1);
+      static unsigned cntHit = 0, cntMiss = 0;
+      if (ruiDist == mCur.val[Metrics::SSE]) {
+        ++cntHit;
+      }
+      else {
+//        if (cs.area.lheight() < 32 && cs.area.lwidth() < 32)
+//        {
+          ++cntMiss;
+//        }
+      }
+    }
+#endif //_DEBUG
 }
 
 void IntraSearch::xIntraCodingLumaQT(CodingStructure& cs, Partitioner& partitioner, PelUnitBuf* predBuf,
