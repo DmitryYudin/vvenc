@@ -991,9 +991,9 @@ bool EncModeCtrl::useModeResult(const EncTestMode& encTestmode, CodingStructure*
         }
         if(changeDecision) {
             //useTemp = tempCS->dist < bestCS->dist;
-            //useTemp = mTemp.val[Metrics::SSIM_Y] > mBest.val[Metrics::SSIM_Y];
+            useTemp = mTemp.val[Metrics::SSIM_YUV] > mBest.val[Metrics::SSIM_YUV];
             //useTemp = mTemp.val[Metrics::SSE_Y] < mBest.val[Metrics::SSE_Y];
-            useTemp = mTemp.val[Metrics::SAD_YUV] < mBest.val[Metrics::SAD_YUV];
+            //useTemp = mTemp.val[Metrics::SAD_YUV] < mBest.val[Metrics::SAD_YUV];
         }
     }
     
