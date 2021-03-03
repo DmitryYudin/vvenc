@@ -30,7 +30,12 @@ Metrics Metrics::CalculateMetrics(const CodingStructure* cu, PictureType picture
             case PIC_RECONSTRUCTION: cur = cu->getRecoBuf(componentID); break;
             default: break;
         }
-        auto calcDist = [&rdCost](const CPelBuf& org, const CPelBuf& cur, int bitDepth, DFunc dfunc) -> double {
+        auto calcDist = [&rdCost, &cu, i](const CPelBuf& org, const CPelBuf& cur, int bitDepth, DFunc dfunc) -> double {
+
+            if ( std::any_of(cu->cus.begin(), cu->cus.end(), [i](const CodingUnit * const cu) { return cu->blocks[i].area() == 0; }) ) {
+                return 0.;
+            }
+
             if(dfunc == DF_TOTAL_FUNCTIONS) {
                 return CalculateSSIM(org.buf, org.stride, cur.buf, cur.stride, org.width, org.height, (1<<bitDepth) - 1);
             } else {
