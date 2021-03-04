@@ -972,15 +972,6 @@ bool EncModeCtrl::useModeResult(const EncTestMode& encTestmode, CodingStructure*
         double rdoCostBest = rdCostBest + ( useEDO ? bestCS->costDbOffset : 0 );
         useTemp = rdoCostTemp < rdoCostBest; // default, based on RDO
 
-        Metrics mBest = Metrics::CalculateMetrics(bestCS, PIC_RECONSTRUCTION, *m_pcRdCost);
-        Metrics mTemp = Metrics::CalculateMetrics(tempCS, PIC_RECONSTRUCTION, *m_pcRdCost);
-
-        static unsigned cnt_hit = 0, cnt_miss = 0; // debug
-        if(bestCS->dist == mBest.val[Metrics::SSE_Y] && tempCS->dist == mTemp.val[Metrics::SSE_Y]) {
-            cnt_hit++;
-        } else {
-            cnt_miss++;
-        }
 
         bool changeDecision = false;
         if(CU::isIntra( *tempCS->cus[0] ) != CU::isIntra( *bestCS->cus[0] )) {
@@ -990,6 +981,17 @@ bool EncModeCtrl::useModeResult(const EncTestMode& encTestmode, CodingStructure*
             changeDecision = false;
         }
         if(changeDecision) {
+            Metrics mBest = Metrics::CalculateMetrics(bestCS, PIC_RECONSTRUCTION, *m_pcRdCost);
+            Metrics mTemp = Metrics::CalculateMetrics(tempCS, PIC_RECONSTRUCTION, *m_pcRdCost);
+
+            static unsigned cnt_hit = 0, cnt_miss = 0; // debug
+            if (bestCS->dist == mBest.val[Metrics::SSE_Y] && tempCS->dist == mTemp.val[Metrics::SSE_Y]) {
+                cnt_hit++;
+            }
+            else {
+                cnt_miss++;
+            }
+
             const int blkArea = tempCS->area.Y().width * tempCS->area.Y().height;
             const int metric = Metrics::SAD_Y; //Metrics::SAD_YUV;
             const double normDist = std::min(mTemp.val[metric], mBest.val[metric]) / blkArea;
