@@ -976,7 +976,7 @@ bool EncModeCtrl::useModeResult(const EncTestMode& encTestmode, CodingStructure*
         Metrics mTemp = Metrics::CalculateMetrics(tempCS, PIC_RECONSTRUCTION, *m_pcRdCost);
 
         static unsigned cnt_hit = 0, cnt_miss = 0; // debug
-        if(bestCS->dist == mBest.val[Metrics::SSE] && tempCS->dist == mTemp.val[Metrics::SSE]) {
+        if(bestCS->dist == mBest.val[Metrics::SSE_Y] && tempCS->dist == mTemp.val[Metrics::SSE_Y]) {
             cnt_hit++;
         } else {
             cnt_miss++;
@@ -991,9 +991,9 @@ bool EncModeCtrl::useModeResult(const EncTestMode& encTestmode, CodingStructure*
         }
         if(changeDecision) {
             //useTemp = tempCS->dist < bestCS->dist;
-            //useTemp = mTemp.val[Metrics::SSIM] > mBest.val[Metrics::SSIM];
-            //useTemp = mTemp.val[Metrics::SSE] < mBest.val[Metrics::SSE];
-            useTemp = mTemp.val[Metrics::SAD] < mBest.val[Metrics::SAD];
+            //useTemp = mTemp.val[Metrics::SSIM_Y] > mBest.val[Metrics::SSIM_Y];
+            //useTemp = mTemp.val[Metrics::SSE_Y] < mBest.val[Metrics::SSE_Y];
+            useTemp = mTemp.val[Metrics::SAD_Y] < mBest.val[Metrics::SAD_Y];
         }
     }
     

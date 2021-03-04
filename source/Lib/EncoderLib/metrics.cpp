@@ -6,6 +6,10 @@
 #include <assert.h>
 
 namespace vvenc {
+double Metrics::getWeightedDist(RdCost& rdCost, ComponentID compID, uint64_t unweightedDist)
+{
+    return COMP_Y == compID ? static_cast<double>(unweightedDist) : std::floor(rdCost.getDistortionWeight(compID) * unweightedDist);
+};
 
 Metrics Metrics::CalculateMetrics(const CodingStructure* cu, PictureType pictureType, RdCost& rdCost)
 {
@@ -34,28 +38,42 @@ Metrics Metrics::CalculateMetrics(const CodingStructure* cu, PictureType picture
                 return distParam.distFunc( distParam );                
             }
         };
-
-        x[SSE][i] = calcDist( org, cur, bd, DF_SSE );
-        x[SAD][i] = calcDist( org, cur, bd, DF_SAD );
-        x[HAD][i] = calcDist( org, cur, bd, DF_HAD );
-        x[HAD_2SAD][i] = calcDist( org, cur, bd, DF_HAD_2SAD );
-        x[SSIM][i] = calcDist( org, cur, bd, DF_TOTAL_FUNCTIONS );
+        
+        x[SSE_Y][i] = calcDist( org, cur, bd, DF_SSE );
+        x[SSE_YUV][i] = x[SSE_Y][i];
+        x[SAD_Y][i] = calcDist(org, cur, bd, DF_SAD);
+        x[SAD_YUV][i] = x[SAD_Y][i];
+        x[HAD_Y][i] = calcDist( org, cur, bd, DF_SSE);//DF_HAD );
+        x[HAD_YUV][i] = x[HAD_Y][i];
+        x[HAD_2SAD_Y][i] = calcDist( org, cur, bd, DF_SSE); //DF_HAD_2SAD );
+        x[HAD_2SAD_YUV][i] = x[HAD_2SAD_Y][i];
+        x[SSIM_Y][i] = calcDist( org, cur, bd, DF_TOTAL_FUNCTIONS );
+        x[SSIM_YUV][i] = x[SSIM_Y][i];
     }
+    
+    auto combineYUV = [&rdCost](const double * yuvm) {
+        return yuvm[COMP_Y] + getWeightedDist(rdCost, COMP_Cb, yuvm[COMP_Cb])
+                            + getWeightedDist(rdCost, COMP_Cr, yuvm[COMP_Cr]);
+    };
 
     for(unsigned i = 0; i < TOTAL; i++) {
-        const double *y = x[i];
+        const auto y = x[i];
         double val = 0;
         switch(i) {
-            case SSE:
-            case SAD:
-            case HAD:
-            case HAD_2SAD: // Chroma is not initialized this time, so we ignore it for a while
-                //val = (4*y[0] + y[1] + y[2])/6;
-                val = y[0];
+            case SSE_Y:
+            case SAD_Y:
+            case HAD_Y:
+            case SSIM_Y:
+            case HAD_2SAD_Y:
+                val = y[COMP_Y];
                 break;
-            case SSIM:
-                val = y[0];
-                break;
+            case SSE_YUV:
+            case SAD_YUV:
+            case HAD_YUV:
+            case HAD_2SAD_YUV:
+            case SSIM_YUV:
+              val = combineYUV(y);
+              break;
             default:
                 break;
         }
