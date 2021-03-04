@@ -990,8 +990,20 @@ bool EncModeCtrl::useModeResult(const EncTestMode& encTestmode, CodingStructure*
             changeDecision = false;
         }
         if(changeDecision) {
+            const int blkArea = tempCS->area.Y().width * tempCS->area.Y().height;
+            const int metric = Metrics::SAD_Y; //Metrics::SAD_YUV;
+            const double normDist = std::min(mTemp.val[metric], mBest.val[metric]) / blkArea;
+            const double thrVal = 28.0;//m_pcEncCfg->m_aParams[0]; //20.0
+            if (normDist > thrVal) {
+                //useTemp = mTemp.val[Metrics::SSIM_Y] > mBest.val[Metrics::SSIM_Y];
+                useTemp = mTemp.val[Metrics::SSIM_YUV] > mBest.val[Metrics::SSIM_YUV];
+            }
+            else {
+                //useTemp = mTemp.val[Metrics::SAD_Y] < mBest.val[Metrics::SAD_Y];
+                useTemp = mTemp.val[Metrics::SAD_YUV] < mBest.val[Metrics::SAD_YUV];
+            }
             //useTemp = tempCS->dist < bestCS->dist;
-            useTemp = mTemp.val[Metrics::SSIM_YUV] > mBest.val[Metrics::SSIM_YUV];
+            //useTemp = mTemp.val[Metrics::SSIM_YUV] > mBest.val[Metrics::SSIM_YUV];
             //useTemp = mTemp.val[Metrics::SSE_Y] < mBest.val[Metrics::SSE_Y];
             //useTemp = mTemp.val[Metrics::SAD_YUV] < mBest.val[Metrics::SAD_YUV];
         }
